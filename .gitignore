@@ -1,0 +1,10 @@
+node_modules/
+dist/
+public/python/
+public/licenses/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.env*
+!.env.example
+artifacts/

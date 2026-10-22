@@ -1,0 +1,825 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "functions",
+      "title": "函数是什么",
+      "stage": 1,
+      "prerequisites": [],
+      "available": true
+    },
+    {
+      "id": "linear",
+      "title": "线性函数与参数",
+      "stage": 1,
+      "prerequisites": [
+        "functions"
+      ],
+      "available": true
+    },
+    {
+      "id": "python",
+      "title": "用 Python 表示函数",
+      "stage": 1,
+      "prerequisites": [
+        "linear"
+      ],
+      "available": true
+    },
+    {
+      "id": "vectors",
+      "title": "向量的基本概念",
+      "stage": 1,
+      "prerequisites": [
+        "functions"
+      ],
+      "available": true
+    },
+    {
+      "id": "dot-product",
+      "title": "向量点积",
+      "stage": 1,
+      "prerequisites": [
+        "linear",
+        "vectors"
+      ],
+      "available": true
+    },
+    {
+      "id": "algebra",
+      "title": "代数与方程",
+      "stage": 1,
+      "prerequisites": [],
+      "available": false
+    },
+    {
+      "id": "coordinates",
+      "title": "坐标系与图像",
+      "stage": 1,
+      "prerequisites": [
+        "functions"
+      ],
+      "available": false
+    },
+    {
+      "id": "powers",
+      "title": "幂与指数",
+      "stage": 1,
+      "prerequisites": [
+        "algebra",
+        "functions"
+      ],
+      "available": false
+    },
+    {
+      "id": "logarithms",
+      "title": "对数与指数函数",
+      "stage": 1,
+      "prerequisites": [
+        "powers"
+      ],
+      "available": false
+    },
+    {
+      "id": "matrices",
+      "title": "矩阵与张量形状",
+      "stage": 1,
+      "prerequisites": [
+        "vectors"
+      ],
+      "available": false
+    },
+    {
+      "id": "matrix-multiplication",
+      "title": "矩阵乘法",
+      "stage": 1,
+      "prerequisites": [
+        "dot-product",
+        "matrices"
+      ],
+      "available": false
+    },
+    {
+      "id": "linear-geometry",
+      "title": "线性变换的几何直觉",
+      "stage": 1,
+      "prerequisites": [
+        "matrix-multiplication",
+        "coordinates"
+      ],
+      "available": false
+    },
+    {
+      "id": "probability",
+      "title": "概率与条件概率",
+      "stage": 1,
+      "prerequisites": [
+        "algebra"
+      ],
+      "available": false
+    },
+    {
+      "id": "distributions",
+      "title": "离散与连续分布",
+      "stage": 1,
+      "prerequisites": [
+        "probability",
+        "functions"
+      ],
+      "available": false
+    },
+    {
+      "id": "expectation",
+      "title": "期望与加权平均",
+      "stage": 1,
+      "prerequisites": [
+        "distributions",
+        "dot-product"
+      ],
+      "available": false
+    },
+    {
+      "id": "variance",
+      "title": "方差与标准差",
+      "stage": 1,
+      "prerequisites": [
+        "expectation",
+        "powers"
+      ],
+      "available": false
+    },
+    {
+      "id": "limits",
+      "title": "极限与局部变化",
+      "stage": 1,
+      "prerequisites": [
+        "functions",
+        "coordinates"
+      ],
+      "available": false
+    },
+    {
+      "id": "derivatives",
+      "title": "导数与切线",
+      "stage": 1,
+      "prerequisites": [
+        "limits",
+        "linear"
+      ],
+      "available": false
+    },
+    {
+      "id": "partial-derivatives",
+      "title": "偏导数",
+      "stage": 1,
+      "prerequisites": [
+        "derivatives",
+        "vectors"
+      ],
+      "available": false
+    },
+    {
+      "id": "chain-rule",
+      "title": "链式法则",
+      "stage": 1,
+      "prerequisites": [
+        "derivatives"
+      ],
+      "available": false
+    },
+    {
+      "id": "gradients",
+      "title": "梯度与方向",
+      "stage": 1,
+      "prerequisites": [
+        "partial-derivatives",
+        "chain-rule"
+      ],
+      "available": false
+    },
+    {
+      "id": "optimization",
+      "title": "最优化与损失地形",
+      "stage": 1,
+      "prerequisites": [
+        "gradients"
+      ],
+      "available": false
+    },
+    {
+      "id": "gradient-descent",
+      "title": "梯度下降",
+      "stage": 1,
+      "prerequisites": [
+        "optimization",
+        "python"
+      ],
+      "available": false
+    },
+    {
+      "id": "rules-vs-learning",
+      "title": "规则编程与机器学习",
+      "stage": 2,
+      "prerequisites": [
+        "python"
+      ],
+      "available": false
+    },
+    {
+      "id": "datasets",
+      "title": "数据集、训练集与验证集",
+      "stage": 2,
+      "prerequisites": [
+        "rules-vs-learning",
+        "probability"
+      ],
+      "available": false
+    },
+    {
+      "id": "parameters",
+      "title": "参数与超参数",
+      "stage": 2,
+      "prerequisites": [
+        "linear",
+        "rules-vs-learning"
+      ],
+      "available": false
+    },
+    {
+      "id": "linear-regression",
+      "title": "从零实现线性回归",
+      "stage": 2,
+      "prerequisites": [
+        "datasets",
+        "parameters",
+        "dot-product"
+      ],
+      "available": false
+    },
+    {
+      "id": "loss-functions",
+      "title": "损失函数与均方误差",
+      "stage": 2,
+      "prerequisites": [
+        "linear-regression",
+        "expectation"
+      ],
+      "available": false
+    },
+    {
+      "id": "training-regression",
+      "title": "手写梯度下降训练循环",
+      "stage": 2,
+      "prerequisites": [
+        "loss-functions",
+        "gradient-descent"
+      ],
+      "available": false
+    },
+    {
+      "id": "generalization",
+      "title": "泛化、欠拟合与过拟合",
+      "stage": 2,
+      "prerequisites": [
+        "training-regression",
+        "datasets"
+      ],
+      "available": false
+    },
+    {
+      "id": "classification",
+      "title": "分类任务与决策边界",
+      "stage": 2,
+      "prerequisites": [
+        "generalization"
+      ],
+      "available": false
+    },
+    {
+      "id": "logistic-regression",
+      "title": "逻辑回归与二元交叉熵",
+      "stage": 2,
+      "prerequisites": [
+        "classification",
+        "logarithms",
+        "derivatives"
+      ],
+      "available": false
+    },
+    {
+      "id": "neurons",
+      "title": "神经元与感知机",
+      "stage": 3,
+      "prerequisites": [
+        "logistic-regression",
+        "dot-product"
+      ],
+      "available": false
+    },
+    {
+      "id": "activations",
+      "title": "激活函数",
+      "stage": 3,
+      "prerequisites": [
+        "neurons",
+        "derivatives"
+      ],
+      "available": false
+    },
+    {
+      "id": "mlp",
+      "title": "多层感知机",
+      "stage": 3,
+      "prerequisites": [
+        "activations",
+        "matrix-multiplication"
+      ],
+      "available": false
+    },
+    {
+      "id": "forward-pass",
+      "title": "前向传播与批处理",
+      "stage": 3,
+      "prerequisites": [
+        "mlp"
+      ],
+      "available": false
+    },
+    {
+      "id": "computation-graph",
+      "title": "计算图",
+      "stage": 3,
+      "prerequisites": [
+        "forward-pass",
+        "chain-rule"
+      ],
+      "available": false
+    },
+    {
+      "id": "backprop",
+      "title": "反向传播",
+      "stage": 3,
+      "prerequisites": [
+        "computation-graph",
+        "gradients"
+      ],
+      "available": false
+    },
+    {
+      "id": "autodiff",
+      "title": "手写微型自动微分引擎",
+      "stage": 3,
+      "prerequisites": [
+        "backprop",
+        "python"
+      ],
+      "available": false
+    },
+    {
+      "id": "optimizers",
+      "title": "SGD、动量与 Adam",
+      "stage": 3,
+      "prerequisites": [
+        "autodiff",
+        "gradient-descent"
+      ],
+      "available": false
+    },
+    {
+      "id": "regularization",
+      "title": "正则化与 Dropout",
+      "stage": 3,
+      "prerequisites": [
+        "optimizers",
+        "generalization"
+      ],
+      "available": false
+    },
+    {
+      "id": "pytorch",
+      "title": "PyTorch 张量与 autograd",
+      "stage": 3,
+      "prerequisites": [
+        "autodiff",
+        "matrix-multiplication"
+      ],
+      "available": false
+    },
+    {
+      "id": "nn-project",
+      "title": "从零神经网络与框架对照",
+      "stage": 3,
+      "prerequisites": [
+        "regularization",
+        "pytorch"
+      ],
+      "available": false
+    },
+    {
+      "id": "text-representation",
+      "title": "文本表示与序列",
+      "stage": 4,
+      "prerequisites": [
+        "python",
+        "datasets"
+      ],
+      "available": false
+    },
+    {
+      "id": "tokenization",
+      "title": "字符、子词与 Tokenization",
+      "stage": 4,
+      "prerequisites": [
+        "text-representation"
+      ],
+      "available": false
+    },
+    {
+      "id": "embeddings",
+      "title": "Embedding 与查表",
+      "stage": 4,
+      "prerequisites": [
+        "tokenization",
+        "matrices"
+      ],
+      "available": false
+    },
+    {
+      "id": "rnn-lstm",
+      "title": "RNN、LSTM 的动机与局限",
+      "stage": 4,
+      "prerequisites": [
+        "embeddings",
+        "forward-pass",
+        "backprop"
+      ],
+      "available": false
+    },
+    {
+      "id": "softmax",
+      "title": "Softmax 与概率归一化",
+      "stage": 4,
+      "prerequisites": [
+        "logarithms",
+        "distributions"
+      ],
+      "available": false
+    },
+    {
+      "id": "attention",
+      "title": "Attention：从加权汇聚开始",
+      "stage": 4,
+      "prerequisites": [
+        "embeddings",
+        "expectation",
+        "rnn-lstm"
+      ],
+      "available": false
+    },
+    {
+      "id": "qkv",
+      "title": "Q、K、V 的来源与作用",
+      "stage": 4,
+      "prerequisites": [
+        "attention",
+        "matrix-multiplication"
+      ],
+      "available": false
+    },
+    {
+      "id": "scaled-attention",
+      "title": "Scaled Dot-Product Attention",
+      "stage": 4,
+      "prerequisites": [
+        "qkv",
+        "softmax",
+        "variance"
+      ],
+      "available": false
+    },
+    {
+      "id": "self-attention",
+      "title": "Self-Attention 与张量形状",
+      "stage": 4,
+      "prerequisites": [
+        "scaled-attention"
+      ],
+      "available": false
+    },
+    {
+      "id": "multi-head",
+      "title": "Multi-Head Attention",
+      "stage": 4,
+      "prerequisites": [
+        "self-attention"
+      ],
+      "available": false
+    },
+    {
+      "id": "positions",
+      "title": "位置编码与位置表示",
+      "stage": 4,
+      "prerequisites": [
+        "self-attention",
+        "powers"
+      ],
+      "available": false
+    },
+    {
+      "id": "residual",
+      "title": "Residual Connection",
+      "stage": 4,
+      "prerequisites": [
+        "forward-pass",
+        "backprop"
+      ],
+      "available": false
+    },
+    {
+      "id": "layernorm",
+      "title": "Layer Normalization",
+      "stage": 4,
+      "prerequisites": [
+        "variance",
+        "forward-pass"
+      ],
+      "available": false
+    },
+    {
+      "id": "encoder-decoder",
+      "title": "Encoder 与 Decoder",
+      "stage": 4,
+      "prerequisites": [
+        "multi-head",
+        "positions",
+        "residual",
+        "layernorm"
+      ],
+      "available": false
+    },
+    {
+      "id": "causal-mask",
+      "title": "Causal Mask 与信息泄露",
+      "stage": 4,
+      "prerequisites": [
+        "self-attention",
+        "datasets"
+      ],
+      "available": false
+    },
+    {
+      "id": "decoder-only",
+      "title": "Decoder-only Transformer",
+      "stage": 4,
+      "prerequisites": [
+        "encoder-decoder",
+        "causal-mask"
+      ],
+      "available": false
+    },
+    {
+      "id": "corpus",
+      "title": "构建与划分训练语料",
+      "stage": 5,
+      "prerequisites": [
+        "tokenization",
+        "datasets"
+      ],
+      "available": false
+    },
+    {
+      "id": "gpt-tokenizer",
+      "title": "实现字符与子词 Tokenizer",
+      "stage": 5,
+      "prerequisites": [
+        "corpus",
+        "tokenization"
+      ],
+      "available": false
+    },
+    {
+      "id": "gpt-embedding",
+      "title": "实现 Token 与位置 Embedding",
+      "stage": 5,
+      "prerequisites": [
+        "gpt-tokenizer",
+        "positions",
+        "pytorch"
+      ],
+      "available": false
+    },
+    {
+      "id": "transformer-block",
+      "title": "实现 Transformer Block",
+      "stage": 5,
+      "prerequisites": [
+        "gpt-embedding",
+        "decoder-only"
+      ],
+      "available": false
+    },
+    {
+      "id": "lm-head",
+      "title": "语言模型输出层",
+      "stage": 5,
+      "prerequisites": [
+        "transformer-block",
+        "softmax"
+      ],
+      "available": false
+    },
+    {
+      "id": "cross-entropy",
+      "title": "交叉熵与下一个 Token 目标",
+      "stage": 5,
+      "prerequisites": [
+        "lm-head",
+        "logarithms"
+      ],
+      "available": false
+    },
+    {
+      "id": "gpt-training",
+      "title": "实现训练循环与验证",
+      "stage": 5,
+      "prerequisites": [
+        "cross-entropy",
+        "optimizers",
+        "corpus"
+      ],
+      "available": false
+    },
+    {
+      "id": "checkpoints",
+      "title": "模型保存、加载与复现",
+      "stage": 5,
+      "prerequisites": [
+        "gpt-training"
+      ],
+      "available": false
+    },
+    {
+      "id": "autoregressive",
+      "title": "自回归逐 Token 生成",
+      "stage": 5,
+      "prerequisites": [
+        "checkpoints",
+        "causal-mask"
+      ],
+      "available": false
+    },
+    {
+      "id": "temperature",
+      "title": "Temperature 与随机采样",
+      "stage": 5,
+      "prerequisites": [
+        "autoregressive",
+        "softmax"
+      ],
+      "available": false
+    },
+    {
+      "id": "top-k-p",
+      "title": "Top-k 与 Top-p",
+      "stage": 5,
+      "prerequisites": [
+        "temperature",
+        "distributions"
+      ],
+      "available": false
+    },
+    {
+      "id": "gpt-evaluation",
+      "title": "验证、消融与错误分析",
+      "stage": 5,
+      "prerequisites": [
+        "gpt-training",
+        "top-k-p",
+        "generalization"
+      ],
+      "available": false
+    },
+    {
+      "id": "tiny-gpt",
+      "title": "可独立训练和推理的微型 GPT",
+      "stage": 5,
+      "prerequisites": [
+        "gpt-evaluation",
+        "checkpoints"
+      ],
+      "available": false
+    },
+    {
+      "id": "pretraining-scaling",
+      "title": "预训练与 Scaling Laws",
+      "stage": 6,
+      "prerequisites": [
+        "tiny-gpt"
+      ],
+      "available": false
+    },
+    {
+      "id": "instruction-sft",
+      "title": "指令微调与 SFT",
+      "stage": 6,
+      "prerequisites": [
+        "pretraining-scaling",
+        "datasets"
+      ],
+      "available": false
+    },
+    {
+      "id": "rlhf-dpo",
+      "title": "RLHF 与 DPO 基础思想",
+      "stage": 6,
+      "prerequisites": [
+        "instruction-sft",
+        "expectation"
+      ],
+      "available": false
+    },
+    {
+      "id": "inference",
+      "title": "推理阶段计算流程",
+      "stage": 6,
+      "prerequisites": [
+        "tiny-gpt"
+      ],
+      "available": false
+    },
+    {
+      "id": "kv-cache",
+      "title": "KV Cache 与缓存正确性",
+      "stage": 6,
+      "prerequisites": [
+        "inference",
+        "qkv",
+        "causal-mask"
+      ],
+      "available": false
+    },
+    {
+      "id": "quantization",
+      "title": "模型量化与误差",
+      "stage": 6,
+      "prerequisites": [
+        "inference",
+        "variance"
+      ],
+      "available": false
+    },
+    {
+      "id": "lora",
+      "title": "LoRA 与参数高效微调",
+      "stage": 6,
+      "prerequisites": [
+        "instruction-sft",
+        "matrix-multiplication"
+      ],
+      "available": false
+    },
+    {
+      "id": "memory-performance",
+      "title": "推理性能、吞吐与显存",
+      "stage": 6,
+      "prerequisites": [
+        "kv-cache",
+        "quantization"
+      ],
+      "available": false
+    },
+    {
+      "id": "hallucination",
+      "title": "幻觉、事实性与模型局限",
+      "stage": 6,
+      "prerequisites": [
+        "gpt-evaluation",
+        "instruction-sft"
+      ],
+      "available": false
+    },
+    {
+      "id": "llm-evaluation",
+      "title": "现代 LLM 评估与数据污染",
+      "stage": 6,
+      "prerequisites": [
+        "hallucination",
+        "datasets"
+      ],
+      "available": false
+    },
+    {
+      "id": "paper-reading",
+      "title": "技术论文阅读与复现实验",
+      "stage": 6,
+      "prerequisites": [
+        "pretraining-scaling",
+        "rlhf-dpo",
+        "lora",
+        "memory-performance",
+        "llm-evaluation"
+      ],
+      "available": false
+    }
+  ]
+}
