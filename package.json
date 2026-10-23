@@ -14,7 +14,10 @@
     "check": "tsc -b",
     "postinstall": "node scripts/copy-python.mjs",
     "validate:course": "node scripts/validate-course.mjs",
-    "start": "node --env-file-if-exists=.env scripts/serve.mjs"
+    "start": "node --env-file-if-exists=.env scripts/serve.mjs",
+    "check:repository": "node scripts/check-repository.mjs",
+    "test:delivery": "node --test scripts/delivery.test.mjs",
+    "package:delivery": "node scripts/package-site.mjs && node scripts/package-delivery.mjs && node scripts/verify-delivery.mjs"
   },
   "dependencies": {
     "idb": "^8.0.3",

@@ -118,6 +118,8 @@ Sites 部署运行 `npm run package:site`，生成忽略跟踪的 `.openai/site-
 
 ## 接手与扩展
 
+GitHub CI 在main推送、PR及手动运行时校验类型、单元测试、83章代码、完整浏览器流程及三个独立Python工程。所有门槛通过后，main自动交付带源码SHA和校验值的Sites部署包；不会自动发布生产，现有Sites origin和站点保持原状。具体触发、产物、权限阻断与受支持发布方式见 [GITHUB_CICD](docs/GITHUB_CICD.md)。当前GitHub连接拒绝建仓，尚未推送或产生真实Actions运行。
+
 先阅读 [PROGRESS](docs/PROGRESS.md)、[ARCHITECTURE](docs/ARCHITECTURE.md) 与 [DEVELOPMENT_PLAN](docs/DEVELOPMENT_PLAN.md)。课程和先修见 [CURRICULUM](docs/CURRICULUM.md)／[KNOWLEDGE_GRAPH](docs/KNOWLEDGE_GRAPH.md)。
 
 `src/data/stage*.ts` 保存教材，`LessonLab.tsx` 懒加载实验，`storage.ts` 验证数据，`server/tutor.ts` 处理导师策略与上游连接。新增内容须同时更新稳定 ID、依赖、课程、实验、验收和导入边界。

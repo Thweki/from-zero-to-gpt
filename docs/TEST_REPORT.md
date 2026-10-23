@@ -1,3 +1,15 @@
+# GitHub CI工程准备：本地验收与远程阻断
+
+2026-10-23，沿用应用0.3.2。工程改动在 `chore/github-ci` 分支，原main、Sites origin及公开版本7保留。GitHub本人账户核实为Thweki，未发现同项目仓库；唯一一次建仓调用被GitHub拒绝：`Resource not accessible by integration (createRepository)`。已停止建仓，未换接口重试，未push，未运行真实Actions。仓库与Actions运行URL均不存在。
+
+本轮实际重跑：严格TypeScript、509/509 Vitest、7/7 Node交付／仓库守卫测试、83/83 CPython课程验收、生产构建、独立regression 6/6、micrograd 10/10、CPU tiny-gpt 23/23。真实调用打包脚本，确认脏工作区会被拒绝。YAML已解析并检查触发器、只读权限、交付依赖及全部40位Actions提交引用；未把解析当作GitHub执行或actionlint验收。
+
+`CI=true PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e -- --output=artifacts/github-ci-browser-results`：**127/127通过**，0跳过、0失败、0flaky，约493.1秒。包含83章全部四模式、83份实际浏览器Python参考程序、导师模拟、超时／停止、JSON、保存恢复、深色外观、全屏和触控模拟。本次完整重跑，不沿用旧批次代替。机器仍为Linux／系统Chromium，未新增实机或外部模型验收。
+
+文件策略与完整Git历史常见凭证扫描通过；未跟踪依赖、缓存、环境配置、个人学习备份或权重。统计与最终已提交源码的构建归档结果记录在工作区GitHub准备回执。部署包的校验脚本检查源码SHA、SHA-256、Site身份及必需WASM／Worker／静态资源。`.github/workflows/ci.yml` 只在main全部门槛成功后交付verified产物，不自动上线；真实Actions仍待GitHub权限恢复。详见 [GITHUB_CICD](GITHUB_CICD.md)。
+
+---
+
 # 0.3.2 独立试用修复验收
 
 2026-10-23，现有项目上的四项可用性修复。逐项复现、实现与限制见 [USABILITY_FIX_REPORT](USABILITY_FIX_REPORT.md)。未读取完整PDF／DOCX附件，依据委派中的问题摘要，不把附件摘要外的发现声称为已覆盖。
