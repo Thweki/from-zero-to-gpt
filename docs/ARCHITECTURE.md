@@ -151,3 +151,8 @@ Worker使用 `experiment.py`／`acceptance_tests.py` 文件名，不包装用户
 `theme.css`统一语义颜色，`typography.css`统一字号、字体与工作区间距；Fontsource变量字体作为锁定依赖由Vite输出同源WOFF2，许可随`public/fonts`发布。中文Noto Sans SC、英文Inter与代码JetBrains Mono，数学由KaTeX处理。没有外部字体CDN。
 
 IndexedDB继续保存规范主题；HTML仅从可失败的localStorage缓存读取`from-zero-to-gpt:theme`作为首帧绘制提示。React读取学习数据后同步实际主题、浏览器theme-color和缓存；这份缓存不是第二份学习状态，也不改变导入／导出格式。字体交付失败时系统字体仍可显示课程。字体来源、更新规则和测试边界见[TYPOGRAPHY](TYPOGRAPHY.md)。
+
+
+## 0.3.5 专注阅读
+
+`focus.css` 位于排版样式之后，统一单栏、按需面板和低饱和强调。两侧面板关闭时使用 `inert`，避免隐藏链接进入键盘顺序；打开时移入焦点，明确关闭按钮和 Escape 可返回入口。面板展开是会话界面状态，不修改学习数据结构，重载默认回到干净的阅读页。原生 details 保留章节跳转、学习目标、误区和参考资料；跳转先关闭菜单再聚焦实际目标，滚动留白为80px。四种解释模式、实验和自测保持直接可用。

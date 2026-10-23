@@ -1,0 +1,94 @@
+/* A quiet default: the lesson is the workspace. Tools are requested explicitly. */
+:root .app-shell { padding-left:0; }
+:root .content-layout, :root .hide-context .content-layout { display:block; }
+:root .sidebar { width:272px; max-width:calc(100vw - 36px); transform:translateX(-100%); visibility:hidden; transition:none; z-index:60; padding-top:32px; box-shadow:none; }
+:root .sidebar.is-open { transform:translateX(0); visibility:visible; }
+:root .mobile-scrim { display:block; position:fixed; inset:0; z-index:59; background:#252b204d; backdrop-filter:none; }
+:root .navigation-close { position:absolute; right:10px; top:6px; }
+:root .mobile-menu { display:inline-flex; }
+:root .sidebar-notice, :root .workspace-label { display:none; }
+:root .sidebar .brand { margin-bottom:24px; }
+:root .context-panel { display:flex; position:fixed; top:64px; bottom:0; right:0; width:350px; max-width:100vw; overflow-y:auto; z-index:35; padding:24px; background:var(--panel); box-shadow:-12px 0 36px #10160c12; }
+:root .hide-context .context-panel { display:none; }
+:root .context-toggle { display:inline-flex; font-size:13px; color:var(--secondary); min-height:40px; gap:7px; }
+:root .context-close { margin-left:auto; }
+:root .thinking-card, :root .context-progress, :root .context-section:first-of-type { display:none; }
+:root .topbar { height:64px; padding:0 max(24px,calc((100vw - 1120px)/2)); background:var(--bg); border-bottom:1px solid var(--border); }
+:root .topbar-actions { gap:12px; }
+:root .home-link { color:var(--text); font-size:14px; font-weight:550; }
+:root .breadcrumb { gap:13px; }
+:root .breadcrumb>b { font-weight:400; color:var(--secondary); }
+:root .search-box { width:38px; padding:0; background:none; border:0; position:relative; }
+:root .search-box>svg { pointer-events:none; }
+:root .search-box input { position:absolute; inset:0; width:38px; opacity:0; cursor:pointer; }
+:root .search-box kbd { display:none; }
+:root .search-box:focus-within { outline:2px solid var(--accent); outline-offset:2px; border-radius:5px; }
+:root .page-content { max-width:960px; margin:0 auto; padding:48px 40px 64px; }
+:root .lesson-page { max-width:840px; padding-top:52px; }
+:root .page-content h1 { font-size:30px; font-weight:550; }
+:root :is(.eyebrow,.edition,.title-dot,.lesson-breadcrumb,.lesson-meta,.chapter-title small,.stage-heading-text small,.route-heading h2>span,.continue-footnote,.continue-content h2>span) { display:none; }
+:root .lesson-subtitle { margin-top:14px; color:var(--secondary); }
+:root .lesson-sticky-tools { display:flex; align-items:center; gap:16px; top:0; margin:28px 0 32px; padding:6px 0; border-bottom:1px solid var(--border); }
+:root .mode-tabs { flex:1; min-width:0; padding:0; border:0; background:none; gap:4px; }
+:root .mode-tabs button { padding:10px 12px; min-height:42px; border:0; color:var(--secondary); border-radius:5px; font-size:13px; }
+:root .mode-tabs button svg { display:none; }
+:root .mode-tabs button[aria-selected=true] { color:var(--text); background:var(--accent-soft); box-shadow:none; }
+.lesson-location { position:relative; flex-shrink:0; font-size:13px; color:var(--secondary); }
+.lesson-location summary { cursor:pointer; padding:10px 6px; min-height:42px; }
+:root .lesson-jump-nav { position:absolute; right:0; top:100%; z-index:11; width:190px; display:flex; flex-direction:column; padding:6px; gap:2px; background:var(--panel); border:1px solid var(--border); border-radius:7px; box-shadow:var(--shadow); }
+:root .lesson-jump-nav button { justify-content:flex-start; padding:10px; min-height:42px; font-size:13px; }
+:root :is(#lesson-mode-panel,#lesson-experiment,#lesson-code,#lesson-quiz) { scroll-margin-top:80px; }
+:root .problem-callout { background:none; padding:0 0 24px; border:0; border-bottom:1px solid var(--border); border-radius:0; }
+:root .problem-callout .mini-label { color:var(--secondary); }
+:root .prose-section { margin:36px 0; }
+:root .prose-section h2 { font-size:20px; font-weight:550; }
+:root .prose-section h2>span { display:none; }
+:root .prose-section p { line-height:2.05; }
+:root .main-formula, :root .formula-card { background:var(--panel-soft); box-shadow:none; border-color:var(--border); }
+:root :is(.math-lab,.extended-lab,.am-lab,.ml-lab,.nn-lab,.tf-lab,.gpt-lab,.modern-lab,.stage-card,.continue-card,.quiz-card,.exercise-section) { box-shadow:none; border-color:var(--border); }
+:root .reading-disclosure { padding:18px 0; border-bottom:1px solid var(--border); margin:16px 0; }
+:root .reading-disclosure>summary { color:var(--secondary); cursor:pointer; font-size:14px; min-height:28px; }
+:root .reading-disclosure .related-section { margin:24px 0 0; }
+:root .exercise-section { background:none; padding:24px 0; border:0; }
+:root .quiz-card { background:var(--panel-soft); }
+:root .lesson-completion { background:none; border:0; border-top:1px solid var(--border); padding:24px 0; }
+:root .button.primary { background:var(--action-bg); color:var(--on-accent); border:1px solid var(--control-border); box-shadow:none; }
+:root .button.primary:hover { background:var(--action-hover); filter:none; }
+:root .continue-card { background:var(--hero); }
+:root .hero-visual { opacity:.65; }
+:root .stage-card.expanded { box-shadow:none; }
+:root .stage-heading { padding-top:20px; padding-bottom:20px; }
+:root .stage-icon { background:#e3e9db; color:#58694d; }
+:root .stage-2 { background:#e5e8df; color:#5c6653; }
+:root .stage-3 { background:#e8e5df; color:#6d6250; }
+:root .stage-4 { background:#e9e6dc; color:#70664e; }
+:root .stage-5 { background:#dfe7e1; color:#51685a; }
+:root .stage-6 { background:#e7e4df; color:#6a6258; }
+:root[data-theme=dark] .stage-icon { background:#2c3426; color:#a4b297; }
+:root[data-theme=dark] .stage-2 { background:#2c3228; color:#a6b09b; }
+:root[data-theme=dark] .stage-3 { background:#323027; color:#b2ab96; }
+:root[data-theme=dark] .stage-4 { background:#343126; color:#b6ad95; }
+:root[data-theme=dark] .stage-5 { background:#28332c; color:#9cb1a2; }
+:root[data-theme=dark] .stage-6 { background:#322f29; color:#b1aa9e; }
+:root .stage-deliverable { border:0; background:none; }
+@media(max-width:760px) {
+ :root .topbar { padding:0 14px; gap:8px; }
+ :root .breadcrumb { gap:7px; }
+ :root .breadcrumb>b,:root .breadcrumb>svg { display:none; }
+ :root .topbar-actions { gap:3px; }
+ :root .topbar .icon-button { width:36px; height:40px; }
+ :root .context-toggle span { display:none; }
+ :root .context-toggle { width:36px; justify-content:center; }
+ :root .page-content { padding:28px 20px 48px; }
+ :root .page-content h1 { font-size:27px; }
+ :root .lesson-sticky-tools { gap:8px; margin:24px 0; }
+ :root .mode-tabs { gap:0; }
+ :root .mode-tabs button { font-size:12px; padding:10px 6px; white-space:nowrap; }
+ :root .lesson-location { font-size:12px; }
+ :root .hero-visual { display:none; }
+ :root .continue-content { width:100%; }
+ :root .prose-section h2 { font-size:19px; }
+}
+:root .topbar .context-toggle { width:auto; min-width:110px; flex-shrink:0; white-space:nowrap; border:0; padding:6px 8px; }
+@media(max-width:760px) { :root .topbar .context-toggle { width:36px; min-width:36px; padding:0; } }
+:root .context-overview { display:none; }

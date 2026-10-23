@@ -9,6 +9,7 @@ for(const lesson of [
   test(`${lesson.id} 从教材到同一个真实 GPT 下载与命令`,async({page})=>{
     const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
     await page.goto(`/#/lesson/${lesson.id}`);
+    await page.getByText('先修知识、延伸阅读与本地项目',{exact:true}).click();
     const project=page.locator('.project-download');
     await expect(project.getByRole('heading')).toHaveText('把现代 LLM 技术接进你自己的 GPT');
     await expect(project.locator('pre')).toContainText(`python tiny_gpt.py ${lesson.command}`);

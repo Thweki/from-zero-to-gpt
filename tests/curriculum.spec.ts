@@ -31,7 +31,7 @@ test.describe('全部 83 个章节页面与四种解释模式', () => {
       expect(lesson, `缺少实际教材：${node.id}`).toBeDefined();
       if (!lesson) throw new Error(`Missing lesson ${node.id}`);
       await page.goto(`/#/lesson/${node.id}`);
-      await expect(page.locator('.lesson-page').getByRole('heading', { name: `${node.title}.`, exact: true })).toBeVisible();
+      await expect(page.locator('.lesson-page').getByRole('heading', { name: `${node.title}`, exact: true })).toBeVisible();
       await expect(page.getByRole('tablist', { name: '解释模式' }).getByRole('tab')).toHaveCount(4);
       await expect(page.locator('.exercise-section')).toContainText(lesson.exercise);
       await expect(page.locator('.quiz-options input[type="radio"]')).toHaveCount(4);

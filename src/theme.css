@@ -1,81 +1,81 @@
 /* Semantic colors shared by the workspace and lazy-loaded experiment panels. */
 :root {
   color-scheme: light;
-  --bg: #f6f7fa;
-  --panel: #ffffff;
-  --panel-soft: #f6f8fb;
-  --panel-raised: #edf0f6;
-  --text: #222735;
-  --secondary: #535f73;
-  --muted: #69768a;
-  --border: #e0e5ee;
-  --control-border: #8793a6;
-  --accent: #3c5dce;
-  --accent-dark: #3454c0;
-  --accent-soft: #edf1ff;
-  --action-bg: #3c5dce;
-  --action-hover: #2f4db4;
-  --on-accent: #fff;
-  --grid: #e3e8f1;
-  --axis: #94a0b4;
-  --hero: #eef2fc;
-  --hero-ink: #647bc2;
-  --plot-secondary: #9b642c;
-  --plot-tertiary: #287e89;
+  --bg: #f0efe9;
+  --panel: #f6f5ef;
+  --panel-soft: #eeeee7;
+  --panel-raised: #e6e7de;
+  --text: #343830;
+  --secondary: #5c6257;
+  --muted: #656c60;
+  --border: #dadcd1;
+  --control-border: #8b9382;
+  --accent: #56664e;
+  --accent-dark: #46573f;
+  --accent-soft: #e6ebdf;
+  --action-bg: #e0e7d7;
+  --action-hover: #d5dfc9;
+  --on-accent: #35462f;
+  --grid: #dfe2d7;
+  --axis: #929c88;
+  --hero: #e9ecdf;
+  --hero-ink: #65765b;
+  --plot-secondary: #896239;
+  --plot-tertiary: #487575;
   --warning: #8a631b;
   --error: #a83d49;
   --error-bg: #fff0f1;
   --success: #2d644f;
   --success-bg: #edf7f1;
   --warning-bg: #fff6e7;
-  --editor-bg: #202634;
-  --editor-text: #e0e7f5;
-  --editor-muted: #a1aec5;
-  --sidebar-bg: #f0f3f8;
-  --sidebar-text: #505d72;
-  --sidebar-muted: #647188;
-  --sidebar-active: #e2e9fc;
-  --chrome-bg: #fcfdff;
+  --editor-bg: #242722;
+  --editor-text: #ced3c7;
+  --editor-muted: #a3ad9c;
+  --sidebar-bg: #eceee5;
+  --sidebar-text: #505b49;
+  --sidebar-muted: #606b59;
+  --sidebar-active: #dfe6d5;
+  --chrome-bg: #f0efe9;
   --shadow: 0 16px 48px #202c4b0a, 0 2px 8px #202c4b04;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #111318;
-  --panel: #191d25;
-  --panel-soft: #202530;
-  --panel-raised: #292f3b;
-  --text: #e8ecf5;
-  --secondary: #b4bed0;
-  --muted: #96a2b7;
-  --border: #303847;
-  --control-border: #66768f;
-  --accent: #a1b4ff;
-  --accent-dark: #b4c3ff;
-  --accent-soft: #252f4b;
-  --action-bg: #a1b4ff;
-  --action-hover: #bac9ff;
-  --on-accent: #142044;
-  --grid: #2b3342;
-  --axis: #7a8ba7;
-  --hero: #20293e;
-  --hero-ink: #9daee1;
-  --plot-secondary: #dfb17d;
-  --plot-tertiary: #8bd0d4;
+  --bg: #1b1d1a;
+  --panel: #22251f;
+  --panel-soft: #282c25;
+  --panel-raised: #30362c;
+  --text: #c8cdbf;
+  --secondary: #b0b8a5;
+  --muted: #a1ab96;
+  --border: #373e32;
+  --control-border: #69755f;
+  --accent: #acb69e;
+  --accent-dark: #bac4ac;
+  --accent-soft: #2d3628;
+  --action-bg: #343f2e;
+  --action-hover: #404d39;
+  --on-accent: #d0d7c6;
+  --grid: #343a2f;
+  --axis: #818f73;
+  --hero: #262e22;
+  --hero-ink: #99a78b;
+  --plot-secondary: #c5a67e;
+  --plot-tertiary: #90b8b0;
   --warning: #e8c68d;
   --error: #f0b5ba;
   --error-bg: #35252c;
   --success: #b8ddc8;
   --success-bg: #20332e;
   --warning-bg: #332e24;
-  --editor-bg: #121721;
-  --editor-text: #e0e7f5;
-  --editor-muted: #a1aec5;
-  --sidebar-bg: #15181f;
-  --sidebar-text: #b8c2d5;
-  --sidebar-muted: #98a6bf;
-  --sidebar-active: #27334f;
-  --chrome-bg: #171b23;
+  --editor-bg: #1a1e17;
+  --editor-text: #c8cfbf;
+  --editor-muted: #a1ad96;
+  --sidebar-bg: #20241c;
+  --sidebar-text: #b2bda5;
+  --sidebar-muted: #9ba98e;
+  --sidebar-active: #303b28;
+  --chrome-bg: #1b1d1a;
   --shadow: 0 20px 64px #0008, 0 2px 8px #0004;
   scrollbar-color: #5b6980 var(--bg);
 }
@@ -100,7 +100,7 @@
 :root[data-theme='dark'] .sidebar nav { scrollbar-color: #5b6980 transparent; }
 :root[data-theme='dark'] .continue-card { border-color: var(--border); }
 :root[data-theme='dark'] .hero-visual { color: var(--hero-ink); }
-:root[data-theme='dark'] .stage-card.expanded { border-color: #536799; box-shadow: 0 3px 18px #0002; }
+:root[data-theme='dark'] .stage-card.expanded { border-color: var(--border); box-shadow: 0 3px 18px #0002; }
 :root[data-theme='dark'] .chapter-row:hover { background: var(--panel-raised); }
 :root[data-theme='dark'] .chapter-row.current { background: var(--accent-soft); }
 :root[data-theme='dark'] .stage-number { color: var(--muted); }

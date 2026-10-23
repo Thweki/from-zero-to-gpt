@@ -1,3 +1,4 @@
+import {openNotebook,closeNotebook} from './focus-helpers';
 import { expect, test, type Page, type Request, type Route } from '@playwright/test';
 
 /** These are deliberately mocked UI/HTTP transport tests. They do not contact a
@@ -38,9 +39,9 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     const code = '# private-code-marker\ndef square(x):\n    return x * x\n';
     const note = 'private-note-marker：我想先自己试。';
     await page.goto('/#/lesson/functions');
-    await page.getByRole('tab', { name: '代码实现', exact: true }).click();
+    await closeNotebook(page);await page.getByRole('tab', { name: '代码实现', exact: true }).click();
     await page.getByLabel('Python 代码编辑器').fill(code);
-    await page.getByLabel('当前章节随手笔记').fill(note);
+    await openNotebook(page);await page.getByLabel('当前章节随手笔记').fill(note);
     await page.getByRole('link', { name: '打开 AI 导师', exact: true }).click();
     const tutor = panel(page);
     await expect(tutor.locator('.tutor-model')).toContainText('UI transport mock');

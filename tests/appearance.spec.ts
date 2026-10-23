@@ -1,3 +1,4 @@
+import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect,type Locator,type Page} from '@playwright/test';
 
 // Measure rendered foreground/background, including inherited and alpha colors.
@@ -28,17 +29,17 @@ async function dark(page:Page){
 }
 
 test('dark reading canvas, inherited titles and route cards are readable; theme survives reload',async({page})=>{
-  await dark(page);
-  await readable(page,['.page-heading h1','.page-description','.continue-content h2','.chapter-title','.stage-heading-text strong','.context-section h3','.sidebar .lesson-nav-link','.save-thought p','.autosave','.thinking-card>span:last-child']);
+  await dark(page);await openNotebook(page);
+  await readable(page,['.page-heading h1','.page-description','.continue-content h2','.chapter-title','.stage-heading-text strong','.save-thought p','.autosave']);
   expect((await colors(page.locator('html'))).backgroundLuminance).toBeLessThan(.05);
   const palette=await page.locator('.stage-icon').evaluateAll(nodes=>nodes.map(n=>getComputedStyle(n).backgroundColor));
   expect(new Set(palette).size).toBe(6);
   await page.reload();await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await page.screenshot({path:'artifacts/dark-appearance/map.png',fullPage:true});
-  await page.getByRole('button',{name:'切换浅色外观'}).click();
+  await page.getByRole('button',{name:'切换浅色外观'}).click();await openNotebook(page);
   expect((await colors(page.locator('html'))).backgroundLuminance).toBeGreaterThan(.8);
-  await readable(page,['.page-heading h1','.continue-content h2','.chapter-title','.save-thought p','.autosave','.thinking-card>span:last-child']);
-  await page.goto('/#/lesson/functions');
+  await readable(page,['.page-heading h1','.continue-content h2','.chapter-title','.save-thought p','.autosave']);
+  await page.goto('/#/lesson/functions');await openNotebook(page);
   await readable(page,['.plot-caption','.range-extents','.select-label','.live-result small']);
   for(const selector of ['.save-thought p','.autosave','.plot-caption','.select-label','.live-result small']){
     expect(await page.locator(selector).first().evaluate(n=>parseFloat(getComputedStyle(n).fontSize)),selector+' font size').toBeGreaterThanOrEqual(11);
@@ -57,7 +58,7 @@ test('GPT output, loss panel and probability table keep dark surfaces and readab
 });
 
 test('dark editor, genuine Python error and success outputs use readable distinct states',async({page})=>{
-  await dark(page);await page.goto('/#/lesson/functions');
+  await dark(page);await page.goto('/#/lesson/functions');await closeNotebook(page);
   await page.getByRole('tab',{name:'代码实现',exact:true}).click();
   await readable(page,['.code-editor','.line-numbers','.code-toolbar>span']);
   await page.getByLabel('Python 代码编辑器').fill('raise ValueError("appearance validation")');
@@ -119,6 +120,7 @@ test('dark matrix vectors and attention heatmaps use visible colors and preserve
   await readable(page,['.am-stat strong','.am-caption']);
   await page.goto('/#/lesson/causal-mask');await page.locator('.tf-lab').waitFor();
   await readable(page,['.tf-heat','.tf-matrix-heading strong','.tf-notice']);
+  for(const cell of await page.locator('.tf-heat').all())expect((await colors(cell)).contrast,'every attention weight remains readable').toBeGreaterThanOrEqual(4.5);
   await expect(page.locator('.tf-masked').first()).toContainText('屏蔽');
   await page.getByLabel('Transformer 信息流',{exact:true}).selectOption('0');
   await page.getByLabel('因果掩码（未来严格为零）',{exact:true}).uncheck();

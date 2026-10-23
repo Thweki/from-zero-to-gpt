@@ -1,3 +1,4 @@
+import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect} from '@playwright/test';
 
 test('平方函数有效端点在桌面和500×757窄屏桌面内可见',async({page})=>{
@@ -14,15 +15,15 @@ test('平方函数有效端点在桌面和500×757窄屏桌面内可见',async({
       expect(geometry.cx-geometry.r).toBeGreaterThan(6);
       expect(geometry.cx+geometry.r).toBeLessThan(631);
     }
-    await page.getByRole('button',{name:'跳到交互实验'}).click();
+    await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到交互实验'}).click();
     await expect(page.locator('#lesson-experiment')).toBeFocused();
-    await expect.poll(()=>page.locator('#lesson-experiment').evaluate(n=>Math.round(n.getBoundingClientRect().top))).toBe(130);
+    await expect.poll(()=>page.locator('#lesson-experiment').evaluate(n=>Math.round(n.getBoundingClientRect().top))).toBe(80);
     await page.screenshot({path:`artifacts/usability-review/square-${viewport.width}.png`});
   }
 });
 
 test('Python错误先显示用户行号与解释，内部堆栈默认折叠并能刷新恢复',async({page})=>{
-  await page.goto('/#/lesson/functions');await page.getByRole('button',{name:'跳到 Python 代码'}).click();
+  await page.goto('/#/lesson/functions');await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到 Python 代码'}).click();
   await page.getByLabel('Python 代码编辑器').fill('x = 2\ny = 3\nprint(missing_value)');
   await page.getByRole('button',{name:/运行并测试/}).click();
   const output=page.locator('.code-output');
@@ -66,15 +67,15 @@ test('长章节定位避开粘性工具栏，保留深色、草稿、实验和�
   await page.goto('/#/lesson/linear');
   await page.getByRole('button',{name:'切换深色外观'}).click();
   await page.getByRole('slider',{name:'斜率 k',exact:true}).fill('2');
-  await page.getByLabel('当前章节随手笔记').fill('继续比较截距与斜率。');
-  await page.getByRole('button',{name:'跳到 Python 代码'}).click();
+  await openNotebook(page);await page.getByLabel('当前章节随手笔记').fill('继续比较截距与斜率。');
+  await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到 Python 代码'}).click();
   await page.getByLabel('Python 代码编辑器').fill('draft = "保留我的尝试"');
-  await page.getByRole('tab',{name:'深入研究',exact:true}).click();
-  await page.getByRole('button',{name:'跳到自测练习'}).click();
+  await closeNotebook(page);await page.getByRole('tab',{name:'深入研究',exact:true}).click();
+  await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到自测练习'}).click();
   await expect(page.locator('#lesson-quiz')).toBeFocused();
-  await page.getByRole('button',{name:'跳到交互实验'}).click();
+  await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到交互实验'}).click();
   await expect(page.locator('#lesson-experiment')).toBeFocused();
-  await expect.poll(()=>page.locator('#lesson-experiment').evaluate(n=>n.getBoundingClientRect().top)).toBeGreaterThan(110);
+  await expect.poll(()=>page.locator('#lesson-experiment').evaluate(n=>n.getBoundingClientRect().top)).toBeGreaterThanOrEqual(79);
   const sizes=await page.locator('.plot-caption,.range-extents').evaluateAll(ns=>ns.map(n=>Number.parseFloat(getComputedStyle(n).fontSize)));
   expect(sizes.every(n=>n>=11)).toBe(true);
   await page.getByLabel('保存学习断点').click();
@@ -86,6 +87,6 @@ test('长章节定位避开粘性工具栏，保留深色、草稿、实验和�
   await page.getByRole('button',{name:'恢复学习'}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await expect(page.getByRole('slider',{name:'斜率 k',exact:true})).toHaveValue('2');
-  await page.getByRole('button',{name:'跳到 Python 代码'}).click();
+  await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到 Python 代码'}).click();
   await expect(page.getByLabel('Python 代码编辑器')).toHaveValue('draft = "保留我的尝试"');
 });
