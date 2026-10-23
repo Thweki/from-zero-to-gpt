@@ -102,6 +102,8 @@ flowchart LR
 
 Worker 部署以 `dist-server/worker.js` 为入口，绑定名为 `ASSETS` 的 `dist/` 静态资源；`/api/tutor/*` 必须先经过 Worker，其他路径由资源绑定处理。平台密钥存储设置 `TUTOR_API_KEY` 和可选访问码，普通变量设置模型及地址。发布时确认 WASM、`/python.worker.js`、字体、下载 ZIP 与 API 都在同一站点可达。只有 `dist/` 的普通静态托管不包含导师后端；`vite preview` 也不是生产 AI 代理。
 
+普通 Cloudflare 部署使用根目录 `wrangler.json`。Sites 的归档布局另由 `scripts/package-site.mjs` 生成：`dist/server/index.js` 是打包后的 Worker，`dist/client/` 是完整静态输出，另附 `.openai/hosting.json`。`npm run package:site` 先构建再打包；归档不追踪且不包含环境变量。已在线验证该布局的资源绑定与导师 API，不可直接把 `dist-server/worker.js` 路径当作 Sites 支持的入口。
+
 ## 验证与扩展
 
 `npm run check` 检查类型，`npm test` 检查教材门槛、DAG、公式、计算性质、本地存储和导师协议；`npm run validate:course` 在 CPython 中批量执行仓库自有参考程序与章节断言。项目目录各自有真实 Python 测试；tiny GPT 和 torch 对照需要独立安装 PyTorch。Playwright 负责导航、输入、图形变化、代码执行、恢复、数据导入导出、导师流程与移动布局。测试报告要区分模拟提供商的确定性测试、真实外部调用与实际本地训练。

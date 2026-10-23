@@ -16,5 +16,6 @@ __pycache__/
 *.pth
 .dev.vars*
 .openai/deploy-receipt.json
+.openai/site-deploy.tar.gz
 public/downloads/
 dist-server/

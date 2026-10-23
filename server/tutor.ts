@@ -75,7 +75,7 @@ export async function handleTutorRequest(request:Request,env:TutorEnvironment,fe
   if(request.signal.aborted)controller.abort();
   const timer=setTimeout(cancel,60000);
   try{
-    const upstream=await fetcher(settings.endpoint,{method:'POST',redirect:'error',signal:controller.signal,headers:{'Content-Type':'application/json','Authorization':`Bearer ${env.TUTOR_API_KEY}`,'User-Agent':'FromZeroToGPT-LearningTutor/0.2.0','x-opencode-session':body.sessionId},body:JSON.stringify({model:settings.model,messages:buildTutorMessages(body),max_tokens:2400,temperature:0.3,stream:false,...(new URL(settings.endpoint).hostname==='opencode.ai'&&settings.model.startsWith('deepseek-')?{thinking:{type:'disabled'}}:{})})});
+    const upstream=await fetcher(settings.endpoint,{method:'POST',redirect:'manual',signal:controller.signal,headers:{'Content-Type':'application/json','Authorization':`Bearer ${env.TUTOR_API_KEY}`,'User-Agent':'FromZeroToGPT-LearningTutor/0.2.0','x-opencode-session':body.sessionId},body:JSON.stringify({model:settings.model,messages:buildTutorMessages(body),max_tokens:2400,temperature:0.3,stream:false,...(new URL(settings.endpoint).hostname==='opencode.ai'&&settings.model.startsWith('deepseek-')?{thinking:{type:'disabled'}}:{})})});
     if(!upstream.ok){await upstream.body?.cancel();return reply({error:upstream.status===429?'模型提供商暂时限流，请稍后重试。':[401,403].includes(upstream.status)?'模型服务拒绝了服务端凭证，请在服务端检查密钥及订阅。':'模型提供商暂时不可用，请稍后重试。',providerStatus:upstream.status},upstream.status===429?429:502);}
     const data=JSON.parse(await limitedText(upstream.body,2000000));
     const answer=data?.choices?.[0]?.message?.content;

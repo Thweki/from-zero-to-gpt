@@ -112,6 +112,8 @@ npm start
 
 Cloudflare Workers 可用根目录 `wrangler.json`：入口 `dist-server/worker.js`，静态资源绑定 `ASSETS` 指向 `dist/`，`/api/*` 优先交给 Worker。在平台密钥存储中设置 API 密钥，在普通环境变量中设置模型及地址。当前 Sites 身份保留在 `.openai/hosting.json`；自行创建 Sites 时应使用自己的项目身份。
 
+Sites 部署运行 `npm run package:site`，生成忽略跟踪的 `.openai/site-deploy.tar.gz`（需要系统 `tar`）。打包脚本把 Worker 放入平台支持的 `dist/server/index.js`，静态资源放入 `dist/client/`，并附带项目身份文件；不包含任何运行时密钥。先推送对应源码提交，再以该提交与此归档保存／发布版本，保持现有访问权限。
+
 仅核心课程的静态部署：上传整个 `dist/`，包括 Python、字体和下载 ZIP。hash 路由通常不需要服务器回退；资源以域名根 `/` 为基础，部署到子路径需要同时调整 Vite、Worker 和 Python 路径。纯静态站点和 `vite preview` 不含导师 API。不要通过 `file://` 打开，服务端需正确提供 `.wasm` 的 `application/wasm` 类型。
 
 ## 接手与扩展
