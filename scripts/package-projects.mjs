@@ -1,7 +1,8 @@
 import { mkdir } from 'node:fs/promises';
-import {fileURLToPath,pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {findPython,runPython} from './python.mjs';
+import {isMain} from './cli-main.mjs';
 export async function packageProjects(root=fileURLToPath(new URL('../',import.meta.url))){
 const python=findPython();
 await mkdir(resolve(root,'public/downloads'),{recursive:true});
@@ -18,4 +19,4 @@ for name in ['regression','micrograd','tiny-gpt']:
 `],{cwd:root,encoding:'utf8'});
 if(result.error||result.status!==0)throw new Error('Project packaging failed: '+(result.error?.message||result.stderr));
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)await packageProjects();
+if(isMain(import.meta.url))await packageProjects();

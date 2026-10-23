@@ -47,6 +47,6 @@ node scripts/launch.mjs --help
 
 `npm run test:launcher`运行Node内置测试；`npm run test:launcher:smoke`从当前Git追踪源码复制到含空格的临时目录，不复制依赖、环境配置或学习记录，再实际调用本机平台入口。
 
-GitHub CI新增Ubuntu24.04、Windows2025与macOS15三个原生runner。每个平台都从没有node_modules的源码开始，执行真实安装／启动，核对HTTP、WASM、三个下载ZIP及导师状态接口，检查重复启动保护、停止和复用依赖的再次启动；退出时只清理测试自己创建的进程和临时目录。最终交付依赖三平台全部通过。
+GitHub CI新增Ubuntu24.04、Windows2025与macOS15三个原生runner。每个平台都运行10项守卫与1项smoke，从没有node_modules的源码开始，执行真实安装／启动，核对HTTP、WASM、三个下载ZIP及导师状态接口，检查重复启动保护、停止和复用依赖的再次启动；退出时只清理测试自己创建的进程和临时目录。最终交付依赖三平台全部通过。
 
 自动化使用 `--no-open`，验证的是原生OS里的脚本、进程与本地HTTP服务，不把它称为实际Finder／文件管理器双击、系统浏览器关联、桌面权限弹窗或真实用户终端Ctrl+C的完整GUI验收。实际CI状态以Actions运行与交接回执为准。

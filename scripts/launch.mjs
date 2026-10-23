@@ -1,15 +1,17 @@
 import {spawn,spawnSync} from 'node:child_process';
 import {createHash,randomUUID} from 'node:crypto';
-import {existsSync,readFileSync} from 'node:fs';
+import {existsSync,readFileSync,realpathSync} from 'node:fs';
 import {mkdir,open,readFile,unlink,writeFile} from 'node:fs/promises';
 import {get} from 'node:http';
 import {createServer} from 'node:net';
-import {join,resolve} from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
 import {findPython} from './python.mjs';
+import {isMain} from './cli-main.mjs';
 
-export const projectRoot=fileURLToPath(new URL('../',import.meta.url));
+// Expand macOS aliases and Windows 8.3 paths before Vite derives its filesystem allow list.
+export const projectRoot=realpathSync.native(fileURLToPath(new URL('../',import.meta.url)));
 export function supportedNode(version){const [major,minor]=version.split('.').map(Number);return major>22||(major===22&&minor>=18);}
 export function parseOptions(args,defaultPort='5173'){
   const options={port:defaultPort,open:true,check:false,help:false};
@@ -112,4 +114,4 @@ export async function main(args=process.argv.slice(2)){
   }catch(error){if(interrupted){console.log('\n本地服务已停止。');return 0;}console.error(`\n启动失败：${error.message}`);return 1;}
   finally{controller.abort();active?.kill('SIGTERM');if(release)await release();process.off('SIGINT',stop);process.off('SIGTERM',stop);}
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)process.exitCode=await main();
+if(isMain(import.meta.url))process.exitCode=await main();

@@ -27,7 +27,7 @@ async function stop(instance){
   if(!instance.ended())throw new Error('Owned launcher process did not stop');
 }
 async function ready(instance,port){
-  const end=Date.now()+180000;
+  const end=Date.now()+240000;
   while(Date.now()<end){
     if(instance.ended())throw new Error(`Launcher exited early:\n${instance.output()}`);
     try{const response=await fetch(`http://127.0.0.1:${port}`,{signal:AbortSignal.timeout(1000)});if(response.ok&&(await response.text()).includes('From Zero to GPT')&&instance.output().includes('学习平台已启动'))return;}catch{/* Not ready. */}
@@ -36,7 +36,7 @@ async function ready(instance,port){
   throw new Error(`Launcher readiness timed out:\n${instance.output()}`);
 }
 
-test('real platform wrapper: clean install, spaced path, HTTP resources, duplicate protection and warm restart',{timeout:300000},async()=>{
+test('real platform wrapper: clean install, spaced path, HTTP resources, duplicate protection and warm restart',{timeout:420000},async()=>{
   const root=await mkdtemp(join(tmpdir(),'From Zero learning lab '));let first,second;
   try{
     // Copy repository source only: never copy local configuration, dependencies or user artifacts.

@@ -1,10 +1,11 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,writeFile,mkdir,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,mkdir,rm,symlink,unlink} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createServer} from 'node:net';
-import {acquireLaunchLock,checkPort,dependencyFingerprint,parseOptions,supportedNode} from './launch.mjs';
+import {acquireLaunchLock,checkPort,dependencyFingerprint,parseOptions,supportedNode,projectRoot} from './launch.mjs';
 import {findPython,runPython} from './python.mjs';
 import {packageProjects} from './package-projects.mjs';
 
@@ -42,6 +43,14 @@ test('runs a real supported Python interpreter without a shell',()=>{
 test('an explicit invalid interpreter does not silently select another one',()=>{
   assert.throws(()=>findPython(join(tmpdir(),'missing from zero python executable')),/FROM_ZERO_PYTHON/);
 });
+test('a symlink or Windows junction still runs the actual CLI entry',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'from zero alias ')),alias=join(root,'project alias');
+  try{
+    await symlink(projectRoot,alias,process.platform==='win32'?'junction':'dir');
+    const result=spawnSync(process.execPath,[join(alias,'scripts','launch.mjs'),'--check'],{cwd:tmpdir(),encoding:'utf8',timeout:20000});
+    assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/依赖检查通过/);
+  }finally{await unlink(alias).catch(e=>{if(e.code!=='ENOENT')throw e;});await rm(root,{recursive:true,force:true});}
+});
 test('an occupied port is rejected without closing the existing service',async()=>{
   const server=createServer();await new Promise(yes=>server.listen(0,'127.0.0.1',yes));
   try{await assert.rejects(()=>checkPort(server.address().port),/已被占用/);assert.equal(server.listening,true);}
@@ -53,6 +62,6 @@ test('project ZIP works in a spaced path and excludes local credentials, caches 
     for(const [name,content] of Object.entries({'README.md':'Study project','main.py':'print(5)','.env':'TUTOR_API_KEY=example','model.pt':'weights','model.safetensors':'weights','__pycache__/cache.pyc':'cache'}))await writeFile(join(project,name),content);
     await packageProjects(root);
     const python=findPython();const result=runPython(python,['-I','-c','import json,sys,zipfile; print(json.dumps(zipfile.ZipFile(sys.argv[1]).namelist()))',join(root,'public','downloads','regression.zip')],{encoding:'utf8'});
-    assert.equal(result.status,0);assert.deepEqual(JSON.parse(result.stdout),['regression/README.md','regression/main.py']);
+    assert.equal(result.status,0);assert.deepEqual(new Set(JSON.parse(result.stdout)),new Set(['regression/README.md','regression/main.py']));
   }finally{await rm(root,{recursive:true,force:true});}
 });

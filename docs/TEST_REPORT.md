@@ -1,8 +1,10 @@
 # 0.3.3 跨平台一键启动验证
 
-2026-10-23。新增Windows／Linux／macOS入口，兼容Python命令与路径含空格。Linux本地9/9启动器测试、1/1真实平台入口smoke（从无node_modules源码首次安装、HTTP资源、重复启动、停止、依赖复用再次启动）通过；TypeScript、509/509 Vitest、83/83课程代码和生产构建通过。测试临时源码不复制.env、依赖、学习记录或模型权重。
+2026-10-23。新增Windows／Linux／macOS入口，兼容Python命令与路径含空格。Linux本地10/10启动器测试、1/1真实平台入口smoke（从无node_modules源码首次安装、HTTP资源、重复启动、停止、依赖复用再次启动）通过；TypeScript、509/509 Vitest、83/83课程代码和生产构建通过。测试临时源码不复制.env、依赖、学习记录或模型权重。
 
 GitHub工作流增加Ubuntu24.04、Windows2025及macOS15原生runner，每个平台都执行相同9项守卫与真实平台smoke。最终交付增加launcher依赖，任一平台失败则不能交付verified包。实际远程结果及提交SHA以Actions和启动器交接回执为准，不把Linux测试或YAML配置称为三平台已通过；自动化不包括实际桌面双击、浏览器关联或系统权限提示。
+
+首次原生CI发现macOS目录别名导致CLI入口未执行，以及Windows8.3短路径导致Vite文件范围校验失败。现统一使用真实本机路径，保留Vite原有文件访问限制；新增符号链接／Windows junction入口回归。ZIP成员验收按集合检查，避免把Windows文件排序差异误判为内容错误。失败批次不计为通过，修复后结果以最新Actions为准。
 
 原学习界面及Sites公开版本7未改动；本轮只发布GitHub代码，不部署站点。详情见 [LAUNCHER](LAUNCHER.md)。
 
