@@ -4,7 +4,7 @@
 
 ## 本轮已完成
 
-- GitHub工程准备：核实本人Thweki账户并检查仓库；现有连接拒绝 `createRepository`，已停止建仓，未推送或触发Actions。补齐完整CI、三个Python工程、源码／历史检查及通过门槛的校验部署包交付；受支持的Sites发布仍由原生工具完成，不虚构Actions部署API。准备情况与继续条件见 [GITHUB_CICD](GITHUB_CICD.md)，本地验证不计作真实Actions运行。
+- GitHub工程接入：首次建仓被拒后未重试；根据用户新证据，只读核实Thweki/from-zero-to-gpt已存在且为私有、连接可访问。完整CI、三个Python工程、源码／历史检查与校验部署包交付已实现；实际push与Actions结果以交接回执为准。保留Sites origin及公开版本7，不虚构Actions部署API。详见 [GITHUB_CICD](GITHUB_CICD.md)，本地验证不计作真实Actions运行。
 
 - 0.3.2：逐项修复独立试用摘要的四项问题：函数全参数视口、Python用户行号与折叠堆栈、真实全屏退出状态、辅助文字与章节定位。保留主题／草稿／学习断点。新增8项单元与8项桌面／触控模拟浏览器用例；细节与验证边界见 [USABILITY_FIX_REPORT](USABILITY_FIX_REPORT.md)。后续已获准复测后发布到现有PUBLIC站点，实际版本以发布回执为准。
 

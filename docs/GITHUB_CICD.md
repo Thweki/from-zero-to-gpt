@@ -1,8 +1,8 @@
 # GitHub CI、交付与现有 Sites 的边界
 
-更新：2026-10-23。当前连接的 GitHub 本人账户由连接工具和 `gh api user` 独立确认均为 `Thweki`（User）。已检查本人仓库，没有发现同名或同项目仓库。新建空私有仓库 `from-zero-to-gpt` 时，GitHub 返回 `Resource not accessible by integration (createRepository)`；已停止建仓，不改用另一种接口绕过。不声称仓库已创建、项目已推送或真实Actions已运行。
+更新：2026-10-23。当前连接的 GitHub 本人账户由连接工具和 `gh api user` 独立确认均为 `Thweki`（User）。首次建仓请求被GitHub拒绝后已停止；用户随后提供仓库存在的新证据。本轮通过连接工具及GitHub API只读确认 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt) 已存在、owner ID匹配、visibility为private、当前连接声明具有push权限；Git读取确认接入前没有分支。没有重复创建仓库，也不把截图或声明权限当作实际推送成功。
 
-本轮可用技能目录没有 engineering 技能，工作区也无 AGENTS.md；遵循现有架构与原生 GitHub／Sites 能力。现有 Sites 的 origin、项目 ID、公开站点及版本7保持原状。本轮只准备 GitHub 工程与交付，不重新发布或修改分享权限。
+本轮可用技能目录没有 engineering 技能，工作区也无 AGENTS.md；遵循现有架构与原生 GitHub／Sites 能力。现有 Sites 的 origin、项目 ID、公开站点及版本7保持原状。本轮接入既有GitHub私有仓库与交付，不重新发布或修改分享权限。
 
 ## 已实现的工作流
 
@@ -20,7 +20,7 @@
 
 失败会阻止最终交付。PR可以生成候选包以检查构建，但不会生成main的verified产物，更不会部署生产。导师浏览器测试使用模拟HTTP；CI无需付费模型API，也不访问学习者的真实数据。
 
-工作流配置和本地命令验证不等于真实GitHub Actions验收。本轮因建仓权限阻断，Actions运行URL与远程结果均不存在；权限恢复后必须完成一次真实运行并检查各job、产物及日志。
+工作流配置和本地命令验证不等于真实GitHub Actions验收。首次接入推送会触发main上的真实运行，必须检查各job、产物及日志；实际推送SHA、Actions运行URL和结果以工作区GitHub交接回执为准，不能因只读权限信息就声称运行通过。
 
 本轮本地已通过严格类型、509项Vitest、7项交付校验测试、83章CPython验收、完整127项浏览器测试（0失败／跳过／flaky，约8.2分钟）、三个Python工程6/10/23项测试及生产构建。完整浏览器输出为 `artifacts/playwright-results.json`，详细说明见 [TEST_REPORT](TEST_REPORT.md)。归档与最终源码提交以工作区GitHub准备回执为准；这些本地结果不冒充真实Actions。
 
@@ -52,18 +52,18 @@ Actions上传的候选产物保留7天，verified产物14天；浏览器结果�
 
 当前是**通过CI门槛后的自动产物交付**，不是自动上线。已经核实的Sites接口要求：向既有Sites源仓库推送精确提交，使用原生工具保存匹配源码及归档的版本，然后部署返回的版本ID。现有Sites源仓库是 `origin`，并非新GitHub仓库。没有发现可供GitHub Actions使用的官方Sites CLI、持久发布令牌或OIDC对接；不能虚构HTTP发布接口，也不能把短时源仓库凭证当作持久CD凭证。
 
-工程改动保存在本地 `chore/github-ci` 分支；原main仍指向已发布的版本7源码。GitHub权限恢复后，只新增名为 `github` 的remote，绝不替换或删除 `origin`。空私有仓库使用普通 `git push github HEAD:main` 推送完整当前分支，避免误把原main当作新CI版本。推送GitHub不会自动修改Sites源仓库或现有生产部署。需要发布时，按已验证的原生Sites流程同步origin、保存精确SHA与匹配归档、部署并核实状态，继续保持已有public状态。
+工程改动保存在本地 `chore/github-ci` 分支；原main仍指向已发布的版本7源码。只新增名为 `github` 的remote，绝不替换或删除 `origin`。已核验的空私有仓库使用普通 `git push github HEAD:main` 推送完整当前分支，避免误把原main当作新CI版本。推送GitHub不会自动修改Sites源仓库或现有生产部署。需要发布时，按已验证的原生Sites流程同步origin、保存精确SHA与匹配归档、部署并核实状态，继续保持已有public状态。
 
 如需真正自动上线，需平台提供受支持的GitHub持续部署集成或可授权给Actions的正式部署身份，并确认既有项目绑定及权限范围；目前没有这些能力。不能在本项目中通过保存用户聊天密钥、抓取连接令牌或另建托管来补足。
 
-## 当前阻断与继续条件
+## 仓库接入与权限边界
 
-GitHub集成拒绝了 `createRepository`。用户可以在本人GitHub账户手动创建空的**私有** `from-zero-to-gpt`，并将它加入当前GitHub连接的可访问仓库范围；或者通过连接管理授权一个支持建仓的连接。无需在聊天中提供个人访问令牌。
+既有私有仓库接入前再次核对owner、visibility、Git分支及源码写入权限，保存现有origin，只新增github remote。使用普通push，不force，不覆盖别人的内容；远程实际写入或Actions访问若被拒绝，则停止相应操作并记录准确错误，不换接口绕过。
 
-恢复后先重新读取仓库metadata，确认owner为Thweki、visibility为private、内容与当前项目一致。确认写入源码／工作流的权限，再新增github remote并普通推送，不force、不覆盖已有内容。推送触发CI，等待真实运行结束，检查所有job与verified artifact；只在该时提供实际仓库和Actions URL。本轮拒绝后没有发起任何替代建仓、远程push或生产部署操作。
+推送到main后触发工作流，等待真实Actions完成并检查各job、浏览器结果及verified artifact。工作区GitHub交接回执记录真实仓库URL、源码提交与运行结果；此前建仓被拒的历史不等于当前仓库不存在，也不等于当前所有权限均可用。本轮没有创建替代仓库、公开代码、写入秘密或改变生产部署。
 
 ## 检查边界
 
 `check-repository.mjs` 是仓库文件策略及常见提供商凭证格式检查，不是对所有秘密或个人信息的完备识别。不得靠忽略整个tests目录或把匹配行打印到日志来处理发现；需要逐项核对，真实泄漏必须先处理再推送。本轮仅记录命中规则／路径和扫描统计，不输出凭证。
 
-浏览器手机参数和触控仍是Chromium模拟，不能声称完成iOS／Android实机或软键盘验收。完整CI的真实GitHub托管环境结果仍待权限恢复后验证，本地测试不代替该结果。
+浏览器手机参数和触控仍是Chromium模拟，不能声称完成iOS／Android实机或软键盘验收。完整CI的真实GitHub托管环境结果以实际运行及回执为准，本地测试不代替该结果。

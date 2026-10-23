@@ -1,3 +1,9 @@
+# GitHub私有仓库接入核验
+
+2026-10-23。用户提供新状态后，通过GitHub连接工具和gh api独立确认当前本人仍为Thweki，精确仓库Thweki/from-zero-to-gpt已存在、为private且可访问，owner ID与本人一致。权限metadata包含push=true，Git只读查询显示接入前尚无分支。未重复建仓。后续按普通push接入，真实Actions结果以交接回执和运行URL为准；不把metadata声明权限当作写入成功。下方保留此前本地验收和历史建仓拒绝，避免混淆先后状态。
+
+---
+
 # GitHub CI工程准备：本地验收与远程阻断
 
 2026-10-23，沿用应用0.3.2。工程改动在 `chore/github-ci` 分支，原main、Sites origin及公开版本7保留。GitHub本人账户核实为Thweki，未发现同项目仓库；唯一一次建仓调用被GitHub拒绝：`Resource not accessible by integration (createRepository)`。已停止建仓，未换接口重试，未push，未运行真实Actions。仓库与Actions运行URL均不存在。
