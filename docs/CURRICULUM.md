@@ -148,3 +148,6 @@
 - [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) 与 [Hugging Face LLM Course](https://huggingface.co/learn/llm-course/)：可视化及现代工作流补充。
 
 区分可证明的数学结论、经验性训练规律和仍在研究的解释。Scaling Laws、对齐、幻觉等不得被描述为没有条件的定律。
+
+
+0.3.0 整合：`kv-cache`、`quantization`、`lora` 三章增加同一微型 GPT 的真实本地实验入口，覆盖增量输出一致性、冻结基座的适配训练／合并、int8 状态存储与三项组合。网页数学实验与本地 PyTorch 运行边界保持明确，详见 `projects/tiny-gpt/EFFICIENCY.md`。

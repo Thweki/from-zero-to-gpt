@@ -1,4 +1,4 @@
-> 0.2.0 实施更新：83章课程首版、AI导师与三个独立工程已完成。本文保留最初产品原则及MVP范围背景，实际功能与边界以 PROGRESS、ARCHITECTURE、TEST_REPORT 为准。
+> 0.3.0 实施更新：83章课程首版、AI导师与三个独立工程已完成；同一微型GPT已接入KV Cache、LoRA训练／合并与int8权重存储。本文保留最初产品原则及MVP范围背景，实际功能与边界以 PROGRESS、ARCHITECTURE、TEST_REPORT 为准。
 
 # From Zero to GPT 产品需求
 

@@ -109,3 +109,12 @@ Worker 部署以 `dist-server/worker.js` 为入口，绑定名为 `ASSETS` 的 `
 `npm run check` 检查类型，`npm test` 检查教材门槛、DAG、公式、计算性质、本地存储和导师协议；`npm run validate:course` 在 CPython 中批量执行仓库自有参考程序与章节断言。项目目录各自有真实 Python 测试；tiny GPT 和 torch 对照需要独立安装 PyTorch。Playwright 负责导航、输入、图形变化、代码执行、恢复、数据导入导出、导师流程与移动布局。测试报告要区分模拟提供商的确定性测试、真实外部调用与实际本地训练。
 
 扩展一章时先固定 ID、先修、数学与形状，再添加可运行练习及独立校验。扩展实验需同步参数持久化与无障碍路径。扩展导师提供商只改服务端变量，先用无密钥、错误、取消与限额测试核对兼容性。若将来需要远程代码执行，应建立独立受限容器或微虚拟机与任务队列，不得把它塞进现有导师代理或网页进程。
+
+
+## 0.3.0 本地 GPT 整合
+
+`projects/tiny-gpt/model.py` 保留训练前向与完整窗口推理，增加显式逐层缓存接口；缓存形状为 `[B,H,S,d]`，使用偏移位置和偏移因果 mask。生成器在绝对位置窗口移动时重建全部缓存，底层拒绝越界。`benchmark.py` 对共同 Token 轨迹逐步比较 logits，计数投影位置、缓存张量字节并测量 CPU 中位时间。
+
+`efficient.py` 实现 LoRALinear、合并、逐输出通道 Int8Linear 与存储报告。仅 A/B 可训练，基座冻结并逐张量检查；适配器仅存低秩张量与元数据，绑定精确基座文件 SHA-256。int8 以 buffers 真正保存，前向临时反量化到浮点；没有整数 GEMM。格式1训练检查点保持兼容；格式2浮点／int8推理文件不含旧优化器，不能作为训练恢复输入。加载使用 weights_only，输出不能覆盖输入。
+
+`tiny_gpt.py` 统一 train/evaluate/generate/inspect/benchmark/lora-train/merge-lora/quantize；支持先浮点LoRA再合并、量化、缓存生成，不声称QLoRA。`ProjectDownload.tsx` 给第五／六阶段同一工程源码下载，三章提供可执行命令与边界。ZIP 由打包脚本生成；PyTorch 始终在本机运行，不进入网站服务端。

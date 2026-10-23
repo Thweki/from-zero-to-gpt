@@ -1,0 +1,101 @@
+{
+  "version": "0.3.0",
+  "date": "2026-10-23",
+  "python": "3.12",
+  "torch": "2.14.1+cpu",
+  "threads": 1,
+  "model": {
+    "parameters": 62592,
+    "context": 48,
+    "width": 48,
+    "heads": 3,
+    "layers": 2,
+    "vocab": 38
+  },
+  "base_training_steps": 250,
+  "lora_steps": 100,
+  "lora_rank": 4,
+  "lora_alpha": 8,
+  "lora_trainable_parameters": 2304,
+  "frozen_base_unchanged": true,
+  "validation_loss": {
+    "base": 0.9017003178596497,
+    "lora": 0.776510727405548,
+    "merged": 0.7765107035636902,
+    "int8_merged": 0.7772069931030273
+  },
+  "merge_probe_logit_max_abs_error": 1.430511474609375e-06,
+  "quantization_probe_logit_max_abs_error": 0.06447753310203552,
+  "state_tensor_bytes": {
+    "float": 254976,
+    "int8": 87224
+  },
+  "cache_short": {
+    "steps": 24,
+    "prompt_tokens": 10,
+    "repeats": 5,
+    "context": 48,
+    "full": {
+      "projected_token_positions": 516,
+      "cache_rebuilds": 0,
+      "final_cache_bytes": 0,
+      "median_ms": 12.971852003829554
+    },
+    "cached": {
+      "projected_token_positions": 33,
+      "cache_rebuilds": 1,
+      "final_cache_bytes": 25344,
+      "median_ms": 11.600742000155151
+    },
+    "logit_max_abs_error": 2.384185791015625e-06,
+    "logits_close": true,
+    "measured_speed_ratio_full_over_cached": 1.1181915780607883,
+    "note": "CPU wall time includes prefill and window rebuilds; excludes sampling/I/O. No guaranteed speedup. KV is FP32."
+  },
+  "cache_rollover": {
+    "steps": 80,
+    "prompt_tokens": 10,
+    "repeats": 5,
+    "context": 48,
+    "full": {
+      "projected_token_positions": 3099,
+      "cache_rebuilds": 0,
+      "final_cache_bytes": 0,
+      "median_ms": 46.86787900573108
+    },
+    "cached": {
+      "projected_token_positions": 2016,
+      "cache_rebuilds": 42,
+      "final_cache_bytes": 36864,
+      "median_ms": 44.67817200202262
+    },
+    "logit_max_abs_error": 2.6226043701171875e-06,
+    "logits_close": true,
+    "measured_speed_ratio_full_over_cached": 1.0490106668556032,
+    "note": "CPU wall time includes prefill and window rebuilds; excludes sampling/I/O. No guaranteed speedup. KV is FP32."
+  },
+  "combined_int8_cache": {
+    "steps": 64,
+    "prompt_tokens": 10,
+    "repeats": 5,
+    "context": 48,
+    "full": {
+      "projected_token_positions": 2331,
+      "cache_rebuilds": 0,
+      "final_cache_bytes": 0,
+      "median_ms": 41.44596699916292
+    },
+    "cached": {
+      "projected_token_positions": 1248,
+      "cache_rebuilds": 26,
+      "final_cache_bytes": 36864,
+      "median_ms": 40.33452900330303
+    },
+    "logit_max_abs_error": 3.993511199951172e-06,
+    "logits_close": true,
+    "measured_speed_ratio_full_over_cached": 1.02755549707222,
+    "note": "CPU wall time includes prefill and window rebuilds; excludes sampling/I/O. No guaranteed speedup. KV is FP32."
+  },
+  "combined_generated_text_equal": true,
+  "note": "One actual CPU run on repeated teaching templates; bytes are tensors, not peak RAM; timings are not guaranteed speedups."
+}

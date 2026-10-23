@@ -45,17 +45,29 @@ class CausalAttention(nn.Module):
         self.out = nn.Linear(cfg.width, cfg.width)
         self.register_buffer("mask", torch.tril(torch.ones(cfg.context, cfg.context, dtype=torch.bool)))
 
-    def forward(self, x):
+    def _attend(self, x, past=None):
         b, t, c = x.shape
         d = c // self.heads
         q, k, v = self.qkv(x).chunk(3, dim=-1)
         q, k, v = [z.view(b, t, self.heads, d).transpose(1, 2) for z in (q, k, v)]
-        # [B,H,T,d] @ [B,H,d,T] -> [B,H,T,T]
+        offset = 0 if past is None else past[0].shape[2]
+        if past is not None:
+            k = torch.cat((past[0], k), dim=2)
+            v = torch.cat((past[1], v), dim=2)
+        # Query length T, previous cache length S=offset.
+        # [B,H,T,d] @ [B,H,d,S+T] -> [B,H,T,S+T]
         scores = (q @ k.transpose(-2, -1)) / math.sqrt(d)
-        scores = scores.masked_fill(~self.mask[:t, :t], float("-inf"))
+        # A chunk beginning at offset sees all earlier tokens, but no future token.
+        scores = scores.masked_fill(~self.mask[offset:offset+t, :offset+t], float("-inf"))
         weights = torch.softmax(scores, dim=-1)
         y = (weights @ v).transpose(1, 2).contiguous().view(b, t, c)
-        return self.out(y)
+        return self.out(y), (k, v)
+
+    def forward(self, x):
+        return self._attend(x)[0]
+
+    def forward_cached(self, x, past=None):
+        return self._attend(x, past)
 
 
 class MLP(nn.Module):
@@ -77,6 +89,11 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.attn(self.norm1(x))
         return x + self.mlp(self.norm2(x))
+
+    def forward_cached(self, x, past=None):
+        update, cache = self.attn.forward_cached(self.norm1(x), past)
+        x = x + update
+        return x + self.mlp(self.norm2(x)), cache
 
 
 class TinyGPT(nn.Module):
@@ -108,6 +125,43 @@ class TinyGPT(nn.Module):
         loss = None if targets is None else F.cross_entropy(logits.reshape(-1, self.cfg.vocab_size), targets.reshape(-1))
         return logits, loss
 
+    @torch.no_grad()
+    def forward_cached(self, ids, cache=None):
+        """Inference-only append. Caller must supply the matching prefix cache.
+
+        Each layer stores [B,H,S,d] keys/values, not attention weights. The cache
+        is returned explicitly, never stored on the model or mutated in place.
+        A sliding window must be rebuilt: learned absolute positions restart.
+        """
+        if self.training:
+            raise ValueError("KV cache requires model.eval(); use forward for training")
+        if ids.ndim != 2 or ids.shape[0] < 1 or ids.shape[1] < 1:
+            raise ValueError("input must be nonempty [B,T]")
+        offset = 0
+        if cache is not None:
+            if len(cache) != self.cfg.layers:
+                raise ValueError("one K/V pair is required per layer")
+            for pair in cache:
+                if len(pair) != 2 or any(not isinstance(z, torch.Tensor) or z.ndim != 4 for z in pair):
+                    raise ValueError("cache entries must be two [B,H,S,d] tensors")
+                k, v = pair
+                if k.shape != v.shape or k.shape[:2] != (ids.shape[0], self.cfg.heads) or k.shape[3] != self.cfg.width // self.cfg.heads:
+                    raise ValueError("cache shape does not match model/batch")
+                if offset and k.shape[2] != offset:
+                    raise ValueError("all layer cache lengths must agree")
+                offset = k.shape[2]
+                if offset < 1 or k.device != ids.device or v.device != ids.device or k.dtype != self.token.weight.dtype or v.dtype != k.dtype:
+                    raise ValueError("cache length/device/dtype does not match")
+        if offset + ids.shape[1] > self.cfg.context:
+            raise ValueError("cache exceeds context; rebuild the current window")
+        positions = torch.arange(offset, offset + ids.shape[1], device=ids.device)
+        x = self.token(ids) + self.position(positions)
+        updated = []
+        for i, block in enumerate(self.blocks):
+            x, pair = block.forward_cached(x, None if cache is None else cache[i])
+            updated.append(tuple(z.detach() for z in pair))
+        return self.head(self.norm(x)), tuple(updated)
+
 
 def filtered_probabilities(logits, temperature=1.0, top_k=0, top_p=1.0):
     if temperature <= 0 or not math.isfinite(temperature):
@@ -134,7 +188,7 @@ def filtered_probabilities(logits, temperature=1.0, top_k=0, top_p=1.0):
 
 
 @torch.no_grad()
-def generate(model, prompt_ids, steps, seed=123, temperature=1.0, top_k=0, top_p=1.0):
+def generate(model, prompt_ids, steps, seed=123, temperature=1.0, top_k=0, top_p=1.0, use_cache=False):
     if not prompt_ids:
         raise ValueError("prompt cannot be empty")
     if steps < 0:
@@ -143,10 +197,20 @@ def generate(model, prompt_ids, steps, seed=123, temperature=1.0, top_k=0, top_p
     ids = torch.tensor([prompt_ids], dtype=torch.long)
     generator = torch.Generator(device="cpu").manual_seed(seed)
     trace = []
+    cache = None
     for _ in range(steps):
-        logits, _ = model(ids[:, -model.cfg.context:])
+        rebuild = cache is None or cache[0][0].shape[2] >= model.cfg.context
+        window = ids[:, -model.cfg.context:]
+        evaluated = window if not use_cache or rebuild else ids[:, -1:]
+        if use_cache:
+            logits, cache = model.forward_cached(evaluated, None if rebuild else cache)
+        else:
+            logits, _ = model(evaluated)
         probs = filtered_probabilities(logits[0, -1], temperature, top_k, top_p)
         next_id = int(torch.multinomial(probs, 1, generator=generator))
-        trace.append({"id": next_id, "probability": float(probs[next_id])})
+        trace.append({"id": next_id, "probability": float(probs[next_id]),
+                      "evaluated_tokens": evaluated.shape[1],
+                      "cache_tokens": 0 if cache is None else cache[0][0].shape[2],
+                      "cache_rebuilt": bool(use_cache and rebuild)})
         ids = torch.cat((ids, torch.tensor([[next_id]])), dim=1)
     return ids[0].tolist(), trace
