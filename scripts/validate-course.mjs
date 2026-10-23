@@ -1,11 +1,12 @@
 // Node >= 22.18: built-in TypeScript type stripping; no extra runtime dependency.
 // Executes repository-owned reference examples only, never user-supplied website code.
-import { spawnSync } from 'node:child_process';
+import {findPython,runPython} from './python.mjs';
 import { lessons } from '../src/data/lessons.ts';
 
+const python=findPython();
 let failures = 0;
 for (const lesson of lessons) {
-  const reference = spawnSync('python3', ['-c', lesson.reference + '\n' + lesson.pythonTests], {
+  const reference = runPython(python, ['-c', lesson.reference + '\n' + lesson.pythonTests], {
     encoding: 'utf8', timeout: 5000, maxBuffer: 1024 * 1024,
   });
   if (reference.error || reference.status !== 0) {
@@ -14,7 +15,7 @@ for (const lesson of lessons) {
     console.error(reference.error?.message || reference.stderr);
     continue;
   }
-  const starter = spawnSync('python3', ['-c', lesson.starter + '\n' + lesson.pythonTests], {
+  const starter = runPython(python, ['-c', lesson.starter + '\n' + lesson.pythonTests], {
     encoding: 'utf8', timeout: 5000, maxBuffer: 1024 * 1024,
   });
   if (starter.error || starter.status === 0 || !starter.stderr.includes('AssertionError')) {

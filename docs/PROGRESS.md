@@ -1,8 +1,10 @@
 # 开发进度与交接
 
-更新：2026-10-23，版本 0.3.2。已从首五章 MVP 扩展为六阶段 83 章课程首版、AI 导师和三个独立工程。实际验证见 TEST_REPORT，不把实验玩具的结果冒充完整大模型训练。
+更新：2026-10-23，版本 0.3.3。已从首五章 MVP 扩展为六阶段 83 章课程首版、AI 导师和三个独立工程。实际验证见 TEST_REPORT，不把实验玩具的结果冒充完整大模型训练。
 
 ## 本轮已完成
+
+- 0.3.3：新增Windows批处理、Linux shell及macOS command一键入口，共享Node启动器；自动检查依赖、按锁文件安装、准备资源、就绪后打开浏览器，支持单实例／固定端口和依赖复用。兼容py -3／python，项目ZIP排除本地配置及权重。新增9项启动器测试、原生三平台首次安装与重启CI门槛；实际结果以Actions及交接回执为准。详见 [LAUNCHER](LAUNCHER.md)。
 
 - GitHub工程接入：首次建仓被拒后未重试；根据用户新证据，只读核实Thweki/from-zero-to-gpt已存在且为私有、连接可访问。完整CI、三个Python工程、源码／历史检查与校验部署包交付已实现；实际push与Actions结果以交接回执为准。保留Sites origin及公开版本7，不虚构Actions部署API。详见 [GITHUB_CICD](GITHUB_CICD.md)，本地验证不计作真实Actions运行。
 

@@ -1,3 +1,13 @@
+# 0.3.3 跨平台一键启动验证
+
+2026-10-23。新增Windows／Linux／macOS入口，兼容Python命令与路径含空格。Linux本地9/9启动器测试、1/1真实平台入口smoke（从无node_modules源码首次安装、HTTP资源、重复启动、停止、依赖复用再次启动）通过；TypeScript、509/509 Vitest、83/83课程代码和生产构建通过。测试临时源码不复制.env、依赖、学习记录或模型权重。
+
+GitHub工作流增加Ubuntu24.04、Windows2025及macOS15原生runner，每个平台都执行相同9项守卫与真实平台smoke。最终交付增加launcher依赖，任一平台失败则不能交付verified包。实际远程结果及提交SHA以Actions和启动器交接回执为准，不把Linux测试或YAML配置称为三平台已通过；自动化不包括实际桌面双击、浏览器关联或系统权限提示。
+
+原学习界面及Sites公开版本7未改动；本轮只发布GitHub代码，不部署站点。详情见 [LAUNCHER](LAUNCHER.md)。
+
+---
+
 # GitHub私有仓库接入核验
 
 2026-10-23。用户提供新状态后，通过GitHub连接工具和gh api独立确认当前本人仍为Thweki，精确仓库Thweki/from-zero-to-gpt已存在、为private且可访问，owner ID与本人一致。权限metadata包含push=true，Git只读查询显示接入前尚无分支。未重复建仓。后续按普通push接入，真实Actions结果以交接回执和运行URL为准；不把metadata声明权限当作写入成功。下方保留此前本地验收和历史建仓拒绝，避免混淆先后状态。

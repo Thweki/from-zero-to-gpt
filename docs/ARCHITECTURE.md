@@ -135,3 +135,12 @@ Worker 部署以 `dist-server/worker.js` 为入口，绑定名为 `ASSETS` 的 `
 Worker使用 `experiment.py`／`acceptance_tests.py` 文件名，不包装用户代码。`python-errors.ts` 从原始异常字符串提取定位和简明解释；优先最内层用户帧，验收断言明确区别。`CodeLab` 默认折叠完整堆栈但保留可展开原文和异常前输出。旧版字符串仍能呈现，无法确认的旧 `<exec>` 行号不冒充用户行号；无需迁移IndexedDB。
 
 `LessonNavigation.tsx` 负责章节内语义定位，`LessonReader` 等待代码模式更新后再聚焦并滚动，尊重减少动画偏好。跳转不改路由、参数或草稿。`usability.css` 在基础主题之后调整辅助文字、定位栏与全屏控件，避免懒加载实验样式把字号缩回。Playwright分别记录窄屏桌面、Chromium设备／触控模拟及真实浏览器Fullscreen API，不能混称真实手机验收。
+
+
+## 0.3.3 本地跨平台启动
+
+根目录start-windows.bat／start-linux.sh／start-macos.command共享 `scripts/launch.mjs`，不依赖系统Shell执行任意用户字符串。Windows仅npm.cmd通过固定cmd命令执行，Vite、Python与用户路径都用参数数组；macOS仅在缺少node时补Homebrew查找路径。启动器使用回环监听、固定默认端口和localhost打开地址，避免暗中换学习数据origin；不覆盖.env，不安装系统软件，不改变生产部署。
+
+`python.mjs`统一探测3.10+解释器，支持Windows py -3与路径含空格的FROM_ZERO_PYTHON覆盖。打包和课程验证消费同一探测结果；打包排除环境配置、缓存和常见模型权重。依赖指纹写入node_modules，单实例锁写入忽略的artifacts；中断安装不会写成功指纹，死进程旧锁可恢复，活进程锁不能被替换。
+
+启动测试使用Node内置runner；跨平台smoke从追踪源码创建含空格的临时目录，无Git／无node_modules也能启动，真实安装后验证资源、并发保护、停止和热启动，不复制学习数据或密钥。CI使用三个原生OS runner，最终delivery依赖它们成功；GUI自动打开、Finder与桌面权限交互不冒充已自动化验证。

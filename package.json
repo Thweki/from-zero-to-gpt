@@ -1,6 +1,6 @@
 {
   "name": "from-zero-to-gpt",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -17,7 +17,10 @@
     "start": "node --env-file-if-exists=.env scripts/serve.mjs",
     "check:repository": "node scripts/check-repository.mjs",
     "test:delivery": "node --test scripts/delivery.test.mjs",
-    "package:delivery": "node scripts/package-site.mjs && node scripts/package-delivery.mjs && node scripts/verify-delivery.mjs"
+    "package:delivery": "node scripts/package-site.mjs && node scripts/package-delivery.mjs && node scripts/verify-delivery.mjs",
+    "launch": "node scripts/launch.mjs",
+    "test:launcher": "node --test scripts/launcher.test.mjs",
+    "test:launcher:smoke": "node --test scripts/launcher-smoke.test.mjs"
   },
   "dependencies": {
     "idb": "^8.0.3",
