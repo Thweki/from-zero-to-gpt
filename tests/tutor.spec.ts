@@ -42,7 +42,9 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     await closeNotebook(page);await page.getByRole('tab', { name: '代码实现', exact: true }).click();
     await page.getByLabel('Python 代码编辑器').fill(code);
     await openNotebook(page);await page.getByLabel('当前章节随手笔记').fill(note);
-    await page.getByRole('link', { name: '打开 AI 导师', exact: true }).click();
+    await closeNotebook(page);
+    await page.getByRole('button',{name:'打开导航',exact:true}).click();
+    await page.getByRole('link',{name:'AI 导师',exact:true}).click();
     const tutor = panel(page);
     await expect(tutor.locator('.tutor-model')).toContainText('UI transport mock');
     await expect(tutor.locator('.tutor-scope')).toContainText('函数是什么');
