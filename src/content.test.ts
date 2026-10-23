@@ -42,9 +42,9 @@ describe('课程依赖图', () => {
     expect(visited.size).toBe(graph.nodes.length);
   });
 
-  it('只有五个真实课程可进入，课程的先修关系与知识图同步', () => {
+  it('83个真实课程可进入，课程的先修关系与知识图同步', () => {
     const available = graph.nodes.filter(node => node.available);
-    expect(available).toHaveLength(5);
+    expect(available).toHaveLength(83);
     expect(available.map(node => node.id).sort()).toEqual(lessons.map(lesson => lesson.id).sort());
     expect(lessons.map(lesson => lesson.id).sort()).toEqual([...lessonIds].sort());
     for (const node of available) {

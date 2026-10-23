@@ -14,3 +14,5 @@ await mkdir('public/licenses',{recursive:true});
 for (const name of ['react','react-dom','katex','lucide-react','idb']) {
   await copyFile(join('node_modules',name,'LICENSE'),join('public/licenses',`${name}-LICENSE`));
 }
+
+await copyFile('node_modules/react-markdown/license','public/licenses/react-markdown-LICENSE');

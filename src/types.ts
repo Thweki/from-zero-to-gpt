@@ -1,4 +1,5 @@
-export type LessonId = 'functions' | 'linear' | 'python' | 'vectors' | 'dot-product';
+import { lessonIds } from './data/lesson-ids';
+export type LessonId = typeof lessonIds[number];
 export type ViewMode = 'intuition' | 'math' | 'code' | 'deep';
 export type LessonStatus = 'new' | 'learning' | 'mastered';
 export interface Lesson {
@@ -15,7 +16,8 @@ export interface Lesson {
   deep: { title: string; paragraphs: string[] }[];
   formula: string;
   formulaCaption: string;
-  lab: 'function' | 'linear' | 'vector' | 'dot';
+  lab: 'function' | 'linear' | 'vector' | 'dot' | 'math-advanced' | 'machine-learning' | 'neural-network' | 'transformer' | 'gpt' | 'modern-llm';
+  runtime?: 'browser' | 'local-python';
   labTask: string;
   starter: string;
   reference: string;
@@ -36,6 +38,8 @@ export interface LessonProgress {
   quizPassed?: boolean;
   labValues?: Record<string, number>;
   lastRun?: string;
+  tutorMessages?: TutorMessage[];
+  tutorDraft?: string;
 }
 export interface Checkpoint {
   lessonId: LessonId;
@@ -53,3 +57,6 @@ export interface LearningState {
   checkpoint?: Checkpoint;
   updatedAt: string;
 }
+
+export interface TutorMessage { role: 'user' | 'assistant'; content: string; createdAt: string; }
+export interface ExtendedLabProps { lesson: Lesson; values: Record<string,number>; onChange: (values:Record<string,number>)=>void; }

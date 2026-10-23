@@ -10,6 +10,7 @@ self.onmessage = async ({data}) => {
       python=await loadPyodide({indexURL:'/python/',stdout:append,stderr:append});
     }
     python.setStdout({batched:append}); python.setStderr({batched:append});
+    self.postMessage({type:'running'});
     const globals=python.toPy({});
     try {
       await python.runPythonAsync(data.code,{globals});

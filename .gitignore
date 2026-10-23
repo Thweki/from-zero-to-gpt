@@ -8,3 +8,13 @@ playwright-report/
 .env*
 !.env.example
 artifacts/
+
+.venv*/
+__pycache__/
+*.pyc
+*.pt
+*.pth
+.dev.vars*
+.openai/deploy-receipt.json
+public/downloads/
+dist-server/

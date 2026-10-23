@@ -1,0 +1,5 @@
+CC0 1.0 Universal — original educational corpus by From Zero to GPT contributors (2026).
+All text in corpus.txt was authored for this project using a short finite grammar; it contains no scraped text.
+To the extent possible under law, the authors waive all copyright and related rights.
+https://creativecommons.org/publicdomain/zero/1.0/
+This small synthetic corpus is intentionally repetitive and is unsuitable for factual or general language benchmarking.

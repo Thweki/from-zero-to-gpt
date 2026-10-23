@@ -1,0 +1,2 @@
+# Install from the CPU wheel index, see README.md. No CUDA packages required.
+torch>=2.2,<3

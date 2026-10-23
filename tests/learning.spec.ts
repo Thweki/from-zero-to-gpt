@@ -35,9 +35,8 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
 test('all curriculum nodes discoverable; prerequisites are inspectable without fake lesson pages',async({page})=>{
   await page.goto('/');await page.getByLabel('搜索知识点',{exact:true}).fill('KV');
   await page.locator('.search-results>button').filter({hasText:'KV Cache'}).click();
-  await expect(page.getByRole('dialog',{name:'课程依赖详情'})).toContainText('KV Cache');
-  await expect(page.getByRole('dialog',{name:'课程依赖详情'})).toContainText('建议先理解');
-  await page.getByLabel('关闭课程详情').click();
+  await expect(page.getByRole('heading',{level:1})).toContainText('KV Cache');
+  await page.goto('/#/map');
   await page.getByLabel('知识依赖视图').click();
   await expect(page.locator('.dependency-flow button')).toHaveCount(5);
   await expect(page.locator('.chapter-list .chapter-row')).toHaveCount(23);
@@ -79,7 +78,8 @@ test('vector and dot-product sliders use real arithmetic',async({page})=>{
   await page.getByRole('slider',{name:'b 的 x 分量',exact:true}).fill('-2');
   await expect(page.getByTestId('lab-result')).toHaveText('-4');
 });
-test('five Python reference implementations actually run in browser worker and pass tests',async({page})=>{
+test('all83 Python reference implementations actually run in browser worker and pass tests',async({page})=>{
+  test.setTimeout(300000);
   for(const lesson of lessons){
     await page.goto(`/#/lesson/${lesson.id}`);await page.getByRole('tab',{name:'代码实现'}).click();
     await page.getByLabel('Python 代码编辑器').fill(lesson.reference);
@@ -93,6 +93,7 @@ test('Python failure is real; runaway code can be stopped without locking UI; ed
   await expect(page.locator('.code-output')).toContainText('AssertionError',{timeout:30000});
   await page.getByLabel('Python 代码编辑器').fill('while True:\n    pass');
   await page.getByRole('button',{name:'运行并测试'}).click();
+  await expect(page.locator('.code-actions')).toContainText('正在执行你的 Python 代码',{timeout:30000});
   await page.getByRole('button',{name:'停止',exact:true}).click();
   await expect(page.locator('.code-output')).toContainText('已手动停止运行');
   await page.reload();await expect(page.getByLabel('Python 代码编辑器')).toHaveValue('while True:\n    pass');
@@ -116,4 +117,15 @@ test('keyboard navigation reaches reading modes and checkpoint dialog keeps focu
   await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:'运行并测试'})).toBeFocused();
   await page.keyboard.press('Shift+Tab');await expect(page.getByLabel('Python 代码编辑器')).toBeFocused();
   await page.keyboard.press('Shift+Tab');await expect(page.getByLabel('重置代码')).toBeFocused();
+});
+
+test('browser Python watchdog stops a genuinely executing infinite loop and keeps UI responsive',async({page})=>{
+  await page.goto('/#/lesson/functions');await page.getByRole('tab',{name:'代码实现'}).click();
+  await page.getByLabel('Python 代码编辑器').fill('while True:\n    pass');
+  await page.getByRole('button',{name:'运行并测试'}).click();
+  await expect(page.locator('.code-actions')).toContainText('正在执行你的 Python 代码',{timeout:30000});
+  await page.getByLabel('当前章节随手笔记').fill('Python 循环正在独立 Worker 中执行，主界面仍可编辑。');
+  await expect(page.locator('.code-output')).toContainText('超过 30 秒限制',{timeout:35000});
+  await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('Python 循环正在独立 Worker 中执行，主界面仍可编辑。');
+  await expect(page.getByRole('button',{name:'运行并测试'})).toBeEnabled();
 });

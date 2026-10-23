@@ -18,11 +18,11 @@
 | vectors | 向量的基本概念 | functions | 修改二维分量观察方向、长度；实现向量操作 |
 | dot-product | 向量点积 | linear、vectors | 调节两个向量观察点积与夹角关系；手写点积 |
 
-这五章是第一阶段的一组入门课，不代表整个数学阶段已经完成。代数和坐标系的进一步练习将独立扩展。
+这五章保留为入门组；0.2.0 已补齐第一阶段其余18章及后续五个阶段。全部课程均有教材、实验、代码与自测。
 
 ## 完整路线
 
-以下所有后续节点均为规划，须依次完成教材、互动、知识检测、自动化验证及阶段报告后发布。正式节点、ID 与依赖以 [knowledge-graph.json](../src/data/knowledge-graph.json) 为准。
+0.2.0 中以下节点均已完成首版教材、交互、知识检测与自动化验证。正式节点、ID 与依赖以 [knowledge-graph.json](../src/data/knowledge-graph.json) 为准。
 
 ### 阶段 1：数学基础
 
@@ -31,99 +31,99 @@
 - `python`：用 Python 表示函数。先修：`linear`。MVP 课程。
 - `vectors`：向量的基本概念。先修：`functions`。MVP 课程。
 - `dot-product`：向量点积。先修：`linear`、`vectors`。MVP 课程。
-- `algebra`：代数与方程。先修：无。规划。
-- `coordinates`：坐标系与图像。先修：`functions`。规划。
-- `powers`：幂与指数。先修：`algebra`、`functions`。规划。
-- `logarithms`：对数与指数函数。先修：`powers`。规划。
-- `matrices`：矩阵与张量形状。先修：`vectors`。规划。
-- `matrix-multiplication`：矩阵乘法。先修：`dot-product`、`matrices`。规划。
-- `linear-geometry`：线性变换的几何直觉。先修：`matrix-multiplication`、`coordinates`。规划。
-- `probability`：概率与条件概率。先修：`algebra`。规划。
-- `distributions`：离散与连续分布。先修：`probability`、`functions`。规划。
-- `expectation`：期望与加权平均。先修：`distributions`、`dot-product`。规划。
-- `variance`：方差与标准差。先修：`expectation`、`powers`。规划。
-- `limits`：极限与局部变化。先修：`functions`、`coordinates`。规划。
-- `derivatives`：导数与切线。先修：`limits`、`linear`。规划。
-- `partial-derivatives`：偏导数。先修：`derivatives`、`vectors`。规划。
-- `chain-rule`：链式法则。先修：`derivatives`。规划。
-- `gradients`：梯度与方向。先修：`partial-derivatives`、`chain-rule`。规划。
-- `optimization`：最优化与损失地形。先修：`gradients`。规划。
-- `gradient-descent`：梯度下降。先修：`optimization`、`python`。规划。
+- `algebra`：代数与方程。先修：无。已交付首版。
+- `coordinates`：坐标系与图像。先修：`functions`。已交付首版。
+- `powers`：幂与指数。先修：`algebra`、`functions`。已交付首版。
+- `logarithms`：对数与指数函数。先修：`powers`。已交付首版。
+- `matrices`：矩阵与张量形状。先修：`vectors`。已交付首版。
+- `matrix-multiplication`：矩阵乘法。先修：`dot-product`、`matrices`。已交付首版。
+- `linear-geometry`：线性变换的几何直觉。先修：`matrix-multiplication`、`coordinates`。已交付首版。
+- `probability`：概率与条件概率。先修：`algebra`。已交付首版。
+- `distributions`：离散与连续分布。先修：`probability`、`functions`。已交付首版。
+- `expectation`：期望与加权平均。先修：`distributions`、`dot-product`。已交付首版。
+- `variance`：方差与标准差。先修：`expectation`、`powers`。已交付首版。
+- `limits`：极限与局部变化。先修：`functions`、`coordinates`。已交付首版。
+- `derivatives`：导数与切线。先修：`limits`、`linear`。已交付首版。
+- `partial-derivatives`：偏导数。先修：`derivatives`、`vectors`。已交付首版。
+- `chain-rule`：链式法则。先修：`derivatives`。已交付首版。
+- `gradients`：梯度与方向。先修：`partial-derivatives`、`chain-rule`。已交付首版。
+- `optimization`：最优化与损失地形。先修：`gradients`。已交付首版。
+- `gradient-descent`：梯度下降。先修：`optimization`、`python`。已交付首版。
 
 ### 阶段 2：机器学习
 
-- `rules-vs-learning`：规则编程与机器学习。先修：`python`。规划。
-- `datasets`：数据集、训练集与验证集。先修：`rules-vs-learning`、`probability`。规划。
-- `parameters`：参数与超参数。先修：`linear`、`rules-vs-learning`。规划。
-- `linear-regression`：从零实现线性回归。先修：`datasets`、`parameters`、`dot-product`。规划。
-- `loss-functions`：损失函数与均方误差。先修：`linear-regression`、`expectation`。规划。
-- `training-regression`：手写梯度下降训练循环。先修：`loss-functions`、`gradient-descent`。规划。
-- `generalization`：泛化、欠拟合与过拟合。先修：`training-regression`、`datasets`。规划。
-- `classification`：分类任务与决策边界。先修：`generalization`。规划。
-- `logistic-regression`：逻辑回归与二元交叉熵。先修：`classification`、`logarithms`、`derivatives`。规划。
+- `rules-vs-learning`：规则编程与机器学习。先修：`python`。已交付首版。
+- `datasets`：数据集、训练集与验证集。先修：`rules-vs-learning`、`probability`。已交付首版。
+- `parameters`：参数与超参数。先修：`linear`、`rules-vs-learning`。已交付首版。
+- `linear-regression`：从零实现线性回归。先修：`datasets`、`parameters`、`dot-product`。已交付首版。
+- `loss-functions`：损失函数与均方误差。先修：`linear-regression`、`expectation`。已交付首版。
+- `training-regression`：手写梯度下降训练循环。先修：`loss-functions`、`gradient-descent`。已交付首版。
+- `generalization`：泛化、欠拟合与过拟合。先修：`training-regression`、`datasets`。已交付首版。
+- `classification`：分类任务与决策边界。先修：`generalization`。已交付首版。
+- `logistic-regression`：逻辑回归与二元交叉熵。先修：`classification`、`logarithms`、`derivatives`。已交付首版。
 
 ### 阶段 3：神经网络
 
-- `neurons`：神经元与感知机。先修：`logistic-regression`、`dot-product`。规划。
-- `activations`：激活函数。先修：`neurons`、`derivatives`。规划。
-- `mlp`：多层感知机。先修：`activations`、`matrix-multiplication`。规划。
-- `forward-pass`：前向传播与批处理。先修：`mlp`。规划。
-- `computation-graph`：计算图。先修：`forward-pass`、`chain-rule`。规划。
-- `backprop`：反向传播。先修：`computation-graph`、`gradients`。规划。
-- `autodiff`：手写微型自动微分引擎。先修：`backprop`、`python`。规划。
-- `optimizers`：SGD、动量与 Adam。先修：`autodiff`、`gradient-descent`。规划。
-- `regularization`：正则化与 Dropout。先修：`optimizers`、`generalization`。规划。
-- `pytorch`：PyTorch 张量与 autograd。先修：`autodiff`、`matrix-multiplication`。规划。
-- `nn-project`：从零神经网络与框架对照。先修：`regularization`、`pytorch`。规划。
+- `neurons`：神经元与感知机。先修：`logistic-regression`、`dot-product`。已交付首版。
+- `activations`：激活函数。先修：`neurons`、`derivatives`。已交付首版。
+- `mlp`：多层感知机。先修：`activations`、`matrix-multiplication`。已交付首版。
+- `forward-pass`：前向传播与批处理。先修：`mlp`。已交付首版。
+- `computation-graph`：计算图。先修：`forward-pass`、`chain-rule`。已交付首版。
+- `backprop`：反向传播。先修：`computation-graph`、`gradients`。已交付首版。
+- `autodiff`：手写微型自动微分引擎。先修：`backprop`、`python`。已交付首版。
+- `optimizers`：SGD、动量与 Adam。先修：`autodiff`、`gradient-descent`。已交付首版。
+- `regularization`：正则化与 Dropout。先修：`optimizers`、`generalization`。已交付首版。
+- `pytorch`：PyTorch 张量与 autograd。先修：`autodiff`、`matrix-multiplication`。已交付首版。
+- `nn-project`：从零神经网络与框架对照。先修：`regularization`、`pytorch`。已交付首版。
 
 ### 阶段 4：自然语言处理与 Transformer
 
-- `text-representation`：文本表示与序列。先修：`python`、`datasets`。规划。
-- `tokenization`：字符、子词与 Tokenization。先修：`text-representation`。规划。
-- `embeddings`：Embedding 与查表。先修：`tokenization`、`matrices`。规划。
-- `rnn-lstm`：RNN、LSTM 的动机与局限。先修：`embeddings`、`forward-pass`、`backprop`。规划。
-- `softmax`：Softmax 与概率归一化。先修：`logarithms`、`distributions`。规划。
-- `attention`：Attention：从加权汇聚开始。先修：`embeddings`、`expectation`、`rnn-lstm`。规划。
-- `qkv`：Q、K、V 的来源与作用。先修：`attention`、`matrix-multiplication`。规划。
-- `scaled-attention`：Scaled Dot-Product Attention。先修：`qkv`、`softmax`、`variance`。规划。
-- `self-attention`：Self-Attention 与张量形状。先修：`scaled-attention`。规划。
-- `multi-head`：Multi-Head Attention。先修：`self-attention`。规划。
-- `positions`：位置编码与位置表示。先修：`self-attention`、`powers`。规划。
-- `residual`：Residual Connection。先修：`forward-pass`、`backprop`。规划。
-- `layernorm`：Layer Normalization。先修：`variance`、`forward-pass`。规划。
-- `encoder-decoder`：Encoder 与 Decoder。先修：`multi-head`、`positions`、`residual`、`layernorm`。规划。
-- `causal-mask`：Causal Mask 与信息泄露。先修：`self-attention`、`datasets`。规划。
-- `decoder-only`：Decoder-only Transformer。先修：`encoder-decoder`、`causal-mask`。规划。
+- `text-representation`：文本表示与序列。先修：`python`、`datasets`。已交付首版。
+- `tokenization`：字符、子词与 Tokenization。先修：`text-representation`。已交付首版。
+- `embeddings`：Embedding 与查表。先修：`tokenization`、`matrices`。已交付首版。
+- `rnn-lstm`：RNN、LSTM 的动机与局限。先修：`embeddings`、`forward-pass`、`backprop`。已交付首版。
+- `softmax`：Softmax 与概率归一化。先修：`logarithms`、`distributions`。已交付首版。
+- `attention`：Attention：从加权汇聚开始。先修：`embeddings`、`expectation`、`rnn-lstm`。已交付首版。
+- `qkv`：Q、K、V 的来源与作用。先修：`attention`、`matrix-multiplication`。已交付首版。
+- `scaled-attention`：Scaled Dot-Product Attention。先修：`qkv`、`softmax`、`variance`。已交付首版。
+- `self-attention`：Self-Attention 与张量形状。先修：`scaled-attention`。已交付首版。
+- `multi-head`：Multi-Head Attention。先修：`self-attention`。已交付首版。
+- `positions`：位置编码与位置表示。先修：`self-attention`、`powers`。已交付首版。
+- `residual`：Residual Connection。先修：`forward-pass`、`backprop`。已交付首版。
+- `layernorm`：Layer Normalization。先修：`variance`、`forward-pass`。已交付首版。
+- `encoder-decoder`：Encoder 与 Decoder。先修：`multi-head`、`positions`、`residual`、`layernorm`。已交付首版。
+- `causal-mask`：Causal Mask 与信息泄露。先修：`self-attention`、`datasets`。已交付首版。
+- `decoder-only`：Decoder-only Transformer。先修：`encoder-decoder`、`causal-mask`。已交付首版。
 
 ### 阶段 5：手写 GPT
 
-- `corpus`：构建与划分训练语料。先修：`tokenization`、`datasets`。规划。
-- `gpt-tokenizer`：实现字符与子词 Tokenizer。先修：`corpus`、`tokenization`。规划。
-- `gpt-embedding`：实现 Token 与位置 Embedding。先修：`gpt-tokenizer`、`positions`、`pytorch`。规划。
-- `transformer-block`：实现 Transformer Block。先修：`gpt-embedding`、`decoder-only`。规划。
-- `lm-head`：语言模型输出层。先修：`transformer-block`、`softmax`。规划。
-- `cross-entropy`：交叉熵与下一个 Token 目标。先修：`lm-head`、`logarithms`。规划。
-- `gpt-training`：实现训练循环与验证。先修：`cross-entropy`、`optimizers`、`corpus`。规划。
-- `checkpoints`：模型保存、加载与复现。先修：`gpt-training`。规划。
-- `autoregressive`：自回归逐 Token 生成。先修：`checkpoints`、`causal-mask`。规划。
-- `temperature`：Temperature 与随机采样。先修：`autoregressive`、`softmax`。规划。
-- `top-k-p`：Top-k 与 Top-p。先修：`temperature`、`distributions`。规划。
-- `gpt-evaluation`：验证、消融与错误分析。先修：`gpt-training`、`top-k-p`、`generalization`。规划。
-- `tiny-gpt`：可独立训练和推理的微型 GPT。先修：`gpt-evaluation`、`checkpoints`。规划。
+- `corpus`：构建与划分训练语料。先修：`tokenization`、`datasets`。已交付首版。
+- `gpt-tokenizer`：实现字符与子词 Tokenizer。先修：`corpus`、`tokenization`。已交付首版。
+- `gpt-embedding`：实现 Token 与位置 Embedding。先修：`gpt-tokenizer`、`positions`、`pytorch`。已交付首版。
+- `transformer-block`：实现 Transformer Block。先修：`gpt-embedding`、`decoder-only`。已交付首版。
+- `lm-head`：语言模型输出层。先修：`transformer-block`、`softmax`。已交付首版。
+- `cross-entropy`：交叉熵与下一个 Token 目标。先修：`lm-head`、`logarithms`。已交付首版。
+- `gpt-training`：实现训练循环与验证。先修：`cross-entropy`、`optimizers`、`corpus`。已交付首版。
+- `checkpoints`：模型保存、加载与复现。先修：`gpt-training`。已交付首版。
+- `autoregressive`：自回归逐 Token 生成。先修：`checkpoints`、`causal-mask`。已交付首版。
+- `temperature`：Temperature 与随机采样。先修：`autoregressive`、`softmax`。已交付首版。
+- `top-k-p`：Top-k 与 Top-p。先修：`temperature`、`distributions`。已交付首版。
+- `gpt-evaluation`：验证、消融与错误分析。先修：`gpt-training`、`top-k-p`、`generalization`。已交付首版。
+- `tiny-gpt`：可独立训练和推理的微型 GPT。先修：`gpt-evaluation`、`checkpoints`。已交付首版。
 
 ### 阶段 6：现代 LLM
 
-- `pretraining-scaling`：预训练与 Scaling Laws。先修：`tiny-gpt`。规划。
-- `instruction-sft`：指令微调与 SFT。先修：`pretraining-scaling`、`datasets`。规划。
-- `rlhf-dpo`：RLHF 与 DPO 基础思想。先修：`instruction-sft`、`expectation`。规划。
-- `inference`：推理阶段计算流程。先修：`tiny-gpt`。规划。
-- `kv-cache`：KV Cache 与缓存正确性。先修：`inference`、`qkv`、`causal-mask`。规划。
-- `quantization`：模型量化与误差。先修：`inference`、`variance`。规划。
-- `lora`：LoRA 与参数高效微调。先修：`instruction-sft`、`matrix-multiplication`。规划。
-- `memory-performance`：推理性能、吞吐与显存。先修：`kv-cache`、`quantization`。规划。
-- `hallucination`：幻觉、事实性与模型局限。先修：`gpt-evaluation`、`instruction-sft`。规划。
-- `llm-evaluation`：现代 LLM 评估与数据污染。先修：`hallucination`、`datasets`。规划。
-- `paper-reading`：技术论文阅读与复现实验。先修：`pretraining-scaling`、`rlhf-dpo`、`lora`、`memory-performance`、`llm-evaluation`。规划。
+- `pretraining-scaling`：预训练与 Scaling Laws。先修：`tiny-gpt`。已交付首版。
+- `instruction-sft`：指令微调与 SFT。先修：`pretraining-scaling`、`datasets`。已交付首版。
+- `rlhf-dpo`：RLHF 与 DPO 基础思想。先修：`instruction-sft`、`expectation`。已交付首版。
+- `inference`：推理阶段计算流程。先修：`tiny-gpt`。已交付首版。
+- `kv-cache`：KV Cache 与缓存正确性。先修：`inference`、`qkv`、`causal-mask`。已交付首版。
+- `quantization`：模型量化与误差。先修：`inference`、`variance`。已交付首版。
+- `lora`：LoRA 与参数高效微调。先修：`instruction-sft`、`matrix-multiplication`。已交付首版。
+- `memory-performance`：推理性能、吞吐与显存。先修：`kv-cache`、`quantization`。已交付首版。
+- `hallucination`：幻觉、事实性与模型局限。先修：`gpt-evaluation`、`instruction-sft`。已交付首版。
+- `llm-evaluation`：现代 LLM 评估与数据污染。先修：`hallucination`、`datasets`。已交付首版。
+- `paper-reading`：技术论文阅读与复现实验。先修：`pretraining-scaling`、`rlhf-dpo`、`lora`、`memory-performance`、`llm-evaluation`。已交付首版。
 
 ## 阶段作品与验收
 

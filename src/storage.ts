@@ -1,6 +1,7 @@
 import { openDB } from 'idb';
 import type { LearningState, LessonId, LessonProgress } from './types';
-export const lessonIds: LessonId[] = ['functions', 'linear', 'python', 'vectors', 'dot-product'];
+export { lessonIds } from './data/lesson-ids';
+import { lessonIds } from './data/lesson-ids';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
 export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
 const database = () => openDB('from-zero-to-gpt', 1, {upgrade(db) {db.createObjectStore('learning');}});
@@ -12,6 +13,8 @@ export async function writeState(state: LearningState) {
   const db = await database();
   try {await db.put('learning', state, 'state');} finally {db.close();}
 }
+const parameterKeys = new Set('x k b ax ay bx by kind a c y window base exponent input rows cols cellrow cellcol cell a11 a12 a21 a22 bscale bshear prior sensitivity falsepositive n p view x1 x2 x3 w1 w2 w3 h point direction rate steps startx starty w activation w2 v1 v2 c nnStep lr lambda optimizer velocity moment secondMoment iteration dropout mask scalingBudget scalingParameters sftLogit sftPromptTokens dpoPolicyMargin dpoReferenceMargin dpoBeta inferenceTemperature inferenceTopK inferenceUniform cacheLength quantBits quantOutlier loraRank loraAlpha memoryParameters memoryWeightBits memoryBatch memoryContext memoryKVHeads memoryBandwidth factualityThreshold evaluationSeen paperRuns paperEffect'.split(' '));
+const isParameter=(key:string)=>parameterKeys.has(key)||/^(ml|tf|gpt)[A-Za-z0-9_]{1,28}$/.test(key);
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 function checkedString(v: unknown, max = 100000): string {if(typeof v !== 'string' || v.length > max) throw new Error('学习数据中的文字格式无效或过长'); return v;}
 export function validateImport(value: unknown): LearningState {
@@ -24,7 +27,9 @@ export function validateImport(value: unknown): LearningState {
     if (p.quizAnswer !== undefined) {if (!Number.isInteger(p.quizAnswer) || Number(p.quizAnswer)<0 || Number(p.quizAnswer)>3) throw new Error('自测数据无效');progress.quizAnswer = p.quizAnswer as number;}
     if (p.quizPassed !== undefined) {if (typeof p.quizPassed !== 'boolean') throw new Error('自测状态无效');progress.quizPassed=p.quizPassed;}
     if (p.lastRun !== undefined) progress.lastRun=checkedString(p.lastRun);
-    if (p.labValues !== undefined) {if (!isObject(p.labValues)) throw new Error('实验参数无效'); progress.labValues = {}; for (const [k,v] of Object.entries(p.labValues)) {if (!['x','k','b','ax','ay','bx','by','kind'].includes(k) || typeof v !== 'number' || !Number.isFinite(v) || Math.abs(v)>100) throw new Error('实验参数无效'); progress.labValues[k]=v;}}
+    if(p.tutorDraft!==undefined)progress.tutorDraft=checkedString(p.tutorDraft,4000);
+    if(p.tutorMessages!==undefined){if(!Array.isArray(p.tutorMessages)||p.tutorMessages.length>80)throw new Error('导师记录格式无效');progress.tutorMessages=p.tutorMessages.map(m=>{if(!isObject(m)||!['user','assistant'].includes(m.role as string)||typeof m.createdAt!=='string'||!Number.isFinite(Date.parse(m.createdAt)))throw new Error('导师记录格式无效');return {role:m.role as 'user'|'assistant',content:checkedString(m.content,24000),createdAt:m.createdAt};});}
+    if (p.labValues !== undefined) {if (!isObject(p.labValues)||Object.keys(p.labValues).length>256) throw new Error('实验参数无效'); progress.labValues = {}; for (const [k,v] of Object.entries(p.labValues)) {if (!isParameter(k) || typeof v !== 'number' || !Number.isFinite(v) || Math.abs(v)>(['x','k','b','ax','ay','bx','by','kind'].includes(k)?100:1e12)) throw new Error('实验参数无效'); progress.labValues[k]=v;}}
     result.progress[key as LessonId]=progress;
   }
   if (value.checkpoint !== undefined) {

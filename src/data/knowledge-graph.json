@@ -50,7 +50,7 @@
       "title": "代数与方程",
       "stage": 1,
       "prerequisites": [],
-      "available": false
+      "available": true
     },
     {
       "id": "coordinates",
@@ -59,7 +59,7 @@
       "prerequisites": [
         "functions"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "powers",
@@ -69,7 +69,7 @@
         "algebra",
         "functions"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "logarithms",
@@ -78,7 +78,7 @@
       "prerequisites": [
         "powers"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "matrices",
@@ -87,7 +87,7 @@
       "prerequisites": [
         "vectors"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "matrix-multiplication",
@@ -97,7 +97,7 @@
         "dot-product",
         "matrices"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "linear-geometry",
@@ -107,7 +107,7 @@
         "matrix-multiplication",
         "coordinates"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "probability",
@@ -116,7 +116,7 @@
       "prerequisites": [
         "algebra"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "distributions",
@@ -126,7 +126,7 @@
         "probability",
         "functions"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "expectation",
@@ -136,7 +136,7 @@
         "distributions",
         "dot-product"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "variance",
@@ -146,7 +146,7 @@
         "expectation",
         "powers"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "limits",
@@ -156,7 +156,7 @@
         "functions",
         "coordinates"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "derivatives",
@@ -166,7 +166,7 @@
         "limits",
         "linear"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "partial-derivatives",
@@ -176,7 +176,7 @@
         "derivatives",
         "vectors"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "chain-rule",
@@ -185,7 +185,7 @@
       "prerequisites": [
         "derivatives"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "gradients",
@@ -195,7 +195,7 @@
         "partial-derivatives",
         "chain-rule"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "optimization",
@@ -204,7 +204,7 @@
       "prerequisites": [
         "gradients"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "gradient-descent",
@@ -214,7 +214,7 @@
         "optimization",
         "python"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "rules-vs-learning",
@@ -223,7 +223,7 @@
       "prerequisites": [
         "python"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "datasets",
@@ -233,7 +233,7 @@
         "rules-vs-learning",
         "probability"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "parameters",
@@ -243,7 +243,7 @@
         "linear",
         "rules-vs-learning"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "linear-regression",
@@ -254,7 +254,7 @@
         "parameters",
         "dot-product"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "loss-functions",
@@ -264,7 +264,7 @@
         "linear-regression",
         "expectation"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "training-regression",
@@ -274,7 +274,7 @@
         "loss-functions",
         "gradient-descent"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "generalization",
@@ -284,7 +284,7 @@
         "training-regression",
         "datasets"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "classification",
@@ -293,7 +293,7 @@
       "prerequisites": [
         "generalization"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "logistic-regression",
@@ -304,7 +304,7 @@
         "logarithms",
         "derivatives"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "neurons",
@@ -314,7 +314,7 @@
         "logistic-regression",
         "dot-product"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "activations",
@@ -324,7 +324,7 @@
         "neurons",
         "derivatives"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "mlp",
@@ -334,7 +334,7 @@
         "activations",
         "matrix-multiplication"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "forward-pass",
@@ -343,7 +343,7 @@
       "prerequisites": [
         "mlp"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "computation-graph",
@@ -353,7 +353,7 @@
         "forward-pass",
         "chain-rule"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "backprop",
@@ -363,7 +363,7 @@
         "computation-graph",
         "gradients"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "autodiff",
@@ -373,7 +373,7 @@
         "backprop",
         "python"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "optimizers",
@@ -383,7 +383,7 @@
         "autodiff",
         "gradient-descent"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "regularization",
@@ -393,7 +393,7 @@
         "optimizers",
         "generalization"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "pytorch",
@@ -403,7 +403,7 @@
         "autodiff",
         "matrix-multiplication"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "nn-project",
@@ -413,7 +413,7 @@
         "regularization",
         "pytorch"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "text-representation",
@@ -423,7 +423,7 @@
         "python",
         "datasets"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "tokenization",
@@ -432,7 +432,7 @@
       "prerequisites": [
         "text-representation"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "embeddings",
@@ -442,7 +442,7 @@
         "tokenization",
         "matrices"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "rnn-lstm",
@@ -453,7 +453,7 @@
         "forward-pass",
         "backprop"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "softmax",
@@ -463,7 +463,7 @@
         "logarithms",
         "distributions"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "attention",
@@ -474,7 +474,7 @@
         "expectation",
         "rnn-lstm"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "qkv",
@@ -484,7 +484,7 @@
         "attention",
         "matrix-multiplication"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "scaled-attention",
@@ -495,7 +495,7 @@
         "softmax",
         "variance"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "self-attention",
@@ -504,7 +504,7 @@
       "prerequisites": [
         "scaled-attention"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "multi-head",
@@ -513,7 +513,7 @@
       "prerequisites": [
         "self-attention"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "positions",
@@ -523,7 +523,7 @@
         "self-attention",
         "powers"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "residual",
@@ -533,7 +533,7 @@
         "forward-pass",
         "backprop"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "layernorm",
@@ -543,7 +543,7 @@
         "variance",
         "forward-pass"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "encoder-decoder",
@@ -555,7 +555,7 @@
         "residual",
         "layernorm"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "causal-mask",
@@ -565,7 +565,7 @@
         "self-attention",
         "datasets"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "decoder-only",
@@ -575,7 +575,7 @@
         "encoder-decoder",
         "causal-mask"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "corpus",
@@ -585,7 +585,7 @@
         "tokenization",
         "datasets"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "gpt-tokenizer",
@@ -595,7 +595,7 @@
         "corpus",
         "tokenization"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "gpt-embedding",
@@ -606,7 +606,7 @@
         "positions",
         "pytorch"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "transformer-block",
@@ -616,7 +616,7 @@
         "gpt-embedding",
         "decoder-only"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "lm-head",
@@ -626,7 +626,7 @@
         "transformer-block",
         "softmax"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "cross-entropy",
@@ -636,7 +636,7 @@
         "lm-head",
         "logarithms"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "gpt-training",
@@ -647,7 +647,7 @@
         "optimizers",
         "corpus"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "checkpoints",
@@ -656,7 +656,7 @@
       "prerequisites": [
         "gpt-training"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "autoregressive",
@@ -666,7 +666,7 @@
         "checkpoints",
         "causal-mask"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "temperature",
@@ -676,7 +676,7 @@
         "autoregressive",
         "softmax"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "top-k-p",
@@ -686,7 +686,7 @@
         "temperature",
         "distributions"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "gpt-evaluation",
@@ -697,7 +697,7 @@
         "top-k-p",
         "generalization"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "tiny-gpt",
@@ -707,7 +707,7 @@
         "gpt-evaluation",
         "checkpoints"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "pretraining-scaling",
@@ -716,7 +716,7 @@
       "prerequisites": [
         "tiny-gpt"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "instruction-sft",
@@ -726,7 +726,7 @@
         "pretraining-scaling",
         "datasets"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "rlhf-dpo",
@@ -736,7 +736,7 @@
         "instruction-sft",
         "expectation"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "inference",
@@ -745,7 +745,7 @@
       "prerequisites": [
         "tiny-gpt"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "kv-cache",
@@ -756,7 +756,7 @@
         "qkv",
         "causal-mask"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "quantization",
@@ -766,7 +766,7 @@
         "inference",
         "variance"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "lora",
@@ -776,7 +776,7 @@
         "instruction-sft",
         "matrix-multiplication"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "memory-performance",
@@ -786,7 +786,7 @@
         "kv-cache",
         "quantization"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "hallucination",
@@ -796,7 +796,7 @@
         "gpt-evaluation",
         "instruction-sft"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "llm-evaluation",
@@ -806,7 +806,7 @@
         "hallucination",
         "datasets"
       ],
-      "available": false
+      "available": true
     },
     {
       "id": "paper-reading",
@@ -819,7 +819,7 @@
         "memory-performance",
         "llm-evaluation"
       ],
-      "available": false
+      "available": true
     }
   ]
 }
