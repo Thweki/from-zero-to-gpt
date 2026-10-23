@@ -14,5 +14,5 @@ export default defineConfig(({mode})=>{
         const response=await handleTutorRequest(request,env);res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()));
       }catch{res.writeHead(500,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'本地导师服务暂时不可用。'}));}
     });
-  }}],server:{host:'0.0.0.0',port:5173},build:{chunkSizeWarningLimit:900,rollupOptions:{output:{manualChunks:{katex:['katex'],markdown:['react-markdown','remark-math','rehype-katex']}}}}};
+  }}],server:{host:'0.0.0.0',port:5173,watch:{ignored:['**/artifacts/**','**/test-results/**','**/playwright-report/**']}},build:{chunkSizeWarningLimit:900,rollupOptions:{output:{manualChunks:{katex:['katex'],markdown:['react-markdown','remark-math','rehype-katex']}}}}};
 });

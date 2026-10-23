@@ -29,7 +29,7 @@ async function dark(page:Page){
 
 test('dark reading canvas, inherited titles and route cards are readable; theme survives reload',async({page})=>{
   await dark(page);
-  await readable(page,['.page-heading h1','.page-description','.continue-content h2','.chapter-title','.stage-heading-text strong','.context-section h3','.sidebar .lesson-nav-link']);
+  await readable(page,['.page-heading h1','.page-description','.continue-content h2','.chapter-title','.stage-heading-text strong','.context-section h3','.sidebar .lesson-nav-link','.save-thought p','.autosave','.thinking-card>span:last-child']);
   expect((await colors(page.locator('html'))).backgroundLuminance).toBeLessThan(.05);
   const palette=await page.locator('.stage-icon').evaluateAll(nodes=>nodes.map(n=>getComputedStyle(n).backgroundColor));
   expect(new Set(palette).size).toBe(6);
@@ -37,7 +37,12 @@ test('dark reading canvas, inherited titles and route cards are readable; theme 
   await page.screenshot({path:'artifacts/dark-appearance/map.png',fullPage:true});
   await page.getByRole('button',{name:'切换浅色外观'}).click();
   expect((await colors(page.locator('html'))).backgroundLuminance).toBeGreaterThan(.8);
-  await readable(page,['.page-heading h1','.continue-content h2','.chapter-title']);
+  await readable(page,['.page-heading h1','.continue-content h2','.chapter-title','.save-thought p','.autosave','.thinking-card>span:last-child']);
+  await page.goto('/#/lesson/functions');
+  await readable(page,['.plot-caption','.range-extents','.select-label','.live-result small']);
+  for(const selector of ['.save-thought p','.autosave','.plot-caption','.select-label','.live-result small']){
+    expect(await page.locator(selector).first().evaluate(n=>parseFloat(getComputedStyle(n).fontSize)),selector+' font size').toBeGreaterThanOrEqual(11);
+  }
 });
 
 test('GPT output, loss panel and probability table keep dark surfaces and readable action text',async({page})=>{
@@ -58,7 +63,7 @@ test('dark editor, genuine Python error and success outputs use readable distinc
   await page.getByLabel('Python 代码编辑器').fill('raise ValueError("appearance validation")');
   await page.getByRole('button',{name:/运行并测试/}).click();
   await expect(page.locator('.code-output')).toContainText('ValueError',{timeout:30000});
-  await readable(page,['.code-output pre']);
+  await readable(page,['.python-error-summary']);
   const errorColor=await page.locator('.code-output').evaluate(n=>getComputedStyle(n).backgroundColor);
   await page.getByLabel('Python 代码编辑器').fill('def square(x):\n    return x * x\n');
   await page.getByRole('button',{name:/运行并测试/}).click();

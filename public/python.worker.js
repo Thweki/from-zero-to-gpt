@@ -13,8 +13,8 @@ self.onmessage = async ({data}) => {
     self.postMessage({type:'running'});
     const globals=python.toPy({});
     try {
-      await python.runPythonAsync(data.code,{globals});
-      if (data.tests) await python.runPythonAsync(data.tests,{globals});
+      await python.runPythonAsync(data.code,{globals,filename:'experiment.py'});
+      if (data.tests) await python.runPythonAsync(data.tests,{globals,filename:'acceptance_tests.py'});
       self.postMessage({type:'done',output:output||'代码已执行，没有标准输出。',passed:!!data.tests});
     } finally {globals.destroy();}
   } catch (e) {self.postMessage({type:'error',output:output+(e.message||String(e))});}

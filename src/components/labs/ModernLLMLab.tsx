@@ -1,7 +1,8 @@
 import { useRef, type ReactNode } from 'react';
-import { Expand, FlaskConical, RotateCcw } from 'lucide-react';
+import { FlaskConical, RotateCcw } from 'lucide-react';
 import type { ExtendedLabProps } from '../../types';
 import './ModernLLMLab.css';
+import {FullscreenButton} from '../FullscreenButton';
 
 export const modernLabDefaults: Record<string, number> = {
   scalingBudget: 6, scalingParameters: 8,
@@ -293,7 +294,7 @@ export function ModernLLMLab({ lesson, values, onChange }: ExtendedLabProps) {
   }
 
   return <section ref={ref} className="modern-lab" aria-label={`${lesson.title}交互实验`} data-modern-lesson={lesson.id}>
-    <div className="modern-header"><span><FlaskConical size={16} />计算实验 <small>LIVE</small></span><div><button type="button" aria-label="重置现代 LLM 实验参数" onClick={() => onChange({ ...modernLabDefaults })}><RotateCcw size={16} /></button><button type="button" aria-label="全屏现代 LLM 实验" onClick={() => { if (document.fullscreenElement) void document.exitFullscreen(); else void ref.current?.requestFullscreen?.(); }}><Expand size={16} /></button></div></div>
+    <div className="modern-header"><span><FlaskConical size={16} />计算实验 <small>LIVE</small></span><div><button type="button" aria-label="重置现代 LLM 实验参数" onClick={() => onChange({ ...modernLabDefaults })}><RotateCcw size={16} /></button><FullscreenButton target={ref} label="全屏现代 LLM 实验"/></div></div>
     <div className="modern-heading"><h3>{title}</h3><p>{assumption}</p></div>
     <div className="modern-layout"><div className="modern-controls">{controls}</div><div className="modern-results" data-testid="modern-lab-results">{content}</div></div>
     <div className="modern-task"><strong>试一试</strong><p>{lesson.labTask}</p></div>

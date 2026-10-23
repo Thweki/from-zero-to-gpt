@@ -125,3 +125,13 @@ Worker 部署以 `dist-server/worker.js` 为入口，绑定名为 `ASSETS` 的 `
 `styles.css` 根元素的 color/background 必须引用 `--text`／`--bg`，避免只改变暗面板而保留浅色正文。`main.tsx` 在基础样式后导入 `theme.css`，集中定义深色语义变量与必要的旧组件适配。主操作使用 `--action-bg`／`--on-accent`，图表使用 `--plot-secondary`／`--plot-tertiary`；懒加载实验直接消费这些变量，GPT的软面板使用 `--panel-soft`。不要再引入未定义的 `--soft` 或为深色按钮固定白字。
 
 深色根背景、正文继承、透明背景合成后的关键文字对比度、原生表单、真实Python错误／通过状态、GPT、导师模拟消息、搜索／toast／暂停弹窗、390px导航、SVG与Attention格子由 `tests/appearance.spec.ts` 覆盖。文字阈值4.5:1、被测主图线阈值3:1；这是代表性渲染检查，不等同于全站WCAG认证。
+
+## 0.3.2 可用性约定
+
+`math-viewport.ts` 根据支持的函数及输入区间拟合等比例坐标，不能只拟合当前点而让拖动时比例持续跳变。新增函数若有区间内部极值，必须相应扩展取界方法；目前实现适用于平方、绝对值及线性函数。坐标标签随单位调整，目标点完整包含半径；投影路径显式不填充。
+
+`FullscreenButton.tsx` 统一四个实验所有者的原生全屏状态与出错提示，以 `fullscreenchange` 和实际元素为准，不用点击计数猜状态。保持目标容器可滚动及退出按钮可达。不支持原生API时明确禁用，不提供假全屏。
+
+Worker使用 `experiment.py`／`acceptance_tests.py` 文件名，不包装用户代码。`python-errors.ts` 从原始异常字符串提取定位和简明解释；优先最内层用户帧，验收断言明确区别。`CodeLab` 默认折叠完整堆栈但保留可展开原文和异常前输出。旧版字符串仍能呈现，无法确认的旧 `<exec>` 行号不冒充用户行号；无需迁移IndexedDB。
+
+`LessonNavigation.tsx` 负责章节内语义定位，`LessonReader` 等待代码模式更新后再聚焦并滚动，尊重减少动画偏好。跳转不改路由、参数或草稿。`usability.css` 在基础主题之后调整辅助文字、定位栏与全屏控件，避免懒加载实验样式把字号缩回。Playwright分别记录窄屏桌面、Chromium设备／触控模拟及真实浏览器Fullscreen API，不能混称真实手机验收。

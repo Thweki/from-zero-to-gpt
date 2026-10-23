@@ -1,0 +1,43 @@
+# 独立试用建议修复与发布验收
+
+日期：2026-10-23。目标为现有 From Zero 项目，不新建项目、站点或学习数据结构。
+
+## 输入与授权
+
+按委派提供的四条问题摘要逐项复现、修复与回归。PDF `libfile_f793d72fc6648191875ca747da4870c2`、DOCX `libfile_d3e11e07a730819189a1bc63e5d43b1c` 没有当前可调用的独立 Library ID 下载入口，因此未读取完整附件，不声称覆盖其摘要以外的全部发现。
+
+最初仅获准本地修复；后续委派记录用户于北京时间 2026-10-23 16:35 明确回复“授权”，允许修复复测后发布到既有公开站点。使用 `.openai/hosting.json` 中的现有项目 `appgprj_6ada68e952008191b3d3a8d29f604b61`，保留 PUBLIC；不新建站点，不修改分享权限。部署的实际版本、源码提交及状态以发布回执为准，不能把本地构建成功当作发布成功。
+
+## 四项修改
+
+| 问题 | 实现 | 验收方法 |
+| --- | --- | --- |
+| 平方函数端点被裁掉 | 原固定单位26导致 `cy=155−9×26=−79`。现在根据允许输入区间和函数输出确定等比例坐标轴，动态刻度；平方函数两端 `y=9` 的圆心为25，半径6，完整落入裁剪区。线性参数端点亦覆盖。去除投影虚线默认填充造成的黑色三角形。 | 单元测试遍历函数种类、线性参数端点及61个输入；浏览器实际操作 `x=−3/+3`，核对输出与SVG圆点几何，1440px桌面及500×757窄屏桌面复核。 |
+| Python堆栈淹没用户错误 | Worker分别命名 `experiment.py` 与 `acceptance_tests.py`，不包装用户代码、不偏移行号。先显示最近用户帧的行号、异常类型与简短中文提示，保留原始消息；内部堆栈默认折叠，可展开。验收断言明确属于测试；旧 `<exec>` 记录保留但不捏造用户行号。 | 真实Pyodide产生第3行NameError，展开／刷新后重新折叠；真实AssertionError区分验收代码。单元覆盖语法、嵌套帧、异常前stdout及旧记录。 |
+| 全屏状态不明确 | 四个全屏入口共用监听 `fullscreenchange` 的按钮。进入显示“退出全屏”并更新图标及 `aria-pressed`；按钮退出与外部API退出均同步。浏览器不支持时禁用并显示“全屏不可用”，拒绝切换时提供状态提示。 | 系统Chromium真实Fullscreen API，覆盖基础数学、高级数学、Transformer外层和现代LLM四个入口，实际进入、按钮退出、外部API退出。 |
+| 辅助小字与长章定位 | 放大关键实验说明、坐标标签、代码及上下文提示，调整浅色／深色辅助文字；窄屏放大SVG标签。增加粘性“正文／交互实验／Python代码／自测”定位栏，跳转移动焦点并预留工具栏高度，尊重减少动画偏好。 | 长章切换解释模式及实验／代码／自测定位，检查目标未被工具栏遮住；保存并刷新恢复主题、草稿、实验参数、笔记及学习断点。检查代表性文字实际渲染对比度和触控布局。 |
+
+已有 Lesson ID、IndexedDB version 1、保存结果字符串与JSON导入格式保持兼容。跳到Python代码会选中既有代码模式，不替换代码草稿。没有执行用户代码的服务端新入口，也没有改变AI提供商配置。
+
+## 本地验证
+
+- `npm run check`：严格TypeScript通过。
+- `npm test`：509/509通过（新增8项视口与错误解析回归）。
+- `npm run validate:course`：83/83参考实现及TODO验收通过。
+- `npm run build`：生产构建通过，包含自托管Pyodide和Worker入口。
+- `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npx playwright test tests/usability.spec.ts tests/usability-touch.spec.ts tests/appearance.spec.ts tests/mobile.spec.ts --output=artifacts/usability-release-results`：15/15通过，最后辅助文字补充调整后完整重跑该批次，约43.7秒。
+- `tests/learning.spec.ts --grep 'map, real|keyboard navigation|all83'`：3/3通过，约3.6分钟；其中all83在浏览器真实执行每章参考实现并全部通过，不用CPython结果替代。
+
+截图与Playwright输出位于忽略的 `artifacts/usability-review/`、`artifacts/usability-release-results/`，不会把个人学习状态或模型凭证加入源码。
+
+## 验证边界
+
+- 500×757只是一项窄屏桌面验收，不是手机实测。
+- 新增Pixel 7参数的Chromium触控模拟，实际使用 `tap()` 操作导航、主题、章节定位、代码区、暂停与恢复，检查无横向溢出。文字由自动化填充，不是软键盘输入。模拟过程使用Escape关闭导航，不据此声称验证了手机触摸遮罩关闭。
+- 没有真实Android／iOS设备、Safari／Firefox、软键盘或系统级手势测试。全屏外部退出使用真实 `document.exitFullscreen()`，没有把它表述为操作系统Esc按键验收。
+- 对比度测试覆盖代表性文字与图形，不是全站WCAG或屏幕阅读器认证。没有承诺所有屏幕尺寸、缩放及浏览器均一致。
+- 本轮未重新调用外部AI模型，也未重训本地PyTorch工程；这些路径无实现变更，既有结果保留在历史报告中。
+
+## 发布复核
+
+发布使用现有Sites的保存版本与部署工具，必须得到实际成功状态后才能宣称已上线。线上复核使用全新浏览器上下文和合成草稿，检查上述四项流程，不接触真实学习者数据。最终原始结果保存在工作区发布回执及线上浏览器输出中。

@@ -1,0 +1,81 @@
+/* Reading aids are functional content: avoid the former 7–9px labels. */
+:root :is(.lesson-meta,.lesson-breadcrumb,.main-formula>p,.formula-card>p,
+  .lab-task,.plot-caption,.am-caption,.am-task,.am-stat>span,
+  .ml-legend,.ml-notice,.ml-control-note,.ml-control-note small,
+  .tf-lab .tf-task p,.tf-notice,.modern-detail,.modern-task,
+  .code-description,.reference-code p,.test-source,.code-output small) {
+  font-size:12px;line-height:1.8;
+}
+:root :is(.range-extents,.slider-label,.lab-header>span,.lab-header small,
+  .plot-area svg text,.ml-plot text,.ml-loss-chart text,.am-chart text,
+  .gpt-tokenization,.gpt-order,.gpt-output-label,.gpt-output small,
+  .gpt-loss small,.gpt-project-note,.gpt-task,.gpt-shapes,
+  .tutor-model,.tutor-footnote,.tutor-scope>span,.tutor-options p) {
+  font-size:11px;line-height:1.8;
+}
+:root .chapter-title small {font-size:11px;line-height:1.7;}
+:root :is(.chapter-badge,.stage-deliverable,.references small,.lesson-pagination,.code-actions>span) {font-size:11px;line-height:1.8;}
+:root .code-toolbar>span {font-size:12px;}
+:root .code-editor {font-size:13px;line-height:1.9;}
+:root .line-numbers {font-size:13px;line-height:1.9;}
+:root :is(.code-output pre,.reference-code pre,.test-source pre) {font-size:12px;line-height:1.9;}
+:root :is(.context-section p,.scratchpad,.context-progress p,.save-thought p,.thinking-card>span:last-child) {font-size:12px;line-height:1.9;}
+:root :is(.context-phase,.context-section .text-button,.autosave,.review-button,.context-footer,
+  .thinking-card .mini-label,.save-thought .mini-label,.save-thought .button,
+  .select-label,.select-label select,.slider-label output,.live-result small,
+  .code-toolbar small,.code-toolbar .text-button,.ml-slider small,.ml-metrics small,.ml-loss-chart p,
+  .tf-shapes span,.tf-matrix-heading span,.tf-masked small,.tf-tokens small,.tf-tokens span,
+  .gpt-project-note code,.gpt-prompt small,.modern-header small,.modern-range small,.modern-metric>span) {font-size:11px;line-height:1.8;}
+
+/* Explanations must remain readable in the light theme as well. */
+:root :is(.lesson-meta,.lesson-breadcrumb,.plot-caption,.range-extents,.main-formula>p,
+  .code-output small,.chapter-title small,.reference-code p,.code-actions>span) {color:var(--secondary);}
+:root :is(.context-phase,.autosave,.review-button,.context-footer,.context-progress p,
+  .save-thought p,.thinking-card>span:last-child,.select-label,.live-result small) {color:var(--secondary);}
+:root .plot-area svg text:not(.vector-a) {fill:var(--secondary);}
+:root .code-output:not(.success) {color:var(--error);}
+
+.fullscreen-control {display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px;}
+:root .fullscreen-control .fullscreen-button {
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:36px;width:auto;min-width:76px;padding:6px 10px;
+  border:1px solid var(--border);border-radius:5px;background:var(--panel);
+  color:var(--accent-dark);font:inherit;font-size:12px;white-space:nowrap;
+}
+.fullscreen-button:hover {background:var(--accent-soft);}
+:root .fullscreen-error {font-size:12px;color:var(--secondary);max-width:280px;}
+:is(.math-lab,.extended-lab):fullscreen {overflow-y:auto;background:var(--panel);}
+:is(.math-lab,.extended-lab):fullscreen>.lab-header,
+.am-lab:fullscreen>.am-header,.modern-lab:fullscreen>.modern-header {
+  position:sticky;top:0;z-index:20;background:var(--panel-soft);
+}
+
+.python-error-summary h4 {font-size:14px;line-height:1.8;margin:5px 0 8px;}
+.python-error-summary p {font-size:13px;line-height:1.9;margin:8px 0;}
+.python-error-message {overflow-wrap:anywhere;}
+.python-error-source {padding:10px 12px;border-left:2px solid currentColor;background:var(--panel);}
+.python-error-details {border-top:1px solid var(--border);margin-top:14px;padding-top:12px;}
+.python-error-details summary {font-size:12px;cursor:pointer;color:var(--secondary);min-height:30px;}
+.python-error-details pre {white-space:pre-wrap;overflow-wrap:anywhere;}
+.python-stdout {margin-top:15px;}
+
+.lesson-sticky-tools {position:sticky;top:0;z-index:10;background:var(--bg);margin:24px 0;}
+.lesson-sticky-tools .mode-tabs {position:static;margin:0;}
+.lesson-jump-nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:9px 0;border-bottom:1px solid var(--border);}
+.lesson-jump-nav button {display:flex;justify-content:center;align-items:center;gap:5px;min-height:36px;border-radius:5px;font-size:12px;color:var(--secondary);white-space:nowrap;}
+.lesson-jump-nav button:hover {background:var(--accent-soft);color:var(--accent-dark);}
+#lesson-mode-panel,#lesson-experiment,#lesson-code,#lesson-quiz {scroll-margin-top:130px;}
+:is(#lesson-mode-panel,#lesson-experiment,#lesson-code,#lesson-quiz):focus {outline:none;}
+@media(max-width:760px){
+  :root .plot-area svg text {font-size:22px;}
+  :root :is(.am-chart text,.modern-chart text,.ml-plot text,.ml-loss-chart text) {font-size:16px;}
+  :root .topbar .icon-button {width:40px;height:40px;}
+  :root input[type=range] {min-height:28px;}
+  :root .plot-caption {font-size:11px;}
+  :root .plot-caption>span:last-child {display:none;}
+  :root .code-editor,:root .line-numbers {font-size:12px;}
+  .lesson-jump-nav {gap:3px;}
+  .lesson-jump-nav button {font-size:11px;gap:4px;min-height:40px;}
+  .lesson-jump-nav svg {width:13px;}
+  :root .fullscreen-control .fullscreen-button {min-height:40px;}
+}

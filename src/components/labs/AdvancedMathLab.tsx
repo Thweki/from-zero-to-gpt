@@ -1,6 +1,7 @@
 import { useId, useRef, type ReactNode } from 'react';
-import { FlaskConical, Maximize2, RotateCcw } from 'lucide-react';
+import { FlaskConical, RotateCcw } from 'lucide-react';
 import type { ExtendedLabProps } from '../../types';
+import {FullscreenButton} from '../FullscreenButton';
 
 type Vector2 = [number, number];
 type Matrix2 = [Vector2, Vector2];
@@ -285,7 +286,7 @@ export function AdvancedMathLab({lesson,values,onChange}:ExtendedLabProps) {
   }
   return <section className="am-lab" ref={ref} aria-label={`${lesson.title}交互实验`}>
     <style>{labStyles}</style>
-    <div className="am-header"><span><FlaskConical size={16}/>交互实验 <small>LIVE</small></span><div><button type="button" aria-label="重置本章数学实验" onClick={()=>onChange(defaultsFor(lesson.id))}><RotateCcw size={16}/></button><button type="button" aria-label="全屏数学实验" onClick={()=>{if(document.fullscreenElement)void document.exitFullscreen();else void ref.current?.requestFullscreen?.();}}><Maximize2 size={16}/></button></div></div>
+    <div className="am-header"><span><FlaskConical size={16}/>交互实验 <small>LIVE</small></span><div><button type="button" aria-label="重置本章数学实验" onClick={()=>onChange(defaultsFor(lesson.id))}><RotateCcw size={16}/></button><FullscreenButton target={ref} label="全屏数学实验"/></div></div>
     <div className="am-body"><div className="am-visual">{visual}<p className="am-caption">{caption}</p></div><div className="am-controls">{controls}</div></div>
     <div className="am-results" aria-live="polite" data-testid="lab-result">{result}</div>
     <div className="am-task"><strong>试一试</strong><p>{lesson.labTask}</p></div>
