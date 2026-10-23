@@ -10,6 +10,8 @@
 
 本轮共18个唯一浏览器用例（重复重跑不累加）。截图／输出为忽略的 `artifacts/usability-review/`、`artifacts/usability-release-results/` 与 `artifacts/usability-learning-results/`。公开部署与线上复核结果保存在工作区发布回执，必须与本地结果分开记录。
 
+首次线上发布批次14/15通过，旧 `mobile.spec.ts` 在异步保存成功前立即刷新导致恢复断言失败；生产逻辑已等待写入并显示“正在保存”，故修正测试为先断言成功跳回地图再刷新，保留原恢复内容断言。新增用例已采用相同等待。失败批次保留在 `artifacts/usability-online-results/`，不算作通过；修正后该用例本地1/1与线上1/1通过，结果另存于 `artifacts/usability-mobile-corrected-local/`、`artifacts/usability-mobile-corrected-online/`；最终发布批次见回执。
+
 边界：500×757是窄屏桌面；Pixel 7参数的Chromium使用真实tap事件但仍是设备／触控模拟，没有软键盘、iOS、Android实机或Safari测试。没有重新调用外部模型、重训PyTorch或重跑全部历史110项浏览器用例；既有证据在下文保留。不宣称全站WCAG认证。
 
 ---

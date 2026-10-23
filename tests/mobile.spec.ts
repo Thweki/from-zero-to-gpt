@@ -12,6 +12,7 @@ test('mobile navigation, interactive learning, checkpoint and no horizontal over
   await page.getByRole('button',{name:'保存思路，今天到这里'}).click();
   await page.getByLabel('下次回来先做哪一步').fill('在手机上继续比较负斜率');
   await page.getByRole('button',{name:'保存并结束本次学习'}).click();
+  await expect(page).toHaveURL(/#\/map$/);
   await page.reload();await expect(page.locator('.resume-card')).toContainText('在手机上继续比较负斜率');
   await page.screenshot({path:'artifacts/mobile-map.png',fullPage:true});
 });
