@@ -4,8 +4,8 @@ import type { ExtendedLabProps } from '../../types';
 
 type Vector2 = [number, number];
 type Matrix2 = [Vector2, Vector2];
-const GOLD = '#b48b48';
-const BLUE = '#6e96ac';
+const GOLD = 'var(--plot-secondary)';
+const BLUE = 'var(--plot-tertiary)';
 const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(high, value));
 const fmt = (value: number, digits = 3) => !Number.isFinite(value) ? '未定义' : Math.abs(value) < 1e-10 ? '0' : Math.abs(value) >= 10000 ? value.toExponential(2) : Number(value.toFixed(digits)).toString();
 

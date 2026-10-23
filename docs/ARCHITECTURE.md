@@ -118,3 +118,10 @@ Worker 部署以 `dist-server/worker.js` 为入口，绑定名为 `ASSETS` 的 `
 `efficient.py` 实现 LoRALinear、合并、逐输出通道 Int8Linear 与存储报告。仅 A/B 可训练，基座冻结并逐张量检查；适配器仅存低秩张量与元数据，绑定精确基座文件 SHA-256。int8 以 buffers 真正保存，前向临时反量化到浮点；没有整数 GEMM。格式1训练检查点保持兼容；格式2浮点／int8推理文件不含旧优化器，不能作为训练恢复输入。加载使用 weights_only，输出不能覆盖输入。
 
 `tiny_gpt.py` 统一 train/evaluate/generate/inspect/benchmark/lora-train/merge-lora/quantize；支持先浮点LoRA再合并、量化、缓存生成，不声称QLoRA。`ProjectDownload.tsx` 给第五／六阶段同一工程源码下载，三章提供可执行命令与边界。ZIP 由打包脚本生成；PyTorch 始终在本机运行，不进入网站服务端。
+
+
+## 0.3.1 主题约定
+
+`styles.css` 根元素的 color/background 必须引用 `--text`／`--bg`，避免只改变暗面板而保留浅色正文。`main.tsx` 在基础样式后导入 `theme.css`，集中定义深色语义变量与必要的旧组件适配。主操作使用 `--action-bg`／`--on-accent`，图表使用 `--plot-secondary`／`--plot-tertiary`；懒加载实验直接消费这些变量，GPT的软面板使用 `--panel-soft`。不要再引入未定义的 `--soft` 或为深色按钮固定白字。
+
+深色根背景、正文继承、透明背景合成后的关键文字对比度、原生表单、真实Python错误／通过状态、GPT、导师模拟消息、搜索／toast／暂停弹窗、390px导航、SVG与Attention格子由 `tests/appearance.spec.ts` 覆盖。文字阈值4.5:1、被测主图线阈值3:1；这是代表性渲染检查，不等同于全站WCAG认证。
