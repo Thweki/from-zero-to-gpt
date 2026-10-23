@@ -14,7 +14,7 @@
 | --- | --- |
 | repository-safety | 检查追踪文件、最大5MiB文件限制和完整可达Git历史的常见凭证格式；排除环境文件、依赖、缓存、权重、个人学习备份等 |
 | web | `npm ci`、严格类型、Vitest、交付校验测试、全部83章CPython参考/TODO验收、真实生产构建、Sites格式打包 |
-| browser | 安装Chromium及系统依赖，执行209项Playwright用例；包括83章页面、83个独立浏览器Python参考验收、导师模拟、学习恢复、深色外观、全屏、窄屏和触控模拟；job预算30分钟，各章结果断言30秒 |
+| browser | 安装Chromium及系统依赖，执行214项Playwright用例；包括83章页面、83个独立浏览器Python参考验收、导师模拟、学习恢复、深色外观、全屏、窄屏和触控模拟；job预算30分钟，各章结果断言30秒 |
 | python | 分别运行标准库regression、micrograd及独立tiny-gpt全部unittest；只有tiny-gpt安装CPU PyTorch |
 | launcher | Ubuntu24.04、Windows2025、macOS15实际调用平台入口，从无依赖源码安装／启动，核对HTTP资源、重复保护、停止与再次启动 |
 | delivery | 仅main上的非PR事件、上述所有job（含三个启动平台）成功后，下载同一次运行的候选产物，复核源码提交、SHA-256、Site身份与必需运行时，再上传 `verified-site-<commit>` |
@@ -25,7 +25,7 @@
 
 本轮本地已通过严格类型、509项Vitest、7项交付校验测试、83章CPython验收、完整127项浏览器测试（0失败／跳过／flaky，约8.2分钟）、三个Python工程6/10/23项测试及生产构建。完整浏览器输出为 `artifacts/playwright-results.json`，详细说明见 [TEST_REPORT](TEST_REPORT.md)。归档与最终源码提交以工作区GitHub准备回执为准；这些本地结果不冒充真实Actions。
 
-上述127项为拆分前的历史批次。0.3.3将同一测试中的83份浏览器Python程序拆为83个独立用例，最新总数为209；断言及运行位置保留，分别记录章节超时和trace。此前超时批次和新批次真实结果以TEST_REPORT及Actions为准。
+0.3.4增加5项字体交付／排版／回退验收，最新共214项。上述127项为拆分前的历史批次。0.3.3将同一测试中的83份浏览器Python程序拆为83个独立用例，最新总数为209；断言及运行位置保留，分别记录章节超时和trace。此前超时批次和新批次真实结果以TEST_REPORT及Actions为准。
 
 ## 构建产物与本地复现
 

@@ -1,0 +1,349 @@
+/* Self-hosted variable fonts: readable Chinese, consistent Latin, explicit code. */
+:root {
+  --font-ui: 'Inter Variable', 'Noto Sans SC Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'Noto Sans SC Variable', ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.7;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+body { font-family: var(--font-ui); }
+::selection { background: var(--accent-soft); color: var(--accent-dark); }
+:root :is(button, input, textarea, select) { font-family: var(--font-ui); }
+:root :is(pre, code, kbd, .mono, .eyebrow, .edition, .nav-key,
+  .workspace-label>span:last-child, .nav-section-label span, .sidebar-notice>span,
+  .continue-content h2>span, .visual-label, .stage-number, .stage-heading-text small,
+  .chapter-group-label>span:first-child, .chapter-index, .chapter-title small,
+  .route-heading h2>span, .prose-section h2>span, .option-letter, .lab-header small,
+  .plot-equation, .plot-area svg text, .slider-label output, .range-extents,
+  .live-result strong, .code-toolbar>span, .line-numbers, .code-editor,
+  .tf-shapes span, .tf-matrix-heading span, .tf-lab table, .tf-editor input,
+  .tf-range output, .tf-result, .nn-slider output, .modern-range output,
+  .modern-metric strong, .modern-matrix span, .modern-probability output,
+  .modern-error-bars output) { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+:root :is(pre, code, .code-editor, .line-numbers) { font-variant-ligatures: none; }
+:root :is(.page-content h1, .modal h2) { letter-spacing: -.035em; font-weight: 650; }
+:root :is(.page-content h2, .page-content h3, .context-section h3) { font-weight: 600; }
+
+/* One frame in both appearances, with a quieter reading canvas. */
+:root .app-shell { padding-left: 248px; }
+:root .sidebar { width: 248px; padding: 30px 16px 0; background: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--border); }
+:root .brand-link { padding: 0 12px; }
+:root .brand { gap: 12px; }
+:root .brand>span { color: var(--text); font-size: 17px; font-weight: 650; letter-spacing: -.55px; }
+:root .brand b { color: var(--accent-dark); font-weight: 500; }
+:root .brand small { font-size: 11px; letter-spacing: .11em; color: var(--sidebar-muted); line-height: 1.8; margin-top: 5px; }
+:root .brand-symbol { transform: none; width: 30px; }
+:root .brand-symbol span { background: var(--accent); height: 3px; border-radius: 3px; }
+:root .workspace-label { color: var(--sidebar-muted); font-size: 12px; padding: 24px 12px; }
+:root .workspace-label>span:last-child { color: var(--sidebar-muted); border-color: var(--border); font-size: 10px; }
+:root .online-dot { background: var(--success); }
+:root .nav-link { color: var(--sidebar-text); font-size: 14px; padding: 11px 13px; border-radius: 8px; margin-bottom: 5px; }
+:root .nav-link.active { color: var(--accent-dark); background: var(--sidebar-active); font-weight: 550; }
+:root .nav-link.active:before { background: var(--accent); width: 3px; border-radius: 3px; height: 20px; }
+:root .nav-link:hover { background: var(--panel-raised); color: var(--text); }
+:root .nav-key { color: var(--sidebar-muted); font-size: 10px; }
+:root .nav-section-label { color: var(--sidebar-muted); font-size: 11px; padding: 28px 12px 12px; letter-spacing: .07em; }
+:root .nav-section-label span { color: var(--sidebar-muted); font-size: 10px; }
+:root .stage-nav-select { padding: 0 9px; }
+:root .stage-nav-select select { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 7px; font-size: 13px; padding: 9px 10px; }
+:root .sidebar nav { scrollbar-color: var(--control-border) transparent; }
+:root .lesson-nav { margin: 14px 5px 0 22px; padding-left: 13px; border-color: var(--border); max-height: 31vh; }
+:root .lesson-nav-link { color: var(--sidebar-text); font-size: 13px; line-height: 1.75; padding: 8px 0 8px 3px; gap: 9px; }
+:root .lesson-nav-link.active { color: var(--accent-dark); font-weight: 550; }
+:root .lesson-nav-link:hover { color: var(--accent-dark); }
+:root .lesson-nav .status-new { color: var(--sidebar-muted); }
+:root .sidebar-notice { margin: 24px 8px 18px; border: 1px solid var(--border); background: var(--panel); padding: 16px; border-radius: 9px; color: var(--secondary); }
+:root .sidebar-notice p { font-size: 12px; line-height: 1.9; }
+:root .sidebar-notice>svg { color: var(--accent); }
+:root .sidebar-notice>span { color: var(--muted); font-size: 9px; letter-spacing: .04em; }
+:root .sidebar-bottom { border-color: var(--border); padding-top: 12px; }
+:root .sidebar-bottom .nav-link { font-size: 13px; }
+:root .theme-toggle { font-size: 13px; color: var(--sidebar-text); padding: 10px 13px; min-height: 42px; border-radius: 7px; }
+:root .theme-toggle:hover { background: var(--panel-raised); }
+:root .theme-pill { color: var(--accent-dark); border-color: var(--border); font-size: 12px; }
+:root .local-status { color: var(--sidebar-muted); border-color: var(--border); font-size: 10px; padding: 16px 0; margin-top: 12px; }
+:root .topbar { height: 72px; background: var(--chrome-bg); padding: 0 36px; }
+:root .breadcrumb { font-size: 12px; gap: 12px; }
+:root .topbar-actions { gap: 14px; }
+:root .search-box { height: 36px; border-radius: 7px; padding: 6px 10px; background: var(--panel); }
+:root .search-box input { font-size: 12px; width: 166px; }
+:root .search-box kbd { font-size: 10px; }
+:root .icon-button { width: 34px; height: 34px; border-radius: 7px; }
+:root .avatar { background: var(--accent-soft); color: var(--accent-dark); }
+:root .avatar>span { background: var(--success); }
+:root .content-layout { grid-template-columns: minmax(0, 1fr) 280px; min-height: calc(100vh - 72px); }
+:root .hide-context .content-layout { grid-template-columns: minmax(0, 1fr); }
+:root .page-content { max-width: 1160px; padding: 38px 36px 44px; }
+:root .page-content h1 { font-size: 34px; line-height: 1.45; }
+:root .page-description { font-size: 14px; line-height: 1.95; letter-spacing: 0; margin-top: 10px; }
+:root .page-heading { margin-bottom: 28px; }
+:root .eyebrow { font-size: 10px; line-height: 1.8; letter-spacing: .1em; margin-bottom: 15px; }
+:root .edition { font-size: 9px; line-height: 1.9; letter-spacing: .1em; }
+:root .edition b { font-size: 11px; }
+:root .title-dot { color: var(--accent); }
+:root .button { border-radius: 8px; font-size: 13px; font-weight: 550; min-height: 42px; padding: 10px 16px; }
+:root .button.primary:hover { filter: none; background: var(--action-hover); }
+:root .button.compact { min-height: 36px; font-size: 12px; }
+:root .text-button { font-size: 13px; }
+:root .badge { font-size: 11px; border-color: var(--border); border-radius: 5px; padding: 3px 8px; }
+:root .mini-label { font-size: 12px; font-weight: 550; letter-spacing: .02em; }
+:root :is(input, textarea, select) { caret-color: var(--accent); }
+:root ::placeholder { color: var(--muted); opacity: 1; }
+
+/* Roadmap: human-sized labels, quiet cards and clear current position. */
+:root .continue-card { background: var(--hero); border-color: var(--border); border-radius: 13px; padding: 29px 30px; margin-bottom: 34px; min-height: 238px; box-shadow: none; }
+:root .continue-content h2 { font-size: 26px; line-height: 1.5; font-weight: 650; letter-spacing: -.025em; }
+:root .continue-content h2>span { font-size: 11px; letter-spacing: 0; line-height: 1.9; margin-top: 5px; }
+:root .continue-content p { font-size: 13px; line-height: 1.9; margin-top: 11px; }
+:root .continue-footnote { font-size: 11px; color: var(--secondary); margin-top: 12px; }
+:root .hero-visual { color: var(--hero-ink); max-width: 280px; }
+:root .visual-label { font-size: 8px; letter-spacing: .06em; }
+:root .visual-note { font-size: 10px; }
+:root .route-heading h2 { font-size: 18px; letter-spacing: -.02em; }
+:root .route-heading h2>span { font-size: 9px; letter-spacing: .04em; }
+:root .route-heading p { font-size: 12px; line-height: 1.8; }
+:root .view-switch { border-radius: 8px; }
+:root .view-switch button { font-size: 11px; min-height: 32px; padding: 6px 9px; }
+:root .stage-list { gap: 14px; }
+:root .stage-card { border-color: var(--border); border-radius: 11px; background: var(--panel); box-shadow: none; }
+:root .stage-card.expanded { border-color: var(--control-border); box-shadow: 0 3px 12px #202c4b03; }
+:root .stage-heading { padding: 19px 20px; gap: 13px; }
+:root .stage-number { font-size: 11px; color: var(--secondary); }
+:root .stage-icon { width: 38px; height: 38px; border-radius: 10px; }
+:root .stage-heading-text strong { font-size: 15px; font-weight: 600; }
+:root .stage-heading-text small { font-size: 8px; letter-spacing: .03em; }
+:root .stage-heading-text p { color: var(--secondary); font-size: 12px; line-height: 1.8; margin-top: 4px; }
+:root .stage-heading .badge { font-size: 10px; }
+:root .stage-content { padding: 0 20px 0 48px; }
+:root .chapter-group-label { font-size: 11px; padding: 10px 0 14px; }
+:root .chapter-group-label>span:first-child { font-size: 10px; }
+:root .chapter-group-label>span:last-child { font-size: 10px; }
+:root .chapter-row { padding: 12px 11px; border-radius: 8px; min-height: 64px; }
+:root .chapter-title { font-size: 14px; line-height: 1.75; font-weight: 450; }
+:root .chapter-title small { font-size: 11px; letter-spacing: -.015em; margin-top: 3px; }
+:root .chapter-index { font-size: 10px; }
+:root .chapter-badge { font-size: 11px; }
+:root .chapter-row.current { box-shadow: inset 3px 0 var(--accent); }
+:root .stage-deliverable { color: var(--secondary); font-size: 11px; padding: 14px 0; line-height: 1.9; }
+:root .roadmap-footer { font-size: 11px; line-height: 1.8; }
+
+/* Reading is the primary task. Equations retain KaTeX's own mathematical face. */
+:root .lesson-page { max-width: 1040px; padding-top: 27px; }
+:root .lesson-breadcrumb { font-size: 12px; margin-bottom: 27px; }
+:root .lesson-subtitle { font-size: 15px; line-height: 1.9; margin-top: 10px; }
+:root .lesson-meta { font-size: 12px; gap: 19px; margin-top: 20px; }
+:root .lesson-title-row .eyebrow { font-size: 10px; letter-spacing: .045em; }
+:root .lesson-sticky-tools { margin: 28px 0; background: var(--bg); }
+:root .mode-tabs { gap: 8px; padding: 5px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+:root .mode-tabs button { border: 0; border-radius: 6px; color: var(--secondary); font-size: 13px; padding: 10px 5px; min-height: 42px; }
+:root .mode-tabs button[aria-selected=true] { color: var(--accent-dark); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--border); font-weight: 550; }
+:root .lesson-jump-nav { gap: 6px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+:root .lesson-jump-nav button { min-height: 38px; font-size: 12px; }
+:root .problem-callout { border-color: var(--accent); border-radius: 0 9px 9px 0; padding: 18px 20px; background: var(--accent-soft); margin-bottom: 32px; }
+:root .problem-callout .mini-label { font-size: 12px; color: var(--accent-dark); }
+:root .problem-callout p { color: var(--text); font-size: 15px; line-height: 1.95; margin-top: 9px; }
+:root .prose-section { margin: 32px 0; }
+:root .prose-section h2 { font-size: 20px; line-height: 1.7; letter-spacing: -.025em; font-weight: 600; margin-bottom: 14px; }
+:root .prose-section h2>span { font-size: 10px; min-width: 27px; height: 27px; border-radius: 6px; background: var(--panel); }
+:root .prose-section p { color: var(--text); font-size: 16px; line-height: 1.95; letter-spacing: .005em; margin: 14px 0; max-inline-size: 76ch; }
+:root :is(.prose-section li, .goals-section li, .exercise-section p, .misconceptions p) { font-size: 14px; line-height: 1.95; }
+:root :is(.main-formula, .formula-card) { border-radius: 10px; padding: 22px 18px; }
+:root :is(.main-formula>p, .formula-card>p) { font-size: 12px; line-height: 1.9; }
+:root :is(.misconceptions, .exercise-section, .quiz-card, .lesson-completion, .settings-card, .note-card, .project-download) { border-radius: 11px; padding: 22px; }
+:root :is(.misconceptions h3, .exercise-section h2, .quiz-card h3, .settings-card h2) { font-size: 17px; line-height: 1.8; }
+:root .quiz-options label { font-size: 14px; padding: 12px 14px; line-height: 1.8; border-radius: 7px; }
+:root :is(.quiz-feedback, .lesson-completion p, .references a, .project-download p, .settings-card p) { font-size: 13px; line-height: 1.9; }
+:root :is(.lesson-pagination .text-button, .references small) { font-size: 12px; line-height: 1.9; }
+:root :is(.resume-card p, .resume-card h3) { font-size: 14px; line-height: 1.9; }
+
+/* Editor and notes share comfortable metrics; the gutter matches every line. */
+:root .code-lab { border-radius: 11px; }
+:root .code-toolbar { padding: 13px 16px; }
+:root .code-toolbar>span { font-size: 12px; }
+:root .code-description { font-size: 13px; line-height: 1.9; }
+:root .editor-wrap { background: var(--editor-bg); color: var(--editor-text); padding: 20px 0; }
+:root .code-editor { color: var(--editor-text); font-size: 14px; line-height: 1.85; padding: 0 18px; }
+:root .line-numbers { color: var(--editor-muted); font-size: 14px; line-height: 1.85; padding: 0 13px; border-color: #ffffff16; }
+:root .code-actions { padding: 13px 16px; }
+:root .code-actions>span { font-size: 11px; }
+:root .code-output { background: var(--error-bg); color: var(--error); padding: 18px; }
+:root .code-output.success { background: var(--success-bg); color: var(--success); }
+:root :is(.code-output pre, .reference-code pre, .test-source pre, .project-workflow pre) { font-size: 13px; line-height: 1.9; }
+:root .reference-code pre { color: var(--text); }
+:root .reference-code p { font-size: 12px; }
+:root .test-source pre { color: var(--secondary); }
+:root .python-error-source { background: var(--panel); }
+:root .context-panel { background: var(--chrome-bg); padding: 27px 22px 22px; }
+:root .context-title { font-size: 14px; font-weight: 600; padding-bottom: 18px; }
+:root .context-title>span { background: var(--accent); border-radius: 50%; }
+:root .context-tabs button { font-size: 12px; min-height: 34px; padding: 6px 9px; }
+:root .context-section { padding: 23px 0; }
+:root .context-phase { font-size: 11px; }
+:root .context-section h3 { font-size: 17px; line-height: 1.7; }
+:root :is(.context-section p, .scratchpad, .context-progress p, .save-thought p, .thinking-card>span:last-child) { font-size: 13px; line-height: 1.9; }
+:root .scratchpad { border-radius: 8px; padding: 13px; min-height: 126px; border-color: var(--border); }
+:root .scratchpad:focus { outline-color: var(--accent); }
+:root .thinking-card { border-radius: 9px; background: var(--panel-soft); border-color: var(--border); }
+:root .lightbulb-icon { color: var(--accent); background: var(--accent-soft); }
+:root :is(.review-button, .autosave, .context-footer, .save-thought .button) { font-size: 11px; }
+:root .save-thought { border-color: var(--control-border); border-radius: 9px; }
+:root .tutor-title { font-size: 14px; }
+:root .tutor-message { font-size: 14px; line-height: 1.9; border-radius: 9px; padding: 13px; }
+:root .tutor-message.user { background: var(--accent-soft); }
+:root :is(.tutor-scope p, .tutor-quick button, .tutor-compose textarea, .tutor-options p) { font-size: 13px; line-height: 1.8; }
+:root .tutor-markdown pre { color: var(--editor-text); background: var(--editor-bg); font-size: 12px; line-height: 1.9; border-radius: 7px; }
+:root .tutor-error { color: var(--warning); background: var(--warning-bg); border-color: var(--warning); }
+:root .tutor-scope { border-radius: 8px; }
+:root :is(.tutor-compose textarea, .tutor-options input, .tutor-options select) { border-radius: 7px; }
+:root .tutor-page { max-width: 900px; }
+:root .tutor-page .tutor-panel { border-radius: 11px; }
+
+/* Experiments use the same type scale while retaining their own visualization. */
+:root :is(.math-lab, .extended-lab) { border-color: var(--border); border-radius: 11px; box-shadow: none; }
+:root .lab-header { padding: 13px 16px; background: var(--panel-soft); }
+:root .lab-header>span { font-size: 13px; }
+:root .fullscreen-control .fullscreen-button { border-radius: 7px; }
+:root :is(.am-caption, .am-task, .ml-notice, .ml-control-note, .tf-notice, .tf-task p, .gpt-task, .modern-detail, .modern-task) { font-size: 13px; line-height: 1.85; }
+:root .slider-label { font-size: 12px; }
+:root .range-extents { font-size: 11px; }
+:root .plot-caption { font-size: 12px; }
+:root .plot-equation { font-size: 18px; }
+:root .live-result strong { font-size: 15px; }
+:root .lab-task { font-size: 13px; line-height: 1.85; }
+:root .select-label { font-size: 12px; }
+:root .select-label select { font-size: 12px; border-radius: 6px; min-height: 36px; }
+:root .lab-course-picker { font-size: 14px; }
+:root .lab-course-picker select { font-size: 14px; border-radius: 7px; }
+:root :is(.tf-lab table, .tf-editor input, .tf-result, .tf-matrix-heading span) { font-size: 12px; }
+:root .tf-heat { font-size: 12px; }
+:root :is(.gpt-output, .gpt-loss, .gpt-disclosure, .gpt-lab thead) { border-color: var(--border); }
+:root .lab-loading { font-size: 14px; }
+
+/* Overlay copy stays as readable as the chapter underneath it. */
+:root .modal { border-radius: 15px; padding: 32px; }
+:root .modal h2 { font-size: 26px; line-height: 1.5; }
+:root .modal .eyebrow { font-size: 10px; }
+:root .modal>p { font-size: 14px; line-height: 1.95; }
+:root .modal label { font-size: 14px; line-height: 1.8; }
+:root .modal label textarea { font-size: 14px; line-height: 1.9; border-radius: 8px; }
+:root .modal>small { font-size: 12px; line-height: 1.8; }
+:root .toast { font-size: 13px; line-height: 1.8; border-radius: 9px; }
+:root .search-results { border-radius: 12px; }
+:root .search-results>button { font-size: 14px; padding: 14px 18px; }
+:root .search-results small { font-size: 12px; }
+:root .search-modal-input input { font-size: 14px; }
+:root .storage-warning { background: var(--warning-bg); color: var(--warning); }
+:root .loading-screen { background: var(--bg); }
+:root .loading-screen p { color: var(--secondary); font-size: 14px; }
+
+@media(min-width:1600px) {
+  :root .app-shell { padding-left: 264px; }
+  :root .sidebar { width: 264px; }
+  :root .content-layout { grid-template-columns: minmax(0,1fr) 300px; }
+  :root .page-content { padding: 46px 48px; }
+  :root .topbar { padding: 0 48px; }
+  :root .page-content h1 { font-size: 38px; }
+  :root .continue-card { padding: 32px 34px; }
+}
+@media(max-width:1250px) {
+  :root .app-shell { padding-left: 224px; }
+  :root .sidebar { width: 224px; padding-left: 12px; padding-right: 12px; }
+  :root .content-layout { grid-template-columns: minmax(0,1fr) 250px; }
+  :root .page-content { padding: 32px 26px; }
+  :root .topbar { padding: 0 26px; }
+  :root .context-panel { padding: 25px 17px; }
+  :root .search-box input { width: 135px; }
+  :root .continue-card { padding: 25px; }
+  :root .stage-heading-text small { display: none; }
+}
+@media(max-width:1050px) {
+  :root .content-layout { grid-template-columns: minmax(0,1fr); }
+  :root .page-content { padding: 32px; }
+  :root .topbar { padding: 0 32px; }
+  :root .context-panel { display: none; }
+}
+@media(max-width:760px) {
+  :root .app-shell { padding-left: 0; }
+  :root .sidebar { width: 258px; padding: 28px 16px 0; }
+  :root .lesson-nav { max-height: 33vh; }
+  :root .sidebar-notice { margin-top: 18px; }
+  :root .topbar { height: 64px; padding: 0 18px; gap: 8px; }
+  :root .topbar-actions { gap: 5px; }
+  :root .breadcrumb { font-size: 12px; }
+  :root .topbar .icon-button { width: 38px; height: 40px; }
+  :root .search-box { background: transparent; padding: 0; }
+  :root .search-box input { width: 80px; font-size: 12px; }
+  :root .content-layout { min-height: calc(100vh - 64px); }
+  :root .page-content { padding: 27px 20px 35px; }
+  :root .page-content h1 { font-size: 28px; line-height: 1.5; }
+  :root .page-description { font-size: 13px; max-width: none; }
+  :root .page-heading { margin-bottom: 24px; }
+  :root .eyebrow { font-size: 9px; letter-spacing: .04em; }
+  :root .continue-card { padding: 23px 21px; min-height: 250px; border-radius: 11px; }
+  :root .continue-content { min-width: 0; }
+  :root .continue-content h2 { font-size: 23px; }
+  :root .continue-content p { font-size: 13px; max-width: 235px; }
+  :root .continue-content h2>span { font-size: 10px; }
+  :root .continue-footnote { font-size: 11px; }
+  :root .hero-visual { opacity: .24; right: -3px; width: 38%; }
+  :root .visual-label { font-size: 7px; }
+  :root .route-heading { align-items: flex-start; gap: 12px; }
+  :root .route-heading h2 { font-size: 17px; }
+  :root .route-heading p { font-size: 11px; max-width: 235px; }
+  :root .stage-heading { padding: 16px 13px; gap: 9px; }
+  :root .stage-heading-text strong { font-size: 14px; }
+  :root .stage-heading-text p { font-size: 11px; }
+  :root .stage-heading-text>span { gap: 5px; }
+  :root .stage-heading .badge { font-size: 10px; }
+  :root .stage-number { font-size: 10px; }
+  :root .stage-icon { width: 32px; height: 32px; border-radius: 8px; }
+  :root .stage-content { padding: 0 13px 0 21px; }
+  :root .chapter-row { gap: 9px; padding: 12px 9px; }
+  :root .chapter-title { font-size: 13px; }
+  :root .chapter-title small { font-size: 10px; }
+  :root .chapter-index { font-size: 9px; }
+  :root .chapter-badge { font-size: 10px; }
+  :root .chapter-group-label>span:last-child { font-size: 9px; }
+  :root .stage-deliverable { font-size: 11px; }
+  :root .roadmap-footer { font-size: 10px; }
+  :root .lesson-breadcrumb { font-size: 11px; margin-bottom: 23px; }
+  :root .lesson-title-row .eyebrow { font-size: 9px; letter-spacing: .015em; }
+  :root .lesson-subtitle { font-size: 14px; }
+  :root .lesson-meta { font-size: 11px; gap: 12px; flex-wrap: wrap; }
+  :root .lesson-sticky-tools { margin: 23px 0; }
+  :root .mode-tabs { padding: 4px; gap: 3px; }
+  :root .mode-tabs button { font-size: 12px; gap: 5px; padding: 10px 2px; min-height: 42px; }
+  :root .mode-tabs svg { width: 13px; }
+  :root .lesson-jump-nav { gap: 3px; }
+  :root .lesson-jump-nav button { font-size: 11px; gap: 4px; min-height: 40px; }
+  :root .problem-callout { padding: 16px; margin-bottom: 28px; }
+  :root .problem-callout p { font-size: 14px; line-height: 1.95; }
+  :root .prose-section { margin: 28px 0; }
+  :root .prose-section h2 { font-size: 18px; gap: 10px; align-items: flex-start; }
+  :root .prose-section h2>span { margin-top: 3px; min-width: 25px; height: 25px; }
+  :root .prose-section p { font-size: 16px; line-height: 1.95; }
+  :root :is(.misconceptions, .exercise-section, .quiz-card, .lesson-completion, .settings-card, .note-card, .project-download) { padding: 18px; }
+  :root .lesson-completion .button { margin-top: 14px; }
+  :root .lab-header { padding: 12px; }
+  :root .lab-header>span { font-size: 12px; flex-wrap: wrap; }
+  :root .lab-header small { font-size: 10px; }
+  :root .plot-equation { font-size: 17px; }
+  :root .code-editor, :root .line-numbers { font-size: 13px; line-height: 1.85; }
+  :root .code-editor { padding: 0 12px; }
+  :root .code-output pre, :root .reference-code pre, :root .test-source pre { font-size: 12px; }
+  :root .code-actions .button { font-size: 12px; }
+  :root .code-actions>span { font-size: 11px; }
+  :root .code-toolbar { padding: 11px 12px; gap: 8px; flex-wrap: wrap; }
+  :root .code-toolbar .text-button { font-size: 11px; }
+  :root .tutor-compose textarea { font-size: 16px; }
+  :root .modal { padding: 27px 23px; }
+  :root .modal h2 { font-size: 23px; }
+  :root .modal label textarea { font-size: 16px; }
+  :root .toast { font-size: 12px; }
+  :root .search-results>button { font-size: 13px; }
+  :root .search-results small { font-size: 11px; }
+}

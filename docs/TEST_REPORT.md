@@ -1,3 +1,13 @@
+# 0.3.4 字体与主题优化验收
+
+2026-10-23。新增同源自托管Noto Sans SC、Inter、JetBrains Mono及OFL许可；正文16px，代码与行号使用相同字体和行高；统一纸面／石墨主题及蓝色强调。调整地图、导航、教材、编辑器、导师、实验和弹窗的阅读尺度。保留KaTeX数学字体和原IndexedDB数据结构；主题缓存只用于首帧提示，实际主题仍由学习数据确定。
+
+本地严格TypeScript、509项Vitest和生产构建通过。最终字体／外观批次20/20通过，含5项新验收：真实字体验证与同源请求、字号与代码行号一致、360／390／768px浅深主题与笔记恢复、React未启动时的深色首帧、字体请求失败时仍可操作实验；其余15项覆盖原深色对比度、真实Python错误／成功、全屏进入退出、长章定位、断点恢复和Chromium触控模拟。先前预览端口冲突的测试未执行，不计入通过批次。
+
+桌面与390px截图已实际查看，保存在忽略的`artifacts/typography-review/`，自动化输出在`artifacts/typography-regression-final/`。完整浏览器门槛为214项，真实Actions、源码SHA及Sites保存／部署结果以本轮交接回执为准。没有新调用外部模型API或重训GPT。边界仍为Linux Chromium及设备模拟，未验证Safari、Windows原生字形渲染、iOS／Android实机或软键盘。详见[TYPOGRAPHY](TYPOGRAPHY.md)。
+
+---
+
 # 0.3.3 跨平台一键启动验证
 
 2026-10-23。新增Windows／Linux／macOS入口，兼容Python命令与路径含空格。Linux本地10/10启动器测试、1/1真实平台入口smoke（从无node_modules源码首次安装、HTTP资源、重复启动、停止、依赖复用再次启动）通过；TypeScript、509/509 Vitest、83/83课程代码和生产构建通过。测试临时源码不复制.env、依赖、学习记录或模型权重。

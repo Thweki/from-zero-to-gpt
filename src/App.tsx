@@ -35,7 +35,15 @@ export default function App(){
   stateRef.current=state;
   const notify=useCallback((message:string)=>{setToast(message);if(toastTimer.current)clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(''),4000);},[]);
   useEffect(()=>{let active=true;readState().then(data=>{if(active){setState(data);setReady(true);}}).catch(()=>{if(active){setReady(true);setCanSave(false);setSaveStatus('error');setStorageError('浏览器存储不可用。当前更改仅保留在本次页面，请导出备份。');}});return()=>{active=false;};},[]);
-  useEffect(()=>{if(ready){document.documentElement.dataset.theme=state.theme;if(!canSave)return;const sequence=++saveSequence.current;setSaveStatus('saving');writeState(state).then(()=>{if(sequence===saveSequence.current)setSaveStatus('saved');}).catch(()=>{setSaveStatus('error');setCanSave(false);setStorageError('自动保存失败，请导出备份后检查浏览器存储权限。');});}},[state,ready,canSave]);
+  useEffect(()=>{
+    if(!ready)return;
+    document.documentElement.dataset.theme=state.theme;
+    const chrome=getComputedStyle(document.documentElement).getPropertyValue('--chrome-bg').trim();
+    if(chrome)document.querySelector('meta[name="theme-color"]')?.setAttribute('content',chrome);
+    // A paint hint only: IndexedDB remains the canonical, exported preference.
+    try{localStorage.setItem('from-zero-to-gpt:theme',state.theme);}catch{/* Storage can be unavailable. */}
+  },[state.theme,ready]);
+  useEffect(()=>{if(ready){if(!canSave)return;const sequence=++saveSequence.current;setSaveStatus('saving');writeState(state).then(()=>{if(sequence===saveSequence.current)setSaveStatus('saved');}).catch(()=>{setSaveStatus('error');setCanSave(false);setStorageError('自动保存失败，请导出备份后检查浏览器存储权限。');});}},[state,ready,canSave]);
   useEffect(()=>{const onHash=()=>{setRoute(routeFromHash());setMobile(false);window.scrollTo({top:0});};window.addEventListener('hashchange',onHash);return()=>window.removeEventListener('hashchange',onHash);},[]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();searchRef.current?.focus();setSearching(true);}if(e.key==='Escape'){setSearching(false);setMobile(false);setCheckpointOpen(false);setPlanned(null);}};document.addEventListener('keydown',key);return()=>document.removeEventListener('keydown',key);},[]);
   useEffect(()=>{if(ready&&route.id)setState(s=>({...s,lastLesson:route.id!,progress:{...s.progress,[route.id!]:{...emptyProgress(),...s.progress[route.id!],code:s.progress[route.id!]?.code??byId(route.id!).starter,status:s.progress[route.id!]?.status==='mastered'?'mastered':'learning'}},updatedAt:new Date().toISOString()}));},[route.id,ready]);

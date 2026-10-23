@@ -144,3 +144,10 @@ Worker使用 `experiment.py`／`acceptance_tests.py` 文件名，不包装用户
 `python.mjs`统一探测3.10+解释器，支持Windows py -3与路径含空格的FROM_ZERO_PYTHON覆盖。打包和课程验证消费同一探测结果；打包排除环境配置、缓存和常见模型权重。依赖指纹写入node_modules，单实例锁写入忽略的artifacts；中断安装不会写成功指纹，死进程旧锁可恢复，活进程锁不能被替换。
 
 启动测试使用Node内置runner；跨平台smoke从追踪源码创建含空格的临时目录，无Git／无node_modules也能启动，真实安装后验证资源、并发保护、停止和热启动，不复制学习数据或密钥。CI使用三个原生OS runner，最终delivery依赖它们成功；GUI自动打开、Finder与桌面权限交互不冒充已自动化验证。
+
+
+## 0.3.4 字体、主题与首帧
+
+`theme.css`统一语义颜色，`typography.css`统一字号、字体与工作区间距；Fontsource变量字体作为锁定依赖由Vite输出同源WOFF2，许可随`public/fonts`发布。中文Noto Sans SC、英文Inter与代码JetBrains Mono，数学由KaTeX处理。没有外部字体CDN。
+
+IndexedDB继续保存规范主题；HTML仅从可失败的localStorage缓存读取`from-zero-to-gpt:theme`作为首帧绘制提示。React读取学习数据后同步实际主题、浏览器theme-color和缓存；这份缓存不是第二份学习状态，也不改变导入／导出格式。字体交付失败时系统字体仍可显示课程。字体来源、更新规则和测试边界见[TYPOGRAPHY](TYPOGRAPHY.md)。
