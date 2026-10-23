@@ -78,14 +78,15 @@ test('vector and dot-product sliders use real arithmetic',async({page})=>{
   await page.getByRole('slider',{name:'b 的 x 分量',exact:true}).fill('-2');
   await expect(page.getByTestId('lab-result')).toHaveText('-4');
 });
-test('all83 Python reference implementations actually run in browser worker and pass tests',async({page})=>{
-  test.setTimeout(300000);
-  for(const lesson of lessons){
+// Each chapter gets its own page/Worker, timeout and trace. A growing curriculum
+// must not share one aggregate wall-clock limit across all Python executions.
+test.describe('Python reference implementations in actual browser Workers',()=>{
+  for(const lesson of lessons)test(`${lesson.id}: ${lesson.title}`,async({page})=>{
     await page.goto(`/#/lesson/${lesson.id}`);await page.getByRole('tab',{name:'代码实现'}).click();
     await page.getByLabel('Python 代码编辑器').fill(lesson.reference);
     await page.getByRole('button',{name:'运行并测试'}).click();
     await expect(page.locator('.code-output')).toContainText('本章单元测试通过',{timeout:30000});
-  }
+  });
 });
 test('Python failure is real; runaway code can be stopped without locking UI; editor persists',async({page})=>{
   await page.goto('/#/lesson/functions');await page.getByRole('tab',{name:'代码实现'}).click();
