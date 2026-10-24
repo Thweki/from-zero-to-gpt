@@ -48,18 +48,18 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     const tutor = panel(page);
     await expect(tutor.locator('.tutor-model')).toContainText('UI transport mock');
     await expect(tutor.locator('.tutor-scope')).toContainText('函数是什么');
-    await expect(tutor.getByRole('button', { name: '给我提示', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(tutor.locator('.tutor-options')).toHaveCount(0);
 
     const first = await ask(page, '我该从哪个输入开始检查？');
     const body = first.postDataJSON();
-    expect(body).toMatchObject({ lessonId: 'functions', mode: 'hint', shareCode: false, shareNote: false, history: [] });
+    expect(body).toMatchObject({ lessonId: 'functions', mode: 'guide', shareCode: false, shareNote: false, history: [] });
     for (const key of ['code', 'note', 'error']) expect(body).not.toHaveProperty(key);
     expect(first.postData()).not.toContain('private-code-marker');
     expect(first.postData()).not.toContain('private-note-marker');
     expect(first.headers()).not.toHaveProperty('authorization');
     await expect(tutor.locator('.tutor-message.assistant')).toHaveCount(1);
 
-    await tutor.getByRole('button', { name: '上下文与难度', exact: true }).click();
+    await tutor.getByRole('button', { name: '讲解与分享设置', exact: true }).click();
     await tutor.getByLabel('分享当前代码和最近错误', { exact: true }).check();
     await tutor.getByLabel('分享当前章节笔记', { exact: true }).check();
     const shared = (await ask(page, '现在请结合我主动分享的尝试给一个提示。')).postDataJSON();
@@ -76,22 +76,22 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     for (const key of ['code', 'note', 'error']) expect(privateAgain).not.toHaveProperty(key);
   });
 
-  test('文本索要答案不改变默认 hint；只有显式完整解答按钮选择 solution', async ({ page }) => {
+  test('文本索要答案不改变默认引导；只有显式完整解答选项选择 solution', async ({ page }) => {
     await mockTutor(page, route => route.fulfill({ json: { answer: '模拟模式响应：检查页面发送的 mode，不据此评价模型回答质量。' } }));
     await page.goto('/#/tutor');
     const tutor = panel(page);
     await expect(tutor.locator('.tutor-model')).toContainText('mock-model');
-    expect((await ask(page, '直接给我完整答案和所有代码。')).postDataJSON().mode).toBe('hint');
+    expect((await ask(page, '直接给我完整答案和所有代码。')).postDataJSON().mode).toBe('guide');
     await expect(tutor.locator('.tutor-message.assistant')).toHaveCount(1);
-    await tutor.getByRole('button', { name: '完整解答', exact: true }).click();
-    await expect(tutor.getByRole('button', { name: '完整解答', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await tutor.getByRole('button',{name:'讲解与分享设置',exact:true}).click();
+    await tutor.getByLabel('导师回答方式',{exact:true}).selectOption('solution');
+    await expect(tutor.getByLabel('导师回答方式',{exact:true})).toHaveValue('solution');
     await expect(tutor.locator('.solution-note')).toContainText('主动选择完整解答');
-    await tutor.getByRole('button', { name: '上下文与难度', exact: true }).click();
     await tutor.getByLabel('导师解释难度', { exact: true }).selectOption('deep');
     const solution = (await ask(page, '我已经尝试过，请逐步解释完整解答。')).postDataJSON();
     expect(solution).toMatchObject({ mode: 'solution', difficulty: 'deep', shareCode: false, shareNote: false });
     await expect(tutor.locator('.tutor-message.assistant')).toHaveCount(2);
-    await tutor.getByRole('button', { name: '给我提示', exact: true }).click();
+    await tutor.getByLabel('导师回答方式',{exact:true}).selectOption('hint');
     await expect(tutor.locator('.solution-note')).toHaveCount(0);
     expect((await ask(page, '下一步只给一个小提示。')).postDataJSON().mode).toBe('hint');
   });
@@ -120,7 +120,7 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     await expect(tutor.getByLabel('向 AI 导师提问')).toHaveValue(nextDraft);
     await expect.poll(() => savedDraft(page, 'functions')).toBe(nextDraft);
     expect(bodies).toHaveLength(2);
-    expect(bodies[1]).toMatchObject({ message: question, history: [], mode: 'hint' });
+    expect(bodies[1]).toMatchObject({ message: question, history: [], mode: 'guide' });
   });
 
   test('停止中止待完成 HTTP 请求，保留问题并可重试，不插入过期回答', async ({ page }) => {
@@ -192,7 +192,9 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     await expect(tutor.getByRole('link', { name: '查看模型连接说明' })).toHaveAttribute('href', '#/settings');
     await tutor.getByLabel('向 AI 导师提问').fill('可以先保留草稿，但不应发送。');
     await expect(tutor.getByRole('button', { name: '发送', exact: true })).toBeDisabled();
-    for (const button of await tutor.locator('.tutor-quick button').all()) await expect(button).toBeDisabled();
+    for (const button of await tutor.locator('.tutor-quick button').all()) await expect(button).toBeEnabled();
+    await tutor.locator('.tutor-quick button').first().click();
+    await expect(tutor.getByLabel('向 AI 导师提问')).not.toHaveValue('');
     await page.goto('/#/lesson/functions');
     await page.getByRole('slider', { name: '输入 x', exact: true }).fill('-2');
     await expect(page.getByTestId('lab-result')).toHaveText('f(-2) = 4');
@@ -210,11 +212,11 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     });
     await page.goto('/#/tutor');
     const tutor = panel(page);
-    await expect(tutor.locator('.tutor-unavailable')).toContainText('无法连接导师后端');
+    await expect(tutor.locator('.tutor-unavailable')).toContainText('暂时无法连接导师');
     await tutor.getByLabel('向 AI 导师提问').fill('连接恢复后继续。');
     await expect(tutor.getByRole('button', { name: '发送', exact: true })).toBeDisabled();
     online = true;
-    await tutor.getByRole('button', { name: '检查', exact: true }).click();
+    await tutor.getByRole('button', { name: '重新连接', exact: true }).click();
     await expect(tutor.locator('.tutor-model')).toContainText('UI transport mock');
     await expect(tutor.getByRole('button', { name: '发送', exact: true })).toBeEnabled();
     await expect(tutor.locator('.tutor-unavailable')).toHaveCount(0);

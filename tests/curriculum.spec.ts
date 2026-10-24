@@ -33,9 +33,7 @@ test.describe('全部 83 个章节页面与四种解释模式', () => {
       await page.goto(`/#/lesson/${node.id}`);
       await expect(page.locator('.lesson-page').getByRole('heading', { name: `${node.title}`, exact: true })).toBeVisible();
       await expect(page.getByRole('tablist', { name: '解释模式' }).getByRole('tab')).toHaveCount(4);
-      await expect(page.locator('.exercise-section')).toContainText(lesson.exercise);
       await expect(page.locator('.quiz-options input[type="radio"]')).toHaveCount(4);
-      await expect(page.locator('.references a')).toHaveCount(lesson.references.length);
       const lab = page.getByRole('region', { name: '交互式数学实验', exact: true });
       await expect(lab).toBeVisible();
       await expect(lab.locator('.lab-loading')).toHaveCount(0);
@@ -45,10 +43,18 @@ test.describe('全部 83 个章节页面与四种解释模式', () => {
         await tab.click();
         await expect(tab).toHaveAttribute('aria-selected', 'true');
         const content = page.getByRole('tabpanel');
-        await expect(content.locator('.problem-callout')).toContainText(lesson.problem);
+        await expect(content).toHaveAttribute('data-mode',mode);
+        await expect(content.locator('#lesson-experiment')).toHaveCount(mode==='intuition'?1:0);
+        await expect(content.locator('.quiz-card')).toHaveCount(mode==='intuition'?1:0);
+        await expect(content.locator('.code-lab')).toHaveCount(mode==='code'?1:0);
+        await expect(content.locator('.references a')).toHaveCount(mode==='deep'?lesson.references.length:0);
+        await expect(content.locator('.exercise-section')).toHaveCount(mode==='code'?1:0);
+        if(mode==='intuition')await expect(content.locator('.problem-callout')).toContainText(lesson.problem);
+        else await expect(content.locator('.problem-callout')).toHaveCount(0);
         if (mode === 'code') {
           await expect(page.getByLabel('Python 代码编辑器', { exact: true })).toHaveValue(lesson.starter);
-          await expect(content.locator('.code-description')).toContainText(lesson.codeExplanation);
+          await expect(content.getByText(lesson.codeExplanation,{exact:true})).toHaveCount(1);
+          await expect(content.locator('.exercise-section')).toContainText(lesson.exercise);
           await content.getByRole('button', { name: '对照参考', exact: true }).click();
           await expect(content.locator('.reference-code pre')).toContainText(lesson.reference);
           await content.getByText('查看实际运行的验收测试', { exact: true }).click();
@@ -59,7 +65,7 @@ test.describe('全部 83 个章节页面与四种解释模式', () => {
           for (let i = 0; i < sections.length; i++) {
             await expect(content.locator('.prose-section').nth(i)).toContainText(sections[i].paragraphs[0]);
           }
-          await expect(content.locator('.katex')).not.toHaveCount(0);
+          if(mode==='math')await expect(content.locator('.katex')).not.toHaveCount(0);
           await expect(content.locator('.katex-error')).toHaveCount(0);
         }
         await noPageOverflow(page, `${node.id}/${mode}`);

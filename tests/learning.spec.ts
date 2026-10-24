@@ -18,7 +18,10 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
   await page.getByRole('button',{name:'标记为已掌握',exact:true}).click();
   await page.reload();
   await expect(page.getByRole('tab',{name:'数学推导'})).toHaveAttribute('aria-selected','true');
+  await expect(page.locator('#lesson-experiment')).toHaveCount(0);
+  await page.getByRole('tab',{name:'直觉理解',exact:true}).click();
   await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 5');
+  await page.getByRole('tab',{name:'数学推导',exact:true}).click();
   await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('斜率描述每单位输入的输出变化。');
   await expect(page.getByRole('button',{name:'改为学习中'})).toBeVisible();
   await page.getByRole('button',{name:'保存思路，今天到这里'}).click();
@@ -28,6 +31,8 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
   await expect(page).toHaveURL(/#\/map$/);
   await page.reload();await expect(page.locator('.resume-card')).toContainText('为什么平移直线不会改变斜率？');
   await page.getByRole('button',{name:'恢复学习'}).click();
+  await expect(page.getByRole('tab',{name:'数学推导',exact:true})).toHaveAttribute('aria-selected','true');
+  await page.getByRole('tab',{name:'直觉理解',exact:true}).click();
   await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 5');
   await page.getByRole('button',{name:'切换深色外观'}).click();await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');

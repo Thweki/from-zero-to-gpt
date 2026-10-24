@@ -156,3 +156,8 @@ IndexedDB继续保存规范主题；HTML仅从可失败的localStorage缓存读�
 ## 0.3.5 专注阅读
 
 `focus.css` 位于排版样式之后，统一单栏、按需面板和低饱和强调。两侧面板关闭时使用 `inert`，避免隐藏链接进入键盘顺序；打开时移入焦点，明确关闭按钮和 Escape 可返回入口。面板展开是会话界面状态，不修改学习数据结构，重载默认回到干净的阅读页。原生 details 保留章节跳转、学习目标、误区和参考资料；跳转先关闭菜单再聚焦实际目标，滚动留白为80px。四种解释模式、实验和自测保持直接可用。
+
+
+## 0.3.6 模式与导师
+
+`components/LessonReader.tsx` 统一四种视图、定位与共享进度，每次只挂载当前模式的功能，避免四份重复实验与自测。`TutorPanel` 接收同一LessonProgress的readingMode，默认guide；服务端严格验证并从教材生成currentMaterial。建议问题仅更新本章草稿，发送仍需明确操作；代码／笔记遵守原显式分享约定，访问码只存组件内存。侧栏关闭时不挂载侧栏TutorPanel，不因阅读课程而查询模型连接。具体交互契约见[LESSON_MODES_AND_TUTOR](LESSON_MODES_AND_TUTOR.md)。

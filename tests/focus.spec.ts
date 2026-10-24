@@ -7,7 +7,7 @@ test('default lesson is a single reading column; requested tools never change th
  await expect(page.locator('.sidebar')).toHaveAttribute('inert','');
  await expect(page.locator('.context-panel')).not.toBeVisible();
  await expect(page.getByRole('button',{name:'跳到交互实验'})).not.toBeVisible();
- await expect(page.getByText('先修知识、延伸阅读与本地项目',{exact:true})).toBeVisible();
+ await expect(page.locator('.related-section')).toHaveCount(0);
  await expect(page.locator('.references a').first()).not.toBeVisible();
  await page.getByRole('button',{name:'打开导航',exact:true}).click();
  await expect(page.getByRole('button',{name:'收起导航'})).toBeFocused();
@@ -20,10 +20,10 @@ test('default lesson is a single reading column; requested tools never change th
  await page.getByRole('slider',{name:'斜率 k',exact:true}).fill('2');
  await openNotebook(page);await page.getByLabel('当前章节随手笔记').fill('先专注观察斜率。');
  await page.keyboard.press('Escape');
- await expect(page.getByRole('button',{name:'切换学习工作台'})).toBeFocused();
+ await expect(page.getByRole('button',{name:'问导师'})).toBeFocused();
  await openNotebook(page);
- await page.getByRole('button',{name:'收起学习工作台'}).click();
- await expect(page.getByRole('button',{name:'切换学习工作台'})).toBeFocused();
+ await page.getByRole('button',{name:'关闭学习助手'}).click();
+ await expect(page.getByRole('button',{name:'问导师'})).toBeFocused();
  await page.getByText('本章定位',{exact:true}).click();
  await page.keyboard.press('Escape');
  await expect(page.getByText('本章定位',{exact:true})).toBeFocused();
