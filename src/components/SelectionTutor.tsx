@@ -69,9 +69,9 @@ async function rasterPreview(graphic:Graphic):Promise<string|undefined> {
 
 export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson;resetKey:string;values:Record<string,number>;onPick:(selection:TutorSelection)=>void}) {
   const [pick,setPick] = useState<Pick|null>(null), [busy,setBusy] = useState(false);
-  const popup = useRef<HTMLDivElement>(null), generation = useRef(0), transferring=useRef(false);
+  const popup = useRef<HTMLDivElement>(null), generation = useRef(0), transferring=useRef(false), dismissedSelection=useRef<string|null>(null);
   useEffect(() => {
-    generation.current++;transferring.current=false;setPick(null);setBusy(false);
+    generation.current++;transferring.current=false;dismissedSelection.current=null;setPick(null);setBusy(false);
     const root = document.getElementById('main-content');
     if (!root) return;
     let timer:ReturnType<typeof setTimeout>;
@@ -81,9 +81,11 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
       const element = node instanceof Element ? node : node?.parentElement;
       return Boolean(element && root.contains(element) && !element.closest(excluded));
     };
-    const read = (point?:{x:number;y:number}) => {
+    const read = (point?:{x:number;y:number},explicit=false) => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed || !selection.rangeCount || !eligible(selection.anchorNode) || !eligible(selection.focusNode)) {setPick(null);return false;}
+      if(!explicit&&dismissedSelection.current===selection.toString())return false;
+      dismissedSelection.current=null;
       const range = selection.getRangeAt(0);
       if (range.cloneContents().querySelector('input,textarea,[contenteditable="true"],.tutor-panel')) {setPick(null);return false;}
       const text = selectedText(range);
@@ -96,7 +98,7 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
     const pointerUp = (event:PointerEvent) => {
       if (popup.current?.contains(event.target as Node)) return;
       clearTimeout(timer);
-      if (read({x:event.clientX,y:event.clientY})) return;
+      if (read({x:event.clientX,y:event.clientY},true)) return;
       const target = event.target instanceof Element ? event.target.closest(graphicSelector) : null;
       if (target && eligible(target) && !target.closest('button,a,[role="button"]')) {rememberScroll();setPick({graphic:target as Graphic,x:event.clientX,y:event.clientY});}
     };
@@ -106,8 +108,8 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
       timer = setTimeout(() => {if (!window.getSelection()?.isCollapsed) read();else setPick(current=>current?.graphic?current:null);},180);
     };
     const keyDown = (event:KeyboardEvent) => {
-      if (event.key === 'Escape') {generation.current++;transferring.current=false;setPick(null);setBusy(false);return;}
-      if (event.key === 'Enter' && event.altKey && read()) {
+      if (event.key === 'Escape') {clearTimeout(timer);dismissedSelection.current=window.getSelection()?.toString()||'';generation.current++;transferring.current=false;setPick(null);setBusy(false);return;}
+      if (event.key === 'Enter' && event.altKey && read(undefined,true)) {
         event.preventDefault();requestAnimationFrame(()=>popup.current?.querySelector('button')?.focus());return;
       }
       if (event.key === 'Enter' && event.target instanceof Element && event.target.matches(graphicSelector)) {
@@ -122,6 +124,7 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
       // Focusing a graph can queue a scroll event after pointerup even though
       // the viewport already moved before the popup was positioned.
       if(event.type==='scroll'&&event.target===document&&window.scrollX===scrollX&&window.scrollY===scrollY)return;
+      dismissedSelection.current=window.getSelection()?.toString()||'';
       generation.current++;setPick(null);setBusy(false);
     };
     const makeFocusable = () => root.querySelectorAll(graphicSelector).forEach(image => {if (!image.closest(excluded) && !image.hasAttribute('tabindex')) {image.setAttribute('tabindex','0');image.setAttribute('aria-description','点击或按 Enter，选择图片后向 AI 导师提问');}});
@@ -160,6 +163,6 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
   };
   return createPortal(<div ref={popup} className="tutor-selection-popup" role="toolbar" aria-label="选中内容操作" aria-keyshortcuts="Alt+Enter" style={{left,top}} onPointerDown={event=>event.preventDefault()}>
     <button type="button" disabled={busy} aria-label="将选中内容带到 AI 导师" onClick={()=>void transfer()}>{busy?<LoaderCircle size={15}/>:<Sparkles size={15}/>}<span>{busy?'正在带入…':'问导师'}</span></button>
-    <button type="button" className="selection-dismiss" aria-label="取消选中内容操作" onClick={()=>{generation.current++;transferring.current=false;setPick(null);setBusy(false);}}><X size={15}/></button>
+    <button type="button" className="selection-dismiss" aria-label="取消选中内容操作" onClick={()=>{dismissedSelection.current=window.getSelection()?.toString()||'';generation.current++;transferring.current=false;setPick(null);setBusy(false);}}><X size={15}/></button>
   </div>,document.fullscreenElement || document.body);
 }

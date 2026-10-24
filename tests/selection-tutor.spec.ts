@@ -82,6 +82,13 @@ test('vision-enabled operator config transmits only the explicitly selected rast
 test('toolbar cancels on Escape, outside click, scroll, or a mode switch and ignores editor selections',async({page})=>{
  await setup(page);await selectText(page);await expect(ask(page)).toBeVisible();
  await page.keyboard.press('Escape');await expect(ask(page)).toHaveCount(0);
+ // The browser may deliver selectionchange after Escape. A cancelled reference
+ // must stay dismissed after the debounced native event, until a new selection.
+ await page.evaluate(()=>document.dispatchEvent(new Event('selectionchange')));
+ await page.waitForTimeout(260);await expect(ask(page)).toHaveCount(0);
+ await selectText(page);await page.getByRole('button',{name:'取消选中内容操作'}).click();
+ await page.evaluate(()=>document.dispatchEvent(new Event('selectionchange')));
+ await page.waitForTimeout(260);await expect(ask(page)).toHaveCount(0);
  await selectText(page);await page.locator('.lesson-page h1').click();await expect(ask(page)).toHaveCount(0);
  await selectText(page);await page.mouse.wheel(0,100);await expect(ask(page)).toHaveCount(0);
  await selectText(page);await page.getByRole('tab',{name:'代码实现',exact:true}).click();await expect(ask(page)).toHaveCount(0);
