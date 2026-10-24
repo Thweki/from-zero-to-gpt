@@ -161,3 +161,7 @@ IndexedDB继续保存规范主题；HTML仅从可失败的localStorage缓存读�
 ## 0.3.6 模式与导师
 
 `components/LessonReader.tsx` 统一四种视图、定位与共享进度，每次只挂载当前模式的功能，避免四份重复实验与自测。`TutorPanel` 接收同一LessonProgress的readingMode，默认guide；服务端严格验证并从教材生成currentMaterial。建议问题仅更新本章草稿，发送仍需明确操作；代码／笔记遵守原显式分享约定，访问码只存组件内存。侧栏关闭时不挂载侧栏TutorPanel，不因阅读课程而查询模型连接。具体交互契约见[LESSON_MODES_AND_TUTOR](LESSON_MODES_AND_TUTOR.md)。
+
+## 选区与导师引用（0.3.7）
+
+`SelectionTutor` 只监听主要内容的显式选区／图片操作，排除编辑器、表单、私密笔记和导师对话；浮窗通过Portal在body或当前全屏元素内呈现。`TutorSelection` 将原文／说明和有限大小的本地栅格保存在章节草稿，原version 1兼容。正文引用独立于问题和代码／笔记分享。服务端共享严格校验，不接收图片URL或SVG，能力仅由 `TUTOR_SUPPORTS_IMAGES` 决定；当前默认文字模式不传像素并明确限制，视觉配置才支持单张image_url，历史仅传文字上下文。详见 [SELECTION_TUTOR](SELECTION_TUTOR.md)。

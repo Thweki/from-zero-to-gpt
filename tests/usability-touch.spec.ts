@@ -26,3 +26,20 @@ test('Chromium触控模拟：导航、主题、章节定位与暂停恢复',asyn
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(await page.evaluate(()=>innerWidth));
   await page.screenshot({path:'artifacts/usability-review/chromium-touch.png',fullPage:true});
 });
+
+test('Chromium触控模拟：点选实验图带入导师，不自动请求模型',async({page})=>{
+ let requests=0;
+ await page.route('**/api/tutor/status',route=>route.fulfill({json:{configured:true,provider:'touch fixture',model:'fixture',imagesSupported:false}}));
+ await page.route('**/api/tutor/chat',route=>{requests++;return route.fulfill({json:{answer:'模拟回答'}});});
+ await page.goto('/#/lesson/functions');
+ expect(await page.evaluate(()=>navigator.maxTouchPoints)).toBeGreaterThan(0);
+ await page.getByRole('img',{name:'函数图像，随参数实时更新'}).tap({position:{x:80,y:70}});
+ await page.getByRole('button',{name:'将选中内容带到 AI 导师',exact:true}).tap();
+ await expect(page.locator('.context-panel').getByLabel('向 AI 导师提问')).toBeFocused();
+ await expect(page.locator('.tutor-composer .tutor-selection-card img')).toBeVisible();
+ await expect(page.locator('.tutor-composer .tutor-selection-card')).toContainText('预览不上传');
+ expect(requests).toBe(0);
+ const send=await page.locator('.context-panel').getByRole('button',{name:'发送',exact:true}).boundingBox();
+ expect(send!.y+send!.height).toBeLessThanOrEqual(await page.evaluate(()=>innerHeight));
+ await page.screenshot({path:'artifacts/selection-review/touch-image.png'});
+});

@@ -2,6 +2,7 @@ import { openDB } from 'idb';
 import type { LearningState, LessonId, LessonProgress } from './types';
 export { lessonIds } from './data/lesson-ids';
 import { lessonIds } from './data/lesson-ids';
+import {validateTutorSelection} from './tutor-selection';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
 export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
 const database = () => openDB('from-zero-to-gpt', 1, {upgrade(db) {db.createObjectStore('learning');}});
@@ -28,7 +29,8 @@ export function validateImport(value: unknown): LearningState {
     if (p.quizPassed !== undefined) {if (typeof p.quizPassed !== 'boolean') throw new Error('自测状态无效');progress.quizPassed=p.quizPassed;}
     if (p.lastRun !== undefined) progress.lastRun=checkedString(p.lastRun);
     if(p.tutorDraft!==undefined)progress.tutorDraft=checkedString(p.tutorDraft,4000);
-    if(p.tutorMessages!==undefined){if(!Array.isArray(p.tutorMessages)||p.tutorMessages.length>80)throw new Error('导师记录格式无效');progress.tutorMessages=p.tutorMessages.map(m=>{if(!isObject(m)||!['user','assistant'].includes(m.role as string)||typeof m.createdAt!=='string'||!Number.isFinite(Date.parse(m.createdAt)))throw new Error('导师记录格式无效');return {role:m.role as 'user'|'assistant',content:checkedString(m.content,24000),createdAt:m.createdAt};});}
+    if(p.tutorSelection!==undefined)progress.tutorSelection=validateTutorSelection(p.tutorSelection);
+    if(p.tutorMessages!==undefined){if(!Array.isArray(p.tutorMessages)||p.tutorMessages.length>80)throw new Error('导师记录格式无效');progress.tutorMessages=p.tutorMessages.map(m=>{if(!isObject(m)||!['user','assistant'].includes(m.role as string)||typeof m.createdAt!=='string'||!Number.isFinite(Date.parse(m.createdAt)))throw new Error('导师记录格式无效');return {role:m.role as 'user'|'assistant',content:checkedString(m.content,24000),createdAt:m.createdAt,...(m.role==='user'&&m.selection!==undefined?{selection:validateTutorSelection(m.selection)}:{})};});}
     if (p.labValues !== undefined) {if (!isObject(p.labValues)||Object.keys(p.labValues).length>256) throw new Error('实验参数无效'); progress.labValues = {}; for (const [k,v] of Object.entries(p.labValues)) {if (!isParameter(k) || typeof v !== 'number' || !Number.isFinite(v) || Math.abs(v)>(['x','k','b','ax','ay','bx','by','kind'].includes(k)?100:1e12)) throw new Error('实验参数无效'); progress.labValues[k]=v;}}
     result.progress[key as LessonId]=progress;
   }

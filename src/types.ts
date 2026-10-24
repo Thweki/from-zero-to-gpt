@@ -1,4 +1,5 @@
 import { lessonIds } from './data/lesson-ids';
+import type {TutorSelection} from './tutor-selection';
 export type LessonId = typeof lessonIds[number];
 export type ViewMode = 'intuition' | 'math' | 'code' | 'deep';
 export type LessonStatus = 'new' | 'learning' | 'mastered';
@@ -40,6 +41,7 @@ export interface LessonProgress {
   lastRun?: string;
   tutorMessages?: TutorMessage[];
   tutorDraft?: string;
+  tutorSelection?: TutorSelection;
 }
 export interface Checkpoint {
   lessonId: LessonId;
@@ -58,5 +60,5 @@ export interface LearningState {
   updatedAt: string;
 }
 
-export interface TutorMessage { role: 'user' | 'assistant'; content: string; createdAt: string; }
+export interface TutorMessage { role: 'user' | 'assistant'; content: string; createdAt: string; selection?: TutorSelection; }
 export interface ExtendedLabProps { lesson: Lesson; values: Record<string,number>; onChange: (values:Record<string,number>)=>void; }

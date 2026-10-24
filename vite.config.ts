@@ -7,7 +7,7 @@ export default defineConfig(({mode})=>{
       if(!req.url?.startsWith('/api/tutor/'))return next();
       try{
         const chunks:Buffer[]=[];let size=0;
-        for await(const chunk of req){size+=chunk.length;if(size>64000){res.writeHead(413,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'请求内容过长。'}));return;}chunks.push(chunk);}
+        for await(const chunk of req){size+=chunk.length;if(size>(env.TUTOR_SUPPORTS_IMAGES==='1'?320000:64000)){res.writeHead(413,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'请求内容过长。'}));return;}chunks.push(chunk);}
         const controller=new AbortController();res.on('close',()=>{if(!res.writableEnded)controller.abort();});
         const {handleTutorRequest}=await server.ssrLoadModule('/server/tutor.ts');
         const request=new Request(`http://${req.headers.host}${req.url}`,{method:req.method,headers:req.headers as Record<string,string>,body:req.method==='POST'?Buffer.concat(chunks):undefined,signal:controller.signal});
