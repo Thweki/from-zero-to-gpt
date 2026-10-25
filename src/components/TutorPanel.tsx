@@ -4,10 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import type {Lesson,TutorMessage,ViewMode} from '../types';
+import {useTutorConnection} from '../tutor-connection';
 import {selectionSummary,type TutorSelection} from '../tutor-selection';
 import './SelectionTutor.css';
 import './TutorPanel.css';
-type Status={configured:boolean;provider:string;model:string;baseURL:string;accessCodeRequired?:boolean;imagesSupported?:boolean;error?:string};
 const modeOptions=[{id:'guide',label:'跟着问题讲解'},{id:'hint',label:'只给一个提示'},{id:'explain',label:'换个方式解释'},{id:'review',label:'复习先修知识'},{id:'solution',label:'完整解答（我已尝试）'}] as const;
 type Mode=typeof modeOptions[number]['id'];
 const readingLabels={intuition:'直觉理解',math:'数学推导',code:'代码实现',deep:'深入研究'};
@@ -28,13 +28,13 @@ function retainRecentImages(messages:TutorMessage[]){
   }).reverse();
 }
 export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='',draft='',onDraft,compact=false,readingMode='intuition',selection,onSelection}:Props){
-  const [status,setStatus]=useState<Status|null>(null),[input,setInput]=useState(draft),[mode,setMode]=useState<Mode>('guide');
+  const {status,checking,error:connectionError,refresh}=useTutorConnection();
+  const [input,setInput]=useState(draft),[mode,setMode]=useState<Mode>('guide');
   const [difficulty,setDifficulty]=useState('beginner'),[shareCode,setShareCode]=useState(false),[shareNote,setShareNote]=useState(false);
   const [pending,setPending]=useState(false),[error,setError]=useState(''),[accessCode,setAccessCode]=useState(''),[options,setOptions]=useState(false);
   const controller=useRef<AbortController|null>(null),bottom=useRef<HTMLDivElement>(null),composer=useRef<HTMLTextAreaElement>(null),current=useRef(messages);
   current.current=messages;
-  const refresh=()=>{fetch('/api/tutor/status').then(async response=>{if(!response.ok)throw new Error();return response.json();}).then(setStatus).catch(()=>setStatus({configured:false,provider:'',model:'',baseURL:'',error:'暂时无法连接导师。可以先保留问题，再重新连接。'}));};
-  useEffect(()=>{refresh();return()=>controller.current?.abort();},[]);
+  useEffect(()=>()=>controller.current?.abort(),[]);
   useEffect(()=>{setInput(draft);},[draft]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});},[messages.length,pending]);
   const editDraft=(text:string)=>{setInput(text);onDraft?.(text);};
@@ -77,8 +77,9 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
   ];
   const lastUser=messages.at(-1)?.role==='user';
   return <section className={`tutor-panel ${compact?'compact':''}`} aria-label="AI 导师对话">
-    <details className={`tutor-model ${status?.configured?'online':''}`}><summary>{status?.configured?'已连接 · 查看模型':'连接状态'}</summary><span>{status?.configured?`${status.provider} · ${status.model}`:'导师连接未就绪'}</span><button className="text-button" onClick={refresh}>检查</button></details>
-    {!status?.configured&&<div className="tutor-unavailable"><WifiOff size={17}/><p>{status?.error||'服务端尚未配置模型密钥。教材和数学实验仍可照常使用。'}</p><div className="button-row"><button className="text-button" onClick={refresh}>重新连接</button><a href="#/settings">查看模型连接说明<ArrowUpRight size={12}/></a></div></div>}
+    <details className={`tutor-model ${status?.configured?'online':''}`}><summary>{checking?'正在检测连接':status?.configured?'服务端已配置 · 查看模型':'连接未就绪'}</summary><span>{status?.configured?`${status.provider} · ${status.model}`:checking?'正在读取服务端配置…':connectionError}</span><p>此状态只确认服务端配置；模型能否回答以实际问答结果为准。</p><button className="text-button" disabled={checking} onClick={refresh}>重新检测</button></details>
+    {checking&&<p className="tutor-checking" role="status">正在检测连接…教材和提问草稿可继续使用。</p>}
+    {!checking&&!status?.configured&&<div className="tutor-unavailable"><WifiOff size={17}/><p>{connectionError}</p><div className="button-row"><button className="text-button" onClick={refresh}>重新连接</button><a href="#/settings">查看模型连接说明<ArrowUpRight size={12}/></a></div></div>}
     <div className="tutor-scope"><strong>{lesson.title}</strong><span>正在看：{readingLabels[readingMode]}</span><p>已带上教材；代码和笔记由你选择附上。</p></div>
     <div className="tutor-messages" role="log" aria-label="导师对话记录" aria-live="polite">
       {messages.length===0?<div className="tutor-empty"><h3>哪一步没想通？</h3><p>直接提问就好。也可以先选一个问题，再按你的想法修改。</p><div className="tutor-quick">{suggestions.map(suggestion=><button disabled={pending} key={suggestion.label} onClick={()=>prepareQuestion(suggestion.question)}>{suggestion.label}<ArrowUpRight size={12}/></button>)}</div></div>:messages.map((message,i)=><article className={`tutor-message ${message.role}`} key={`${message.createdAt}-${i}`}><span className="tutor-speaker">{message.role==='user'?'你':'AI 导师'}</span>{message.selection&&<SelectionCard selection={message.selection}/>}<div className="tutor-markdown"><ReactMarkdown disallowedElements={['img']} remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{message.content}</ReactMarkdown></div></article>)}
@@ -108,7 +109,6 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
   </section>;
 }
 export function TutorConnection(){
-  const [status,setStatus]=useState<Status|null>(null);
-  useEffect(()=>{fetch('/api/tutor/status').then(r=>r.ok?r.json():Promise.reject()).then(setStatus).catch(()=>setStatus({configured:false,provider:'',model:'',baseURL:'',error:'当前部署尚未提供导师后端。'}));},[]);
-  return <><div className="section-title"><h2>AI 导师连接</h2><span className={`badge ${status?.configured?'':'neutral'}`}>{status?.configured?'已配置服务端连接':'未连接'}</span></div>{status?.configured?<dl className="tutor-config"><div><dt>提供商</dt><dd>{status.provider}</dd></div><div><dt>模型</dt><dd>{status.model}</dd></div><div><dt>接口</dt><dd>{status.baseURL}</dd></div><div><dt>密钥</dt><dd>仅在服务端 · 浏览器不可读取</dd></div></dl>:<p>{status?.error||'设置服务端环境变量后，刷新即可连接。没有密钥时，全部教材和实验仍可使用。'}</p>}<a className="button secondary compact" href="#/tutor"><Sparkles size={14}/>打开 AI 导师<ArrowUpRight size={14}/></a><details className="tutor-config-help"><summary>更换提供商或自部署模型</summary><p>在服务器或托管平台设置以下变量后重启／重新部署。支持 OpenAI 兼容 Chat Completions；地址和模型由服务端决定，浏览器不能修改上游地址或读取密钥。</p><pre>{`TUTOR_PROVIDER=OpenCode Go\nTUTOR_BASE_URL=https://opencode.ai/inference/go/openai/v1\nTUTOR_MODEL=deepseek-v4.1-flash\nTUTOR_API_KEY=<仅在服务端填写>\n# 公网自部署可加独立访问码：\nTUTOR_ACCESS_TOKEN=<访问码>`}</pre><p>本地可复制 .env.example 为 .env，再使用 npm run dev 或构建后 npm start。自建本地 HTTP 模型还需显式设置 TUTOR_ALLOW_LOCAL_HTTP=1。不要把密钥放在 VITE_ 变量、源码或学习数据中。</p><a href="https://opencode.ai/docs/go/" target="_blank" rel="noreferrer" className="text-button">OpenCode Go 官方接口说明<ArrowUpRight size={12}/></a></details></>;
+  const {status,checking,error,refresh}=useTutorConnection();
+  return <><div className="section-title"><h2>AI 导师连接</h2><span className={`badge ${status?.configured?'':'neutral'}`}>{checking?'正在检测连接':status?.configured?'服务端已配置':'连接未就绪'}</span></div>{status?.configured?<dl className="tutor-config"><div><dt>提供商</dt><dd>{status.provider}</dd></div><div><dt>模型</dt><dd>{status.model}</dd></div><div><dt>接口</dt><dd>{status.baseURL}</dd></div><div><dt>密钥</dt><dd>仅在服务端 · 浏览器不可读取</dd></div></dl>:<p>{checking?'正在读取服务端配置…':error}</p>}<p className="connection-scope-note">配置状态不代表已完成实际问答检测；教材、实验和草稿不依赖导师。</p><button className="text-button" disabled={checking} onClick={refresh}>重新检测连接</button><a className="button secondary compact" href="#/tutor"><Sparkles size={14}/>打开 AI 导师<ArrowUpRight size={14}/></a><details className="tutor-config-help"><summary>更换提供商或自部署模型</summary><p>在服务器或托管平台设置以下变量后重启／重新部署。支持 OpenAI 兼容 Chat Completions；地址和模型由服务端决定，浏览器不能修改上游地址或读取密钥。</p><pre>{`TUTOR_PROVIDER=OpenCode Go\nTUTOR_BASE_URL=https://opencode.ai/inference/go/openai/v1\nTUTOR_MODEL=deepseek-v4.1-flash\nTUTOR_API_KEY=<仅在服务端填写>\n# 公网自部署可加独立访问码：\nTUTOR_ACCESS_TOKEN=<访问码>`}</pre><p>本地可复制 .env.example 为 .env，再使用 npm run dev 或构建后 npm start。自建本地 HTTP 模型还需显式设置 TUTOR_ALLOW_LOCAL_HTTP=1。不要把密钥放在 VITE_ 变量、源码或学习数据中。</p><a href="https://opencode.ai/docs/go/" target="_blank" rel="noreferrer" className="text-button">OpenCode Go 官方接口说明<ArrowUpRight size={12}/></a></details></>;
 }

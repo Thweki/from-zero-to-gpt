@@ -28,6 +28,10 @@ export function validateImport(value: unknown): LearningState {
     if (p.quizAnswer !== undefined) {if (!Number.isInteger(p.quizAnswer) || Number(p.quizAnswer)<0 || Number(p.quizAnswer)>3) throw new Error('自测数据无效');progress.quizAnswer = p.quizAnswer as number;}
     if (p.quizPassed !== undefined) {if (typeof p.quizPassed !== 'boolean') throw new Error('自测状态无效');progress.quizPassed=p.quizPassed;}
     if (p.lastRun !== undefined) progress.lastRun=checkedString(p.lastRun);
+    for(const field of ['readCompleted','experimented','codePassed'] as const){if(p[field]!==undefined){if(typeof p[field]!=='boolean')throw new Error('学习活动状态无效');progress[field]=p[field];}}
+    if(p.lastVisited!==undefined){if(typeof p.lastVisited!=='string'||!Number.isFinite(Date.parse(p.lastVisited)))throw new Error('章节访问时间无效');progress.lastVisited=p.lastVisited;}
+    if(p.observationDraft!==undefined)progress.observationDraft=checkedString(p.observationDraft,4000);
+    if(p.observationSnapshot!==undefined)progress.observationSnapshot=checkedString(p.observationSnapshot,3000);
     if(p.tutorDraft!==undefined)progress.tutorDraft=checkedString(p.tutorDraft,4000);
     if(p.tutorSelection!==undefined)progress.tutorSelection=validateTutorSelection(p.tutorSelection);
     if(p.tutorMessages!==undefined){if(!Array.isArray(p.tutorMessages)||p.tutorMessages.length>80)throw new Error('导师记录格式无效');progress.tutorMessages=p.tutorMessages.map(m=>{if(!isObject(m)||!['user','assistant'].includes(m.role as string)||typeof m.createdAt!=='string'||!Number.isFinite(Date.parse(m.createdAt)))throw new Error('导师记录格式无效');return {role:m.role as 'user'|'assistant',content:checkedString(m.content,24000),createdAt:m.createdAt,...(m.role==='user'&&m.selection!==undefined?{selection:validateTutorSelection(m.selection)}:{})};});}

@@ -42,6 +42,12 @@ export interface LessonProgress {
   tutorMessages?: TutorMessage[];
   tutorDraft?: string;
   tutorSelection?: TutorSelection;
+  readCompleted?: boolean;
+  experimented?: boolean;
+  codePassed?: boolean;
+  lastVisited?: string;
+  observationDraft?: string;
+  observationSnapshot?: string;
 }
 export interface Checkpoint {
   lessonId: LessonId;
@@ -61,4 +67,4 @@ export interface LearningState {
 }
 
 export interface TutorMessage { role: 'user' | 'assistant'; content: string; createdAt: string; selection?: TutorSelection; }
-export interface ExtendedLabProps { lesson: Lesson; values: Record<string,number>; onChange: (values:Record<string,number>)=>void; }
+export interface ExtendedLabProps { lesson: Lesson; values: Record<string,number>; onChange: (values:Record<string,number>)=>void; onObserve?:(origin:HTMLElement)=>void; }

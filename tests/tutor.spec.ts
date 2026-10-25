@@ -176,9 +176,9 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     await panel(page).getByLabel('向 AI 导师提问').fill(otherDraft);
     await expect.poll(() => savedDraft(page, 'linear')).toBe(otherDraft);
     await page.reload();
-    await expect(page.getByLabel('导师关联章节')).toHaveValue('linear');
+    await expect(page.getByLabel('导师关联章节', { exact: true })).toHaveValue('linear');
     await expect(panel(page).getByLabel('向 AI 导师提问')).toHaveValue(otherDraft);
-    await page.getByLabel('导师关联章节').selectOption('functions');
+    await page.getByLabel('导师关联章节', { exact: true }).selectOption('functions');
     await expect(panel(page).getByRole('log')).toContainText(question);
     await expect(panel(page).getByLabel('向 AI 导师提问')).toHaveValue(draft);
   });

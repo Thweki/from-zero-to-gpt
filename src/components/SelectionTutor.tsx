@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom';
 import {LoaderCircle, Sparkles, X} from 'lucide-react';
 import type {Lesson} from '../types';
 import {selectionImageLimit, type TutorSelection} from '../tutor-selection';
+import {experimentContext} from '../experiment-context';
 import './SelectionTutor.css';
 
 type Graphic = HTMLImageElement | SVGSVGElement | HTMLCanvasElement;
@@ -147,10 +148,8 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
       const graphic=pick.graphic;
       const title=compact(graphic.getAttribute('aria-label') || (graphic instanceof HTMLImageElement?graphic.alt:'') || graphic.querySelector('title')?.textContent || '教材图片').slice(0,160);
       const plot=graphic.closest('section');
-      const equation=plot?.querySelector('.plot-equation')?.textContent;
-      const result=plot?.querySelector('.live-result')?.textContent;
       const labels=compact([...graphic.querySelectorAll('text')].map(node=>node.textContent).join(' '));
-      const text=[`章节：${lesson.title}`,`图表：${title}`,equation&&`公式：${compact(equation)}`,result&&`当前结果：${compact(result)}`,labels&&`图内标注：${labels}`,Object.keys(values).length&&`选择时的实验参数：${JSON.stringify(values)}`].filter(Boolean).join('\n').slice(0,3000);
+      const text=[experimentContext(lesson,plot,values),`图表：${title}`,labels&&`图内标注：${labels}`].filter(Boolean).join('\n').slice(0,3000);
       // Snapshot pixels synchronously before yielding, so moving a slider later
       // cannot change the selected experiment's meaning.
       const preview=rasterPreview(graphic);

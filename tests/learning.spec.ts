@@ -15,7 +15,7 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
   await openNotebook(page);await page.getByLabel('当前章节随手笔记').fill('斜率描述每单位输入的输出变化。');
   await closeNotebook(page);await page.getByRole('tab',{name:'数学推导'}).click();
   await expect(page.locator('.katex')).not.toHaveCount(0);
-  await page.getByRole('button',{name:'标记为已掌握',exact:true}).click();
+  await page.getByRole('button',{name:'自评为已掌握',exact:true}).click();
   await page.reload();
   await expect(page.getByRole('tab',{name:'数学推导'})).toHaveAttribute('aria-selected','true');
   await expect(page.locator('#lesson-experiment')).toHaveCount(0);
@@ -23,7 +23,7 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
   await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 5');
   await page.getByRole('tab',{name:'数学推导',exact:true}).click();
   await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('斜率描述每单位输入的输出变化。');
-  await expect(page.getByRole('button',{name:'改为学习中'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'取消掌握自评'})).toBeVisible();
   await page.getByRole('button',{name:'保存思路，今天到这里'}).click();
   await page.getByLabel('现在正在想什么').fill('为什么平移直线不会改变斜率？');
   await page.getByLabel('下次回来先做哪一步').fill('保持 k=2，改变 b，用两个点验证。');

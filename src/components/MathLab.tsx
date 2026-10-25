@@ -4,9 +4,9 @@ import type { Lesson } from '../types';
 import { dot, norm, format } from '../math';
 import {functionPlotScale,axisTicks} from '../math-viewport';
 import {FullscreenButton} from './FullscreenButton';
-type Props={lesson:Lesson; values:Record<string,number>; onChange:(values:Record<string,number>)=>void};
+type Props={lesson:Lesson; values:Record<string,number>; onChange:(values:Record<string,number>)=>void;onObserve?:(origin:HTMLElement)=>void};
 export const labDefaults = {x:2,k:1,b:0,ax:3,ay:2,bx:1,by:3,kind:0};
-export function MathLab({lesson,values,onChange}:Props) {
+export function MathLab({lesson,values,onChange,onObserve}:Props) {
   const ref=useRef<HTMLElement>(null);
   const v={...labDefaults,...values};
   const set=(key:string,value:number)=>onChange({...v,[key]:value});
@@ -29,6 +29,6 @@ export function MathLab({lesson,values,onChange}:Props) {
     <div className="plot-caption"><span className="legend-dot"/>{vectors?lesson.lab==='dot'?'绿色 a · 金色 b · 虚线表示垂直投影':'绿色 a · 金色 b · 灰色 a + b':'移动滑块，观察输入与输出如何一起变化'}<span>坐标系 · 两轴等比例</span></div></div>
     <div className="lab-controls">{vectors?<>{range('ax','a 的 x 分量')}{range('ay','a 的 y 分量')}{range('bx','b 的 x 分量')}{range('by','b 的 y 分量')}</>:<>{lesson.lab==='linear'?<>{range('k','斜率 k',-3,3,.1)}{range('b','截距 b',-4,4,.1)}</>:<label className="select-label">选择一个函数<select aria-label="选择函数" value={v.kind} onChange={e=>set('kind',Number(e.target.value))}><option value={0}>f(x) = x²</option><option value={1}>f(x) = 2x + 1</option><option value={2}>f(x) = |x|</option></select></label>}{range('x','输入 x',-3,3,.1)}</>}
     <div className="live-result"><small>{vectors?lesson.lab==='dot'?'点积 a · b':'向量和 a + b':'函数的输出'}</small><strong data-testid="lab-result">{vectors?lesson.lab==='dot'?format(product):`(${format(v.ax+v.bx)}, ${format(v.ay+v.by)})`:<>f({format(v.x)}) = <em>{format(result)}</em></>}</strong>{vectors&&<span>‖a‖ = {format(norm(a))} · ‖b‖ = {format(norm(b))}</span>}</div></div></div>
-    <div className="lab-task"><span>试一试</span>{lesson.labTask}</div>
+    <div className="lab-task"><div><span>试一试</span>{lesson.labTask}</div>{onObserve&&<button type="button" className="text-button observation-trigger" onClick={event=>onObserve(event.currentTarget)}>记录观察</button>}</div>
   </section>;
 }

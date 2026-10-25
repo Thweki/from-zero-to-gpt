@@ -199,7 +199,7 @@ function Distribution({ values, labels }: { values: number[]; labels: string[] }
   return <div className="modern-distribution" aria-label="归一化概率分布">{values.map((p, i) => <div className="modern-probability" key={labels[i]}><span>{labels[i]}</span><div className="modern-bar-track"><div className="modern-bar-fill" style={{ width: `${100 * p}%` }} /></div><output>{percent(p)}</output></div>)}</div>;
 }
 
-export function ModernLLMLab({ lesson, values, onChange }: ExtendedLabProps) {
+export function ModernLLMLab({ lesson, values, onChange, onObserve }: ExtendedLabProps) {
   const ref = useRef<HTMLElement>(null);
   const v = { ...modernLabDefaults };
   for (const [key, fallback] of Object.entries(v)) if (Number.isFinite(values[key])) v[key] = values[key] ?? fallback;
@@ -297,6 +297,6 @@ export function ModernLLMLab({ lesson, values, onChange }: ExtendedLabProps) {
     <div className="modern-header"><span><FlaskConical size={16} />计算实验 <small>LIVE</small></span><div><button type="button" aria-label="重置现代 LLM 实验参数" onClick={() => onChange({ ...modernLabDefaults })}><RotateCcw size={16} /></button><FullscreenButton target={ref} label="全屏现代 LLM 实验"/></div></div>
     <div className="modern-heading"><h3>{title}</h3><p>{assumption}</p></div>
     <div className="modern-layout"><div className="modern-controls">{controls}</div><div className="modern-results" data-testid="modern-lab-results">{content}</div></div>
-    <div className="modern-task"><strong>试一试</strong><p>{lesson.labTask}</p></div>
+    <div className="modern-task"><strong>试一试</strong><p>{lesson.labTask}</p>{onObserve&&<button type="button" className="text-button observation-trigger" onClick={event=>onObserve(event.currentTarget)}>记录观察</button>}</div>
   </section>;
 }

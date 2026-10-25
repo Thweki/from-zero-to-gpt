@@ -140,7 +140,7 @@ function MatrixView({matrix,label}:{matrix:number[][];label:string}) {
 const loss=(x:number,y:number)=>(x-1)**2+2*(y+1)**2;
 const surface=(x:number,y:number)=>x*x+x*y+2*y*y;
 
-export function AdvancedMathLab({lesson,values,onChange}:ExtendedLabProps) {
+export function AdvancedMathLab({lesson,values,onChange,onObserve}:ExtendedLabProps) {
   const ref=useRef<HTMLElement>(null);
   const v=valuesFor(lesson.id,values);
   const set=(key:string,value:number)=>onChange({...v,[key]:value});
@@ -289,7 +289,7 @@ export function AdvancedMathLab({lesson,values,onChange}:ExtendedLabProps) {
     <div className="am-header"><span><FlaskConical size={16}/>交互实验 <small>LIVE</small></span><div><button type="button" aria-label="重置本章数学实验" onClick={()=>onChange(defaultsFor(lesson.id))}><RotateCcw size={16}/></button><FullscreenButton target={ref} label="全屏数学实验"/></div></div>
     <div className="am-body"><div className="am-visual">{visual}<p className="am-caption">{caption}</p></div><div className="am-controls">{controls}</div></div>
     <div className="am-results" aria-live="polite" data-testid="lab-result">{result}</div>
-    <div className="am-task"><strong>试一试</strong><p>{lesson.labTask}</p></div>
+    <div className="am-task"><strong>试一试</strong><p>{lesson.labTask}</p>{onObserve&&<button type="button" className="text-button observation-trigger" onClick={event=>onObserve(event.currentTarget)}>记录观察</button>}</div>
   </section>;
 }
 

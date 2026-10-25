@@ -43,3 +43,18 @@ test('Chromium触控模拟：点选实验图带入导师，不自动请求模型
  expect(send!.y+send!.height).toBeLessThanOrEqual(await page.evaluate(()=>innerHeight));
  await page.screenshot({path:'artifacts/selection-review/touch-image.png'});
 });
+
+test('Chromium触控模拟：44px首页控件与实验观察的保存返回',async({page})=>{
+ await page.goto('/');
+ for(const control of await page.locator('.topbar button,.view-switch button').all()){
+  const box=await control.boundingBox();if(box){expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);}
+ }
+ await page.getByRole('button',{name:'开始探索',exact:true}).tap();
+ await page.getByLabel('输入 x',{exact:true}).fill('-2');
+ await page.getByRole('button',{name:'记录观察',exact:true}).tap();
+ await expect(page.getByLabel('这次实验的观察')).toBeFocused();
+ await page.getByLabel('这次实验的观察').fill('触控模拟观察；非软键盘输入验收。');
+ await page.getByRole('button',{name:'保存观察，回到实验',exact:true}).tap();
+ await expect(page.locator('.context-panel')).not.toBeVisible();
+ await expect(page.getByLabel('输入 x',{exact:true})).toHaveValue('-2');
+});

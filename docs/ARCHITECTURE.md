@@ -165,3 +165,7 @@ IndexedDB继续保存规范主题；HTML仅从可失败的localStorage缓存读�
 ## 选区与导师引用（0.3.7）
 
 `SelectionTutor` 只监听主要内容的显式选区／图片操作，排除编辑器、表单、私密笔记和导师对话；浮窗通过Portal在body或当前全屏元素内呈现。`TutorSelection` 将原文／说明和有限大小的本地栅格保存在章节草稿，原version 1兼容。正文引用独立于问题和代码／笔记分享。服务端共享严格校验，不接收图片URL或SVG，能力仅由 `TUTOR_SUPPORTS_IMAGES` 决定；当前默认文字模式不传像素并明确限制，视觉配置才支持单张image_url，历史仅传文字上下文。详见 [SELECTION_TUTOR](SELECTION_TUTOR.md)。
+
+## 新手路径与辅助工具（0.3.8）
+
+`LessonReader` 将推荐活动和独立的本地证据分开。`CodeLab` 回传被执行的源代码，只有它与当前编辑器一致才将当前代码标为验收通过；自评不设自动门槛。`ChapterPicker` 由六阶段元数据和83个稳定ID生成二级列表、有限搜索和按访问时间排序的最近章节。`ObservationNote` 将快照和未完成草稿保存在章节进度，显式保存才追加到笔记，保存／暂存恢复实验视口；追加受原笔记导入长度限制。`experimentContext` 是观察和选图共用的有限上下文提取器。`tutor-connection` 使用 `useSyncExternalStore` 共享配置检测，去重请求、明确加载／失败状态和60秒缓存；不会用配置探测代表实际模型问答成功。`useReadablePlots` 根据渲染宽度设置SVG刻度字号，监听新图表和尺寸变更，不改变数值或比例。数据字段可选，兼容version 1。细节见 [REVIEW_FIXES_0_3_8](REVIEW_FIXES_0_3_8.md)。

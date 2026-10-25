@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Play, RotateCcw, Square, Check, Copy, Code2 } from 'lucide-react';
 import type { Lesson } from '../types';
 import {analyzePythonFailure} from '../python-errors';
-type Props={lesson:Lesson; code:string; lastRun?:string; onCode:(code:string)=>void; onResult:(result:string)=>void};
+type Props={lesson:Lesson; code:string; lastRun?:string; onCode:(code:string)=>void; onResult:(result:string,source?:string)=>void};
 export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
   const worker=useRef<Worker|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const failure=lastRun?analyzePythonFailure(lastRun):null;
@@ -18,7 +18,7 @@ export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
       if(data.type==='running'){setStatus('正在执行你的 Python 代码…');return;}
       if(data.type==='loading'){setStatus('首次加载本地 Pyodide 资源，可能需要片刻…');return;}
       const result=(data.type==='error'?'运行错误\n':data.passed?'✓ 本章单元测试通过\n':'')+data.output;
-      onResult(result);setStatus(data.type==='error'?'请根据错误继续调试':'执行完成');stop();
+      onResult(result,code);setStatus(data.type==='error'?'请根据错误继续调试':'执行完成');stop();
     };
     current.onerror=()=>{onResult('Python 环境加载失败。请检查静态资源 /python/ 是否部署完整，再重试。');setStatus('加载失败');stop();};
     current.postMessage({code,tests:lesson.pythonTests});
