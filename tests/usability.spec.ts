@@ -1,3 +1,4 @@
+import {expectSectionAligned} from './layout-helpers';
 import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect} from '@playwright/test';
 
@@ -17,7 +18,7 @@ test('平方函数有效端点在桌面和500×757窄屏桌面内可见',async({
     }
     await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到交互实验'}).click();
     await expect(page.locator('#lesson-experiment')).toBeFocused();
-    await expect.poll(()=>page.locator('#lesson-experiment').evaluate(n=>Math.round(n.getBoundingClientRect().top))).toBe(80);
+    await expectSectionAligned(page,'lesson-experiment');
     await page.screenshot({path:`artifacts/usability-review/square-${viewport.width}.png`});
   }
 });
@@ -75,7 +76,7 @@ test('长章节定位避开粘性工具栏，保留深色、草稿、实验和�
   await expect(page.locator('#lesson-quiz')).toBeFocused();
   await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到交互实验'}).click();
   await expect(page.locator('#lesson-experiment')).toBeFocused();
-  await expect.poll(()=>page.locator('#lesson-experiment').evaluate(n=>n.getBoundingClientRect().top)).toBeGreaterThanOrEqual(79);
+  await expectSectionAligned(page,'lesson-experiment');
   const sizes=await page.locator('.plot-caption,.range-extents').evaluateAll(ns=>ns.map(n=>Number.parseFloat(getComputedStyle(n).fontSize)));
   expect(sizes.every(n=>n>=11)).toBe(true);
   await page.getByLabel('保存学习断点').click();

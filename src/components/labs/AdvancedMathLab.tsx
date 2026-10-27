@@ -115,10 +115,10 @@ function Cartesian({label,xmin=-5,xmax=5,ymin=-5,ymax=5,curves=[],points=[],segm
   };
   return <svg className="am-chart" viewBox="0 0 480 300" role="img" aria-label={label}>
     <title>{label}</title><defs><clipPath id={`am-clip-${uid}`}><rect x="34" y="32" width="412" height="232"/></clipPath><marker id={`am-arrow-${uid}`} markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="context-stroke"/></marker></defs>
-    {xticks.map((n,i)=><g key={`x${i}`}><path d={`M${px(n)} 32V264`} stroke="var(--grid)"/><text x={px(n)} y="282" textAnchor="middle">{fmt(n,1)}</text></g>)}
-    {yticks.map((n,i)=><g key={`y${i}`}><path d={`M34 ${py(n)}H446`} stroke="var(--grid)"/><text x="27" y={py(n)+3} textAnchor="end">{fmt(n,1)}</text></g>)}
+    {xticks.map((n,i)=><g key={`x${i}`}><path d={`M${px(n)} 32V264`} stroke="var(--grid)"/><text className="am-x-tick" x={px(n)} y="282" textAnchor={i===0?'start':i===4?'end':'middle'}>{fmt(n,1)}</text></g>)}
+    {yticks.map((n,i)=><g key={`y${i}`}><path d={`M34 ${py(n)}H446`} stroke="var(--grid)"/><text className="am-y-tick" x="27" y={py(n)+3} textAnchor="end">{fmt(n,1)}</text></g>)}
     {xmin<=0&&xmax>=0&&<path d={`M${px(0)} 32V264`} stroke="var(--axis)"/>}{ymin<=0&&ymax>=0&&<path d={`M34 ${py(0)}H446`} stroke="var(--axis)"/>}
-    <text x="453" y="280">x</text><text x="18" y="22">y</text>
+    <text className="am-x-label" x="446" y="22" textAnchor="end">x</text><text className="am-y-label" x="34" y="22">y</text>
     <g clipPath={`url(#am-clip-${uid})`}>
       {children?.({px,py})}
       {curves.map((curve,i)=><path key={i} d={path(curve.fn)} fill="none" stroke={curve.color??'var(--accent)'} strokeWidth="2.5" strokeDasharray={curve.dash?'6 4':undefined}/>)}

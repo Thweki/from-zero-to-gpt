@@ -142,3 +142,43 @@ for(const theme of ['light','dark'])test(`${theme}: primary mobile targets are 4
  for(const width of [390,360]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);}
  await page.screenshot({path:`artifacts/review-fixes/${theme}-mobile.png`});
 });
+
+test('dependency view preserves stage and complete-directory choices and exposes textual prerequisites',async({page})=>{
+ await page.goto('/');
+ const rows=page.locator('.stage-content .chapter-row');await expect(rows).toHaveCount(5);
+ await page.getByRole('button',{name:'知识依赖视图',exact:true}).click();await expect(rows).toHaveCount(5);
+ await expect(rows.filter({hasText:'向量点积'})).toContainText('先修：线性函数与参数、向量的基本概念');
+ await page.getByRole('button',{name:/展开数学基础全部/}).click();await expect(rows).toHaveCount(23);
+ await page.getByRole('button',{name:'课程路线视图',exact:true}).click();await expect(rows).toHaveCount(23);
+ await page.getByRole('button',{name:'知识依赖视图',exact:true}).click();await expect(rows).toHaveCount(23);
+ await page.getByRole('button',{name:'收起阶段目录',exact:true}).click();await expect(rows).toHaveCount(5);
+ await page.locator('.stage-heading').nth(1).click();
+ const second=await rows.count();
+ for(const name of ['课程路线视图','知识依赖视图']){
+  await page.getByRole('button',{name,exact:true}).click();await expect(page.locator('.stage-heading').nth(1)).toHaveAttribute('aria-expanded','true');await expect(rows).toHaveCount(second);
+ }
+ await page.locator('.dependency-flow').getByRole('button',{name:'向量点积',exact:true}).click();await expect(page).toHaveURL(/#\/lesson\/dot-product$/);
+});
+
+for(const width of [320,390,1440])test(`${width}px shared Cartesian axis labels avoid every end tick in light and dark themes`,async({page})=>{
+ test.setTimeout(120000);await page.setViewportSize({width,height:844});
+ for(const lesson of lessons.filter(lesson=>lesson.lab==='math-advanced')){
+  await page.goto(`/#/lesson/${lesson.id}`);await expect(page.getByRole('heading',{name:lesson.title,exact:true})).toBeVisible();
+  await expect(page.locator('.lab-loading')).toHaveCount(0);
+  for(const theme of ['light','dark']){
+   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.getByRole('button',{name:theme==='dark'?'切换深色外观':'切换浅色外观',exact:true}).click();
+   await page.evaluate(()=>document.fonts.ready);
+   const charts=page.locator('svg:has(.am-x-label)');
+   for(const chart of await charts.all()){
+    await expect(chart).toHaveAttribute('role','img');expect(await chart.getAttribute('aria-label')).toBeTruthy();await expect(chart.locator('title')).not.toBeEmpty();
+    await expect.poll(()=>chart.evaluate(svg=>{
+     return ['x','y'].every(axis=>{
+      const label=svg.querySelector(`.am-${axis}-label`)!.getBoundingClientRect();
+      return Array.from(svg.querySelectorAll(`.am-${axis}-tick`)).every(n=>{const tick=n.getBoundingClientRect();return tick.right<label.left||tick.left>label.right||tick.bottom<label.top||tick.top>label.bottom;});
+     });
+    }),{message:lesson.id}).toBe(true);
+   }
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=(window.visualViewport?.width??innerWidth))).toBe(true);
+ }
+});

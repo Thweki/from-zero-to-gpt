@@ -52,12 +52,6 @@
 :root .plot-caption{line-height:1.8;gap:6px;flex-wrap:wrap;}
 #main-content :is(.plot-caption,.plot-caption>span:last-child,.range-extents){font-size:13px;color:var(--secondary);}
 @media(max-width:760px){
- :root .topbar{padding:0 10px;}
- :root .breadcrumb{gap:5px;}
- :root .topbar-actions{gap:3px;}
- :root .topbar .icon-button{width:44px;height:44px;min-width:44px;min-height:44px;}
- :root .topbar .search-box,:root .topbar .search-box input{width:44px;height:44px;min-width:44px;}
- :root .topbar .context-toggle{min-height:44px;}
  :root .view-switch button{min-width:44px;min-height:44px;}
  .recommended-path button,.chapter-picker :is(select,input),.chapter-picker-search>summary,.chapter-search-results button,.chapter-recent button,.observation-trigger{min-height:44px;}
  .recommended-path ol{gap:0 8px;}

@@ -64,13 +64,10 @@
 .lesson-jump-nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:9px 0;border-bottom:1px solid var(--border);}
 .lesson-jump-nav button {display:flex;justify-content:center;align-items:center;gap:5px;min-height:36px;border-radius:5px;font-size:12px;color:var(--secondary);white-space:nowrap;}
 .lesson-jump-nav button:hover {background:var(--accent-soft);color:var(--accent-dark);}
-#lesson-mode-panel,#lesson-experiment,#lesson-code,#lesson-quiz {scroll-margin-top:130px;}
 :is(#lesson-mode-panel,#lesson-experiment,#lesson-code,#lesson-quiz):focus {outline:none;}
 @media(max-width:760px){
   :root .plot-area svg text {font-size:22px;}
   :root :is(.am-chart text,.modern-chart text,.ml-plot text,.ml-loss-chart text) {font-size:16px;}
-  :root .topbar .icon-button {width:40px;height:40px;}
-  :root input[type=range] {min-height:28px;}
   :root .plot-caption {font-size:11px;}
   :root .plot-caption>span:last-child {display:none;}
   :root .code-editor,:root .line-numbers {font-size:12px;}
@@ -78,4 +75,15 @@
   .lesson-jump-nav button {font-size:11px;gap:4px;min-height:40px;}
   .lesson-jump-nav svg {width:13px;}
   :root .fullscreen-control .fullscreen-button {min-height:40px;}
+}
+
+.code-indent,.code-touch-hint {display:none;}
+@media(max-width:760px),(pointer:coarse){
+  /* Keep this shared hit area above styles loaded with individual labs. */
+  #main-content input[type=range] {min-height:44px;}
+  .code-indent {display:inline-flex;min-height:44px;}
+  .code-touch-hint {display:inline;}
+  .code-keyboard-hint,.code-actions kbd {display:none;}
+  .code-actions {flex-wrap:wrap;}
+  .code-actions>span {flex-basis:100%;}
 }

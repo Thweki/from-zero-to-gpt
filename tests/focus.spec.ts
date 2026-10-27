@@ -60,3 +60,33 @@ for(const theme of ['light','dark'])test(`${theme}: quiet primary actions and pa
  await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:`artifacts/focus-review/lesson-${theme}-desktop.png`});
 });
+
+test('search dismissal restores its trigger for Escape, close and backdrop, while results navigate',async({page})=>{
+ await page.goto('/');const search=page.getByRole('textbox',{name:'搜索知识点',exact:true});
+ for(const method of ['escape','button','backdrop']){
+  await search.click();await expect(page.getByRole('textbox',{name:'搜索词',exact:true})).toBeFocused();
+  if(method==='escape')await page.keyboard.press('Escape');
+  else if(method==='button')await page.getByRole('button',{name:'关闭搜索',exact:true}).click();
+  else await page.locator('.search-overlay').click({position:{x:8,y:8}});
+  await expect(page.getByRole('dialog',{name:'搜索知识点结果'})).toHaveCount(0);
+  await expect(search).toBeFocused();
+ }
+ await search.press('Enter');await page.getByRole('textbox',{name:'搜索词',exact:true}).fill('梯度与方向');
+ await page.locator('.search-results>button').click();await expect(page).toHaveURL(/#\/lesson\/gradients$/);
+ await expect(search).not.toBeFocused();await expect(page.getByRole('heading',{name:'梯度与方向',exact:true})).toBeVisible();
+});
+
+test('hidden import input is excluded from Tab order while the visible button still imports and rejects invalid JSON',async({page})=>{
+ await page.goto('/#/settings');
+ const file=page.locator('input[type=file]');await expect(file).toHaveAttribute('tabindex','-1');await expect(file).toHaveAttribute('aria-hidden','true');
+ await page.getByRole('button',{name:'导入学习数据',exact:true}).focus();
+ for(let i=0;i<12;i++){await page.keyboard.press('Tab');await expect(file).not.toBeFocused();if(await page.getByRole('dialog',{name:'搜索知识点结果'}).isVisible())await page.keyboard.press('Escape');}
+ const data={version:1,theme:'dark',lastLesson:'functions',updatedAt:new Date().toISOString(),progress:{functions:{status:'learning',mode:'intuition',note:'保留导入测试笔记',code:'def square(x):\n    return x * x',review:false}}};
+ for(const valid of [true,false]){
+  const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'导入学习数据',exact:true}).click();
+  await (await chooser).setFiles({name:'learning.json',mimeType:'application/json',buffer:Buffer.from(valid?JSON.stringify(data):'{}')});
+  if(valid){await expect(page.locator('.toast')).toContainText('学习数据已恢复');await expect(page.locator('html')).toHaveAttribute('data-theme','dark');}
+  else await expect(page.locator('.toast')).toContainText('不支持的学习数据格式');
+ }
+ await page.goto('/#/lesson/functions');await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('保留导入测试笔记');
+});

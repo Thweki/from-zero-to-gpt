@@ -45,6 +45,8 @@ test('all curriculum nodes discoverable; prerequisites are inspectable without f
   await page.goto('/#/map');
   await page.getByLabel('知识依赖视图').click();
   await expect(page.locator('.dependency-flow button')).toHaveCount(5);
+  await expect(page.locator('.chapter-list .chapter-row')).toHaveCount(5);
+  await page.getByRole('button',{name:/展开数学基础全部/}).click();
   await expect(page.locator('.chapter-list .chapter-row')).toHaveCount(23);
 });
 test('self check gives a hint for mistakes, records success, and review flag persists',async({page})=>{

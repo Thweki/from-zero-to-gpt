@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
 import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
 import {lessons,lessonById} from '../data/lessons';
@@ -35,6 +35,15 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
   const [pendingSection,setPendingSection]=useState<LessonSection|null>(null);
+  const toolsRef=useRef<HTMLDivElement>(null);
+  useLayoutEffect(()=>{
+    const tools=toolsRef.current;
+    if(!tools)return;
+    const measure=()=>tools.parentElement?.style.setProperty('--lesson-tools-height',`${tools.getBoundingClientRect().height}px`);
+    measure();
+    const observer=new ResizeObserver(measure);observer.observe(tools);
+    return()=>observer.disconnect();
+  },[]);
   const goToSection=(section:LessonSection)=>{
     if(section==='code')patch({mode:'code'});
     else if(section==='experiment'||section==='quiz')patch({mode:'intuition'});
@@ -44,10 +53,30 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
     if(!pendingSection)return;
     const id={reading:'lesson-mode-panel',experiment:'lesson-experiment',code:'lesson-code',quiz:'lesson-quiz'}[pendingSection];
     const target=document.getElementById(id);
-    if(target){target.focus({preventScroll:true});target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});setPendingSection(null);}
+    if(!target)return;
+    const article=target.closest('article')!;
+    let frame=0,cancelled=false;
+    // A lazy experiment can change both the destination and the available scroll
+    // range. Navigate after its content and the reading fonts have laid out.
+    const align=()=>{
+      if(article.querySelector('.lab-loading'))return;
+      observer.disconnect();
+      void document.fonts.ready.then(()=>{
+        if(cancelled)return;
+        frame=requestAnimationFrame(()=>{
+          target.focus({preventScroll:true});
+          target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+          setPendingSection(null);
+        });
+      });
+    };
+    const observer=new MutationObserver(align);
+    observer.observe(article,{childList:true,subtree:true});
+    align();
+    return()=>{cancelled=true;cancelAnimationFrame(frame);observer.disconnect();};
   },[pendingSection,progress.mode]);
   const next=lessons[lessons.indexOf(lesson)+1];
-  const changeMode=(mode:ViewMode)=>patch({mode});
+  const changeMode=(mode:ViewMode)=>{setPendingSection(null);patch({mode});};
   const hintVisible=hint||(feedback&&answer!==lesson.quiz.correct);
   const pathDone=progress.readCompleted&&progress.experimented&&progress.quizPassed;
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
@@ -59,7 +88,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
       <ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol>
       <p>{pathDone?'现在可以停下，也可以选一项扩展继续探索。':'数学推导、代码实现和深入研究是可选扩展，随时可以跳转。'}用时仅作参考，不计时、不设期限。</p>
     </section>
-    <div className="lesson-sticky-tools">
+    <div className="lesson-sticky-tools" ref={toolsRef}>
       <div className="mode-tabs" role="tablist" aria-label="解释模式" onKeyDown={event=>{
         const i=modes.findIndex(mode=>mode.id===progress.mode);let n=i;
         if(event.key==='ArrowRight')n=(i+1)%modes.length;
