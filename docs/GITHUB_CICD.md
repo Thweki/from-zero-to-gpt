@@ -1,8 +1,8 @@
 # GitHub CI、交付与现有 Sites 的边界
 
-更新：2026-10-23。当前连接的 GitHub 本人账户由连接工具和 `gh api user` 独立确认均为 `Thweki`（User）。首次建仓请求被GitHub拒绝后已停止；用户随后提供仓库存在的新证据。本轮通过连接工具及GitHub API只读确认 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt) 已存在、owner ID匹配、visibility为private、当前连接声明具有push权限；Git读取确认接入前没有分支。没有重复创建仓库，也不把截图或声明权限当作实际推送成功。
+更新：2026-10-31。项目源码仓库为 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt)，默认分支为 `main`，当前本地 `origin` 指向此 GitHub 仓库。应用、原创教材和独立工程从本次版本起采用 GPL-2.0-only；完整历史保留，第三方声明见 [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md)。仓库公开状态以 GitHub 页面为准。
 
-本轮可用技能目录没有 engineering 技能，工作区也无 AGENTS.md；遵循现有架构与原生 GitHub／Sites 能力。现有 Sites 的 origin、项目 ID、公开站点及版本7保持原状。本轮接入既有GitHub私有仓库与交付，不重新发布或修改分享权限。
+`.openai/hosting.json` 记录的是既有站点的绑定，不是可供其他贡献者复用的部署身份。开源源码与站点生产部署是独立操作；自行部署应使用自己的站点及凭证，不应把运行时密钥写入仓库或 Actions 日志。
 
 ## 已实现的工作流
 
@@ -49,21 +49,21 @@ npm run package:delivery
 
 交付脚本要求工作区干净，CI中的checkout与GITHUB_SHA一致。校验拒绝被修改的归档、错误提交、路径逃逸、错误Site身份和缺失运行文件。直接运行 `node scripts/verify-delivery.mjs <产物目录>` 可重新核对。产物是构建输出，不包含环境变量、Git配置、API密钥、node_modules、虚拟环境、训练权重或学习备份。
 
-Actions上传的候选产物保留7天，verified产物14天；浏览器结果保留7天。它们沿用私有仓库的访问控制，没有创建GitHub Release、GitHub Pages或新公开站点。
+Actions上传的候选产物保留7天，verified产物14天；浏览器结果保留7天。它们沿用仓库的访问控制，仓库公开后工作流、日志和产物也可能公开；不要在其中保存私人数据或凭证。此工作流不会创建GitHub Release、GitHub Pages或新站点。
 
 ## CD实际范围
 
-当前是**通过CI门槛后的自动产物交付**，不是自动上线。已经核实的Sites接口要求：向既有Sites源仓库推送精确提交，使用原生工具保存匹配源码及归档的版本，然后部署返回的版本ID。现有Sites源仓库是 `origin`，并非新GitHub仓库。没有发现可供GitHub Actions使用的官方Sites CLI、持久发布令牌或OIDC对接；不能虚构HTTP发布接口，也不能把短时源仓库凭证当作持久CD凭证。
+当前是**通过CI门槛后的自动产物交付**，不是自动上线。既有Sites流程要求使用站点自己的源仓库与身份，保存匹配源码及归档的版本，再部署返回的版本ID。当前本地 `origin` 是GitHub仓库，不能把它视为Sites源仓库。这里没有配置可供GitHub Actions使用的Sites持续部署身份，不能把短时源仓库凭证当作持久CD凭证。
 
-工程改动保存在本地 `chore/github-ci` 分支；原main仍指向已发布的版本7源码。只新增名为 `github` 的remote，绝不替换或删除 `origin`。已核验的空私有仓库使用普通 `git push github HEAD:main` 推送完整当前分支，避免误把原main当作新CI版本。推送GitHub不会自动修改Sites源仓库或现有生产部署。需要发布时，按已验证的原生Sites流程同步origin、保存精确SHA与匹配归档、部署并核实状态，继续保持已有public状态。
+贡献时从当前 `main` 建分支并提交PR；维护者推送前应核对目标remote、远程分支及待推送提交，使用普通push，不强推覆盖他人内容。推送GitHub不会自动修改Sites源仓库或现有生产部署。分发构建产物时保留GPL与第三方声明，并提供与清单提交一致的相应源码和构建文件。
 
 如需真正自动上线，需平台提供受支持的GitHub持续部署集成或可授权给Actions的正式部署身份，并确认既有项目绑定及权限范围；目前没有这些能力。不能在本项目中通过保存用户聊天密钥、抓取连接令牌或另建托管来补足。
 
 ## 仓库接入与权限边界
 
-既有私有仓库接入前再次核对owner、visibility、Git分支及源码写入权限，保存现有origin，只新增github remote。使用普通push，不force，不覆盖别人的内容；远程实际写入或Actions访问若被拒绝，则停止相应操作并记录准确错误，不换接口绕过。
+发布前核对owner、visibility、Git分支及源码写入权限，扫描待公开文件、完整可达历史以及将公开的工作流日志和产物。使用普通push，不force，不覆盖别人的内容；远程实际写入或Actions访问若被拒绝，则停止相应操作并记录准确错误，不换接口绕过。
 
-推送到main后触发工作流，等待真实Actions完成并检查各job、浏览器结果及verified artifact。工作区GitHub交接回执记录真实仓库URL、源码提交与运行结果；此前建仓被拒的历史不等于当前仓库不存在，也不等于当前所有权限均可用。本轮没有创建替代仓库、公开代码、写入秘密或改变生产部署。
+推送到main后触发工作流，等待真实Actions完成并检查各job、浏览器结果及verified artifact；本地测试不等同于Actions通过。首次接入时曾发生建仓权限拒绝，其历史记录见 [TEST_REPORT](TEST_REPORT.md)，不代表当前仓库不存在或当前所有操作权限均可用。
 
 ## 检查边界
 

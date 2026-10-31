@@ -3,7 +3,7 @@
   "version": "0.3.8",
   "private": true,
   "type": "module",
-  "license": "MIT",
+  "license": "GPL-2.0-only",
   "scripts": {
     "dev": "node scripts/package-projects.mjs && vite --host 0.0.0.0",
     "build": "tsc -b && node scripts/copy-python.mjs && node scripts/package-projects.mjs && vite build && node scripts/build-server.mjs",

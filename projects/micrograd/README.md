@@ -34,3 +34,7 @@ python torch_compare.py
 ```
 
 脚本先对同一标量公式断言两个引擎的数值梯度一致，再用真实 `nn.Linear`、`backward()`、`zero_grad()`、`SGD.step()` 训练相同结构的 XOR 网络。两个实现采用独立初始化，不能预期每个权重或整条训练轨迹相同。此可选依赖不会被标准库测试导入，也不会在浏览器运行；具体 torch 安装选项参见 [官方安装说明](https://pytorch.org/get-started/locally/)。对照 [autograd 教程](https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html) 检查叶子梯度、`no_grad()` 与 `detach()` 的作用。
+
+## 许可证
+
+Copyright (c) 2026 From Zero to GPT contributors。此教学工程的代码与说明采用 **GPL-2.0-only（仅 GPL 第 2 版）**，全文见同目录 [LICENSE](LICENSE)。历史 MIT 授权不被撤回。

@@ -18,3 +18,7 @@ python -m unittest -v
 建议实验：比较 `--steps 1` 与 `--steps 400`；固定种子只改变学习率；将生成式改成二次函数后观察线性模型的残差。测试使用手算值、中心有限差分、已知直线、保留样本和独立子进程检验训练与加载流程。
 
 进一步阅读：[D2L 线性回归](https://d2l.ai/chapter_linear-regression/linear-regression.html)、[Python random 文档](https://docs.python.org/3/library/random.html)。教学项目的推导与练习位于网站阶段二的线性回归、损失函数、训练循环与泛化课程。
+
+## 许可证
+
+Copyright (c) 2026 From Zero to GPT contributors。此教学工程的代码与说明采用 **GPL-2.0-only（仅 GPL 第 2 版）**，全文见同目录 [LICENSE](LICENSE)。历史 MIT 授权不被撤回。

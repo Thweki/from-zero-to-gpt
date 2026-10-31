@@ -36,6 +36,10 @@ coverage/
 .npmrc
 .netrc
 .git-credentials
+.aws/
+.ssh/
+.codex/
+.agents/
 id_rsa
 id_ed25519
 .DS_Store

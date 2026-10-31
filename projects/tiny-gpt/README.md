@@ -74,3 +74,7 @@ python tiny_gpt.py generate --checkpoint runs/merged-int8.pt --kv-cache --tokens
 ```
 
 量化器真正保存 int8 权重，但前向反量化后使用浮点计算，不宣称整数内核加速；此组合也不是 QLoRA。旧训练检查点保持兼容，合并／量化产物是单独标注的推理检查点，不能拿来恢复旧 AdamW。
+
+## 许可证
+
+Copyright (c) 2026 From Zero to GPT contributors。此教学工程的代码与说明采用 **GPL-2.0-only（仅 GPL 第 2 版）**，全文见同目录 [LICENSE](LICENSE)。历史 MIT 授权不被撤回。 `data/corpus.txt` 继续采用 CC0-1.0；PyTorch 等外部依赖保留各自许可。

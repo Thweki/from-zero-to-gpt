@@ -11,6 +11,8 @@ for (const file of ['LICENSE','CPYTHON-LICENSE']) {
   await copyFile(join('third_party/pyodide',file),join('public/python',file));
 }
 await mkdir('public/licenses',{recursive:true});
+await copyFile('LICENSE','public/licenses/from-zero-to-gpt-LICENSE');
+await copyFile('THIRD_PARTY_NOTICES.md','public/licenses/THIRD_PARTY_NOTICES.md');
 for (const name of ['react','react-dom','katex','lucide-react','idb']) {
   await copyFile(join('node_modules',name,'LICENSE'),join('public/licenses',`${name}-LICENSE`));
 }

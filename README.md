@@ -1,6 +1,6 @@
 # From Zero to GPT
 
-从一个函数，到自己实现的语言模型。为有 Linux／编程经验、希望重新建立数学直觉的自学开发者而建。中文优先、本地优先、MIT 开源，没有签到、截止日期或学习时长 KPI。
+从一个函数，到自己实现的语言模型。为有 Linux／编程经验、希望重新建立数学直觉的自学开发者而建。中文优先、本地优先、[GPL-2.0-only 开源](LICENSE)，没有签到、截止日期或学习时长 KPI。
 
 当前版本 **0.3.8**：六阶段 83 章完整首版教材、真实交互实验、浏览器 Python、可选 AI 导师，以及三个可下载并独立运行的工程。路线中的 83 个节点均有实质内容、练习与验收；后续仍会持续补充深度和真实任务案例。
 
@@ -12,7 +12,14 @@
 
 需要 Node **22.18+**（推荐 Node 24 LTS，含 npm）和 Python **3.10+**（推荐3.12）。网站服务进程不会执行用户 Python。首次启动安装项目依赖，需要网络；后续依赖未变则复用本地安装。
 
-下载仓库ZIP并解压，或clone仓库后，使用对应入口：
+下载[仓库 ZIP](https://github.com/Thweki/from-zero-to-gpt/archive/refs/heads/main.zip) 并解压，或克隆仓库：
+
+```bash
+git clone https://github.com/Thweki/from-zero-to-gpt.git
+cd from-zero-to-gpt
+```
+
+然后使用对应入口：
 
 | 系统 | 一键入口 |
 | --- | --- |
@@ -43,7 +50,7 @@ npm ci
 npm run dev
 ```
 
-在本工作区项目位于 `/workspace/sites/from-zero-to-gpt`。开发地址通常是 `http://localhost:5173`；远程机器请使用端口转发。安装／构建会从锁定 npm 包复制约 14 MB 的 Pyodide，运行基础练习无需外部 Python CDN。
+开发地址通常是 `http://localhost:5173`；远程机器请使用端口转发。安装／构建会从锁定 npm 包复制约 14 MB 的 Pyodide，运行基础练习无需外部 Python CDN。
 
 ## 可以学习和操作什么
 
@@ -140,7 +147,7 @@ npm start
 
 默认监听 `127.0.0.1:8787`，可用 `HOST`、`PORT` 配置。对外部署使用 HTTPS 反向代理，并设置 `TUTOR_PUBLIC_ORIGIN=https://你的域名`，保持浏览器与代理同源。服务端只负责静态资源和模型请求，不运行用户代码。
 
-Cloudflare Workers 可用根目录 `wrangler.json`：入口 `dist-server/worker.js`，静态资源绑定 `ASSETS` 指向 `dist/`，`/api/*` 优先交给 Worker。在平台密钥存储中设置 API 密钥，在普通环境变量中设置模型及地址。当前 Sites 身份保留在 `.openai/hosting.json`；自行创建 Sites 时应使用自己的项目身份。
+Cloudflare Workers 可用根目录 `wrangler.json`：入口 `dist-server/worker.js`，静态资源绑定 `ASSETS` 指向 `dist/`，`/api/*` 优先交给 Worker。在平台密钥存储中设置 API 密钥，在普通环境变量中设置模型及地址。既有 Sites 绑定记录在 `.openai/hosting.json`；自行部署时使用自己的项目身份，勿复用此绑定。
 
 Sites 部署运行 `npm run package:site`，生成忽略跟踪的 `.openai/site-deploy.tar.gz`（需要系统 `tar`）。打包脚本把 Worker 放入平台支持的 `dist/server/index.js`，静态资源放入 `dist/client/`，并附带项目身份文件；不包含任何运行时密钥。先推送对应源码提交，再以该提交与此归档保存／发布版本，保持现有访问权限。
 
@@ -148,7 +155,7 @@ Sites 部署运行 `npm run package:site`，生成忽略跟踪的 `.openai/site-
 
 ## 接手与扩展
 
-GitHub CI 在main推送、PR及手动运行时校验类型、单元测试、83章代码、完整浏览器流程及三个独立Python工程。所有门槛通过后，main自动交付带源码SHA和校验值的Sites部署包；不会自动发布生产，现有Sites origin和站点保持原状。具体触发、产物、权限阻断与受支持发布方式见 [GITHUB_CICD](docs/GITHUB_CICD.md)。已核验的GitHub私有仓库为 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt)；实际校验结果查看仓库Actions，生产站点由既有Sites流程单独发布。
+GitHub CI 在main推送、PR及手动运行时校验类型、单元测试、83章代码、完整浏览器流程及三个独立Python工程。所有门槛通过后，main自动交付带源码SHA和校验值的Sites部署包；不会自动发布生产，现有Sites origin和站点保持原状。具体触发、产物、权限阻断与受支持发布方式见 [GITHUB_CICD](docs/GITHUB_CICD.md)。GitHub源码仓库为 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt)；实际校验结果查看仓库Actions，生产站点由既有Sites流程单独发布。
 
 先阅读 [PROGRESS](docs/PROGRESS.md)、[ARCHITECTURE](docs/ARCHITECTURE.md) 与 [DEVELOPMENT_PLAN](docs/DEVELOPMENT_PLAN.md)。课程和先修见 [CURRICULUM](docs/CURRICULUM.md)／[KNOWLEDGE_GRAPH](docs/KNOWLEDGE_GRAPH.md)。
 
@@ -157,3 +164,11 @@ GitHub CI 在main推送、PR及手动运行时校验类型、单元测试、83�
 当前尚无完整 i18n、Monaco、可拖拽缩放的全图编辑器、跨设备同步／多窗口冲突解决或 PWA。生产级多租户身份、全局配额、GPU／分布式训练、大规模模型质量均不在当前交付范围。浏览器 Worker 是响应性边界，不是运行恶意第三方代码的安全容器。
 
 依赖与运行时许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)。教材为原创中文讲解，逐章引用官方文档与论文，不复制受版权保护的整章教材。
+
+## 许可证
+
+Copyright (c) 2026 From Zero to GPT contributors。
+
+本次版本起，应用源码、原创中文教材及三个独立教学工程采用 **GNU General Public License v2.0 only（GPL-2.0-only，仅第 2 版）**，全文见 [LICENSE](LICENSE)。本项目不授予自动升级到后续 GPL 版本的许可。再分发修改版或构建产物时，须保留版权和许可声明，并按 GPL 第 2 版提供相应源码及构建所需文件；完整条款以许可证为准。
+
+历史提交中的 MIT 声明保留，本次更改不撤回已按 MIT 授予的权利。第三方依赖、字体和引用内容仍适用各自许可；原创 tiny-GPT 语料继续使用 CC0-1.0，详见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md) 和[语料声明](projects/tiny-gpt/data/LICENSE.txt)。
