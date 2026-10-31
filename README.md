@@ -1,143 +1,169 @@
 # From Zero to GPT
 
-从一个函数，到自己实现的语言模型。为有 Linux／编程经验、希望重新建立数学直觉的自学开发者而建。中文优先、本地优先、[GPL-2.0-only 开源](LICENSE)，没有签到、截止日期或学习时长 KPI。
+**从一个函数，到自己实现的语言模型。**
 
-当前版本 **0.3.8**：六阶段 83 章完整首版教材、真实交互实验、浏览器 Python、可选 AI 导师，以及三个可下载并独立运行的工程。路线中的 83 个节点均有实质内容、练习与验收；后续仍会持续补充深度和真实任务案例。
+一个中文优先、本地优先的交互式 LLM 学习项目：用六阶段、83 章教材，把数学直觉、图形实验、Python 练习和三个独立工程连起来。适合有一些编程经验、希望从数学基础重新走到 Transformer 与 GPT 的自学者；无需先配置 AI 密钥，也不要求 GPU。
 
-在教材中选中文字或点击图片，鼠标附近出现「问导师」，一键将引用带入当前章节的导师草稿；保留原有问题，确认后才发送。实验图会保存选择当时的预览和参数。当前文字模型接收图表说明与数值，预览不上传；视觉模型接入及边界见 [选区提问](docs/SELECTION_TUTOR.md)。
+[快速开始](#快速开始) · [界面预览](#界面预览) · [学习路线](#学习路线) · [参与贡献](#参与贡献) · [许可证](#许可证)
 
-新增新手三步路径（直觉 → 实验 → 自测），数学／代码／研究标为可选扩展；阅读、自测、代码验收与自评掌握分开记录。实验旁可直接保存观察并回到原位置；三处辅助页面复用两级章节选择、搜索和最近记录。导师检测期间明确显示等待状态，手机主要触控目标扩大。详见 [试用反馈修复](docs/REVIEW_FIXES_0_3_8.md)。
+![From Zero to GPT 学习首页：六阶段学习路线与第一组数学课程](docs/assets/readme/overview.png)
 
-## 本地启动
+## 你可以做什么
 
-需要 Node **22.18+**（推荐 Node 24 LTS，含 npm）和 Python **3.10+**（推荐3.12）。网站服务进程不会执行用户 Python。首次启动安装项目依赖，需要网络；后续依赖未变则复用本地安装。
+- **按自己的节奏学习**：每章从「读懂直觉 → 动手实验 → 自测理解」开始，数学推导、代码实现和深入研究按需展开。
+- **让公式动起来**：调整参数观察梯度、回归损失、计算图、Q/K/V、注意力权重与因果 mask，图形响应真实计算。
+- **在浏览器写 Python**：独立 Worker 中的 Pyodide 执行代码和章节断言，支持运行、停止、重置、参考实现与错误定位。
+- **完成可带走的作品**：下载并独立运行线性回归、标量自动微分与 XOR 网络、微型 GPT 三个工程。
+- **保存学习现场**：进度、笔记、代码、实验参数和导师对话保存在浏览器；支持导出、导入，以及记录问题与下一步后暂停。
+- **按需使用 AI 导师**：接入 OpenAI 兼容接口，围绕当前章节提问；选中文字或实验图后可将引用带入草稿。
 
-下载[仓库 ZIP](https://github.com/Thweki/from-zero-to-gpt/archive/refs/heads/main.zip) 并解压，或克隆仓库：
+当前版本为 **0.3.8**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
+
+## 快速开始
+
+### 环境要求
+
+| 依赖 | 要求 | 用途 |
+| --- | --- | --- |
+| Node.js / npm | Node.js **22.18+**，推荐 24 LTS；安装时包含 npm | 本地网站、依赖安装与构建 |
+| Python | **3.10+**，推荐 3.12 | 启动检查、教学工程打包与本地课程验证 |
+| 浏览器 | 支持 WebAssembly、Web Worker 和 IndexedDB 的现代浏览器 | 图形实验、浏览器 Python 与学习记录 |
+| PyTorch | 仅运行独立 tiny-GPT 工程时另行安装 | 本地 CPU 训练与生成；网站启动不需要 |
+
+首次安装 npm 依赖需要网络。基础浏览器 Python 运行时随依赖复制到本地，不依赖外部 Python CDN；网站服务进程不执行学习者提交的 Python 代码。
+
+### 启动学习网站
 
 ```bash
 git clone https://github.com/Thweki/from-zero-to-gpt.git
 cd from-zero-to-gpt
+npm run launch
 ```
 
-然后使用对应入口：
+也可以[下载仓库 ZIP](https://github.com/Thweki/from-zero-to-gpt/archive/refs/heads/main.zip) 后解压。启动器会检查环境、按锁文件安装依赖、准备 Python 运行时和工程下载包，服务就绪后打开 **http://localhost:5173**。保留终端，按 **Ctrl+C** 停止。
 
-| 系统 | 一键入口 |
+| 平台 | 对应入口 |
 | --- | --- |
-| Windows | 双击根目录 `start-windows.bat` |
-| Linux | 在项目目录执行 `./start-linux.sh`，或 `sh start-linux.sh` |
-| macOS | 双击根目录 `start-macos.command`，或 `sh start-macos.command` |
+| Linux | `sh start-linux.sh` |
+| macOS | 双击 `start-macos.command`，或运行 `sh start-macos.command` |
+| Windows | 双击 `start-windows.bat` |
 
-启动器自动检查Node／npm／Python、按锁文件安装依赖、准备浏览器Python和工程ZIP，服务就绪后打开 **http://localhost:5173**。保留终端窗口，按 **Ctrl+C** 停止。Windows兼容 `py -3`／`python`；macOS Finder缺少Homebrew PATH时自动查找常见安装目录。已有 `.env` 不会被覆盖，无需配置AI密钥即可学习。
-
-文件被系统作为文本打开或缺少执行权限时，可以在终端用上面的 `sh` 命令运行。启动器不自动安装系统软件、修改PowerShell执行策略或移除macOS安全标记。系统图形界面可能要求首次允许执行；完整选项和排错见 [LAUNCHER](docs/LAUNCHER.md)。
-
-通用命令：
+无桌面环境或需要指定端口时：
 
 ```bash
-npm run launch
-# 只检查依赖
 npm run launch -- --check
-# 不自动打开浏览器，或明确选择另一个端口
 npm run launch -- --no-open --port 5180
 ```
 
-默认端口被占用会明确报错，不会悄悄换端口。学习数据按浏览器地址保存，换端口或在localhost／127.0.0.1之间切换会使用另一份本地数据；恢复学习请继续使用原地址。
+默认端口被占用时会明确报错。学习记录按浏览器地址保存，`localhost`、`127.0.0.1` 和不同端口使用不同的数据空间；恢复学习时请继续使用原地址。完整环境排查见 [启动指南](docs/LAUNCHER.md)。
 
-也可以继续使用手动开发方式：
+### 先试一章
+
+打开「函数是什么」，依次读懂直觉、调整实验参数、完成自测；再切换「代码实现」，修改代码并点击「运行并测试」。不必一次完成全部扩展，也没有签到、倒计时或学习时长要求。
+
+## 界面预览
+
+以下截图取自当前项目的本地运行界面，使用独立浏览器会话。Python 截图中的输出与验收结果来自实际执行。
+
+### 数学直觉与图形实验
+
+「梯度与方向」把当前位置、方向和梯度结果放在同一处，便于调整参数后比较变化。
+
+![梯度与方向实验：等高线、梯度箭头、方向控件和计算结果](docs/assets/readme/gradient-lab.png)
+
+### 看见因果注意力
+
+深色主题下的因果 mask 实验：可检查注意力矩阵，未来位置的权重严格为零。
+
+![深色主题中的因果注意力实验：注意力权重矩阵与被屏蔽的未来位置](docs/assets/readme/attention-dark.png)
+
+### 写代码，再用断言验证
+
+浏览器内运行平方函数，显示实际输出 `square(5) = 25`，并通过本章的 Python 验收测试。
+
+![浏览器 Python 实验室：平方函数代码、运行输出和章节断言通过结果](docs/assets/readme/python-lab.png)
+
+## 学习路线
+
+| 阶段 | 章节 | 学习重点 | 可以完成的内容 |
+| --- | ---: | --- | --- |
+| 01 数学基础 | 23 | 函数、矩阵、概率、导数、梯度与优化 | 用图形和代码解释基础数学 |
+| 02 机器学习 | 9 | 数据划分、损失、梯度更新与泛化 | 无框架线性回归与逻辑回归练习 |
+| 03 神经网络 | 11 | 计算图、反向传播、优化器与 MLP | 标量自动微分引擎与 XOR 网络 |
+| 04 NLP / Transformer | 16 | Token、Embedding、Q/K/V、注意力、mask 与归一化 | 逐张量检查 Transformer 数据流 |
+| 05 手写 GPT | 13 | Tokenizer、Block、交叉熵、训练、保存与采样 | 本地可训练的微型 GPT |
+| 06 现代 LLM | 11 | SFT / DPO、KV Cache、量化、LoRA 与评估 | 推理对照实验、资源估算与论文阅读 |
+
+完整章节、先修关系和阶段验收见 [课程体系](docs/CURRICULUM.md) 与 [知识图谱](docs/KNOWLEDGE_GRAPH.md)。路线标明先修知识，学习者仍可自由跳转。
+
+### 三个独立工程
+
+| 工程 | 内容 | 运行依赖 |
+| --- | --- | --- |
+| [regression](projects/regression/README.md) | 训练、评估、保存与加载线性回归模型 | Python 标准库 |
+| [micrograd](projects/micrograd/README.md) | 标量自动微分、数值梯度检查与带种子的 XOR MLP | Python 标准库；可选 PyTorch 对照 |
+| [tiny-gpt](projects/tiny-gpt/README.md) | 显式因果多头注意力、LayerNorm、MLP、训练与自回归采样 | 本地 Python + CPU PyTorch |
+
+三个工程都可从课程页面下载 ZIP，也可直接进入上述目录运行。tiny-GPT 使用原创 CC0 英文模板语料，默认约 6 万参数；它用于学习训练与推理流程，生成文本仍会有错误与重复。网页里的概率演示与这个可训练 Transformer 是不同模型；完整 PyTorch 训练在本地 Python 中进行。实测与边界见 [tiny-GPT 验证记录](projects/tiny-gpt/VALIDATION.md) 和 [KV Cache / LoRA / int8 实验](projects/tiny-gpt/EFFICIENCY.md)。
+
+## AI 导师（可选）
+
+若尚无 `.env`，复制根目录 [.env.example](.env.example) 为 `.env`；已有配置时直接编辑。填写自己的 `TUTOR_PROVIDER`、`TUTOR_BASE_URL`、`TUTOR_MODEL` 和 `TUTOR_API_KEY`，然后启动或重启服务。接口需兼容 OpenAI Chat Completions。未配置或服务不可用时，课程、实验和代码练习仍可使用。
+
+密钥仅由服务端读取，不要提交 `.env`，也不要用 `VITE_*` 保存秘密。默认发送本章教材、问题和最近对话；代码、错误与笔记分别由默认关闭的分享选项控制。选区引用先进入可编辑草稿，确认后才发送。模型输出不会自动执行，回答仍需自行核对。
+
+公网自托管时可配置独立 `TUTOR_ACCESS_TOKEN`；配置字段、同源与请求边界见 [架构说明](docs/ARCHITECTURE.md#配置与部署)，引用文字与图片的行为见 [选区提问](docs/SELECTION_TUTOR.md)。
+
+## 学习记录与备份
+
+数据保存在当前浏览器的 IndexedDB，不会自动跨浏览器、设备或域名同步。可以在设置页导出学习 JSON；导入会替换当前记录，操作前请先备份。清除站点数据也可能清除进度、笔记与对话。
+
+「保存思路，立即结束」可留下当前问题、下一步、代码与运行结果，下次从首页继续。阅读、自测、代码验收与自评掌握分别记录，避免把完成动作等同于理解。
+
+## 开发与验证
+
+本项目使用 React、TypeScript、Vite、KaTeX 和 Pyodide；可选导师代理同时提供 Node 与 Cloudflare Worker 入口。
 
 ```bash
 npm ci
 npm run dev
 ```
 
-开发地址通常是 `http://localhost:5173`；远程机器请使用端口转发。安装／构建会从锁定 npm 包复制约 14 MB 的 Pyodide，运行基础练习无需外部 Python CDN。
-
-## 可以学习和操作什么
-
-| 阶段 | 章节 | 实际内容与作品 |
-| --- | ---: | --- |
-| 数学基础 | 23 | 代数、函数、幂对数、矩阵、概率、导数、梯度与优化 |
-| 机器学习 | 9 | 数据划分、损失、真实梯度更新、泛化与逻辑回归；无框架回归工程 |
-| 神经网络 | 11 | 神经元、计算图、反传、优化器；标准库自动微分引擎与 XOR 网络 |
-| NLP / Transformer | 16 | 文本到 Token、可编辑 Embedding/QKV、注意力热图、mask、归一化与张量数据流 |
-| 手写 GPT | 13 | Tokenizer、Block、交叉熵、训练、保存与采样；真实本地微型 GPT |
-| 现代 LLM | 11 | SFT/DPO、缓存、量化、LoRA、资源估算、评估与论文阅读 |
-
-每章有问题动机、直觉、数学推导、代码、深入解释、误区、实验、练习、自测提示与来源。四种阅读模式各有侧重：直觉与图形实验／自测、数学推导、Python编程任务、研究边界／引用／本地项目；共同保留本章学习状态，不重复整套实验。“本章定位”按需展开，可跳到正文、交互实验、Python代码和自测。默认单栏阅读，目录、笔记与导师按需打开，学习目标与误区按需展开，延伸资料统一放在深入研究。知识图明确先修但不强制锁课。浅深主题采用柔和纸面与低亮夜间表面、浅淡灰绿强调，覆盖正文、代码输出、实验图表、导师、搜索与弹窗。中文Noto Sans SC、英文Inter与代码JetBrains Mono均随站点提供，正文16px，数学保留KaTeX字体；阅读尺度和字体许可见 [TYPOGRAPHY](docs/TYPOGRAPHY.md)。主题选择沿用本地保存。
-
-交互实验响应真实计算：修改矩阵会改变注意力权重；因果 mask 产生严格零；梯度与有限差分可以对照；回归训练／验证损失独立计算；缓存与完整计算可核对。缩小模型、固定概率表、经验假设和资源估算均明确标注。
-
-Python 在独立浏览器 Worker 中执行，支持代码保存、参考实现、真实断言／错误、重置、停止、30 秒超时。错误先展示用户代码行号和中文提示，完整堆栈可按需展开。Tab／Shift+Tab 切换焦点，Ctrl/⌘ + ] 插入缩进，Ctrl/⌘ + Enter 运行。浏览器没有被声称可以运行完整 PyTorch 训练。
-
-## AI 导师
-
-支持 OpenAI 兼容 Chat Completions。当前测试提供商为 OpenCode Go，模型 `deepseek-v4.1-flash`；接口取自 [OpenCode 官方说明](https://opencode.ai/docs/go/)，并已进行真实请求与网页验证。
-
-页眉“问导师”直接打开当前章节对话，手机也显示文字入口；无需先选回答方式。建议问题先填入可编辑草稿，Enter发送、Shift+Enter换行，并保护中文输入法确认操作。默认跟随当前阅读模式讲解概念，对练习先给提示；额外讲解方式、深度和分享选项收在“讲解与分享设置”。完整实现仅在学习者主动选择「完整解答」时提供给模型上下文。策略由系统提示和资料最小化实现，不能保证模型永远不犯错。
-
-默认只发送本章规范教材、问题和最近对话；代码／运行错误、笔记分别由默认关闭的复选框控制。对话与提问草稿按章节保存在 IndexedDB。模型输出不会自动执行，外部 Markdown 图片被禁用以避免未经点击的第三方请求。
-
-密钥只在服务端配置：
-
-```bash
-cp .env.example .env
-# 用本地编辑器在 .env 填写 TUTOR_API_KEY；不要提交这个文件。
-npm run dev
-```
-
-```dotenv
-TUTOR_PROVIDER=OpenCode Go
-TUTOR_BASE_URL=https://opencode.ai/inference/go/openai/v1
-TUTOR_MODEL=deepseek-v4.1-flash
-TUTOR_API_KEY=<仅在服务端设置>
-```
-
-可更换提供商、模型和密钥。浏览器不能指定任意上游地址，状态接口不会返回密钥；不使用 `VITE_*` 保存秘密。HTTPS 是默认协议；自建回环 HTTP 模型需显式 `TUTOR_ALLOW_LOCAL_HTTP=1`。公网自部署可设置独立 `TUTOR_ACCESS_TOKEN` 并在导师输入区填写访问码；访问码只保留在页面内存。
-
-没有模型配置、提供商断线或限流时，全部课程、实验和代码功能仍可使用。接口对请求／响应大小和时间设限，支持取消，过滤原始上游错误；内存速率限制是单进程／isolate 的尽力限制，公开服务应使用可信网关的认证与持久化配额。
-
-若开发环境要求通过 `HTTP_PROXY`／`HTTPS_PROXY` 联网，推荐在 Node 24 中使用 `NODE_USE_ENV_PROXY=1 NODE_USE_SYSTEM_CA=1 npm run dev`，保留环境提供的代理和 CA 信任，不要关闭 TLS 检查。
-
-## 学习保存与恢复
-
-进度、主题、笔记、代码、数值参数、复习标记、最近运行结果、导师对话及草稿自动保存在当前浏览器的 IndexedDB。保留原版本 1 的兼容导入；已有首五章记录可以继续使用。
-
-顶部暂停按钮／「保存思路，立即结束」保存当前问题、下一步、代码快照与运行结果。首页给出恢复摘要，不要求为了记住上下文而持续工作。
-
-设置页可以导出和导入全部学习 JSON；导入会替换当前记录，操作前请先导出备份，最大文件 64 MB。切换浏览器、域名或设备不会自动同步；清除站点数据可能删除记录。保存失败会提示，当前内存记录仍可导出。
-
-## 三个真正独立的工程
-
-课程页提供 ZIP 下载，源码保留在仓库中：
-
-- [projects/regression](projects/regression/README.md)：纯标准库训练、评估、保存／加载回归模型。
-- [projects/micrograd](projects/micrograd/README.md)：标量自动微分、共享节点梯度、数值梯度检查与带种子 XOR MLP。
-- [projects/tiny-gpt](projects/tiny-gpt/README.md)：显式因果多头注意力、LayerNorm、MLP、训练／验证、检查点续训与自回归采样；使用本地 CPU PyTorch，无 `nn.Transformer`、预训练权重或远程模型 API。
-
-微型 GPT 默认 62,592 参数、两层三头、上下文 48，使用原创 CC0 英文模板语料。它已经真实训练，但输出仍会有错误与重复，不能作为聊天助手。KV Cache、LoRA 适配训练／合并、逐通道 int8 存储已经整合进同一个模型；第六阶段相关课页提供命令和完整源码下载，详见 [整合实验](projects/tiny-gpt/EFFICIENCY.md)。量化前向仍用浮点计算，模型滑窗后重建缓存，不宣称整数内核加速或无限记忆。默认 250 步实测与失败生成例子见 [VALIDATION](projects/tiny-gpt/VALIDATION.md)。验证集与训练集来自相近模板，不能据此声称通用语言能力。网页概率表演示与这个 Transformer 是不同模型。
-
-## 验证
+开发服务默认使用端口 5173。修改后运行：
 
 ```bash
 npm run check
 npm test
 npm run validate:course
 npm run build
+```
+
+浏览器回归需要 Playwright Chromium：
+
+```bash
 npx playwright install chromium
 npm run test:e2e
 ```
 
-有系统 Chromium 时：
+已有系统 Chromium 时，可将 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 设置为本机浏览器可执行文件的路径。
 
-```bash
-PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
+独立 Python 工程按各自 README 运行测试；tiny-GPT 需先安装 CPU PyTorch。GitHub Actions 配置见 [ci.yml](.github/workflows/ci.yml)，实际结果查看 [Actions](https://github.com/Thweki/from-zero-to-gpt/actions/workflows/ci.yml)。验证范围与历史记录见 [测试报告](docs/TEST_REPORT.md)。
+
+### 目录导航
+
+```text
+src/data/           课程正文、章节 ID 与先修知识图
+src/components/     阅读、实验、代码、笔记与导师界面
+server/             导师请求校验、上游代理与 Worker 入口
+projects/           三个可独立运行的 Python 教学工程
+public/             浏览器运行资源、字体许可与生成的下载包
+scripts/            启动、课程验证、构建与打包工具
+docs/               课程规划、架构、使用说明与验证记录
 ```
 
-另在各项目目录运行 Python 单元测试；tiny GPT 按其 README 安装 CPU PyTorch。GitHub Actions 提供网站验证与独立 tiny-GPT CPU 测试。测试明确区分模拟提供商的协议测试、真实外部调用与本地训练，详见 [TEST_REPORT](docs/TEST_REPORT.md)。
+架构与内容扩展先读 [ARCHITECTURE](docs/ARCHITECTURE.md) 和 [DEVELOPMENT_PLAN](docs/DEVELOPMENT_PLAN.md)；新增课程需要同步章节 ID、先修关系、实验和验收。
 
-## 生产部署
-
-完整应用含导师代理：
+### 自行部署
 
 ```bash
 npm ci
@@ -145,30 +171,31 @@ npm run build
 npm start
 ```
 
-默认监听 `127.0.0.1:8787`，可用 `HOST`、`PORT` 配置。对外部署使用 HTTPS 反向代理，并设置 `TUTOR_PUBLIC_ORIGIN=https://你的域名`，保持浏览器与代理同源。服务端只负责静态资源和模型请求，不运行用户代码。
+Node 服务默认监听 `127.0.0.1:8787`，可通过 `HOST`、`PORT` 配置。对外部署应使用 HTTPS 反向代理，并设置 `TUTOR_PUBLIC_ORIGIN`。纯静态托管可以发布 `dist/`，但不包含导师 API；浏览器 Python、字体和工程 ZIP 需完整保留。
 
-Cloudflare Workers 可用根目录 `wrangler.json`：入口 `dist-server/worker.js`，静态资源绑定 `ASSETS` 指向 `dist/`，`/api/*` 优先交给 Worker。在平台密钥存储中设置 API 密钥，在普通环境变量中设置模型及地址。既有 Sites 绑定记录在 `.openai/hosting.json`；自行部署时使用自己的项目身份，勿复用此绑定。
+Cloudflare 配置见 [wrangler.json](wrangler.json)，构建与交付方式见 [CI / 交付说明](docs/GITHUB_CICD.md)。如使用 Sites，请配置自己的项目身份，勿复用仓库中的既有站点绑定。当前 CI 交付构建产物，不自动发布生产站点。
 
-Sites 部署运行 `npm run package:site`，生成忽略跟踪的 `.openai/site-deploy.tar.gz`（需要系统 `tar`）。打包脚本把 Worker 放入平台支持的 `dist/server/index.js`，静态资源放入 `dist/client/`，并附带项目身份文件；不包含任何运行时密钥。先推送对应源码提交，再以该提交与此归档保存／发布版本，保持现有访问权限。
+## 参与贡献
 
-仅核心课程的静态部署：上传整个 `dist/`，包括 Python、字体和下载 ZIP。hash 路由通常不需要服务器回退；资源以域名根 `/` 为基础，部署到子路径需要同时调整 Vite、Worker 和 Python 路径。纯静态站点和 `vite preview` 不含导师 API。不要通过 `file://` 打开，服务端需正确提供 `.wasm` 的 `application/wasm` 类型。
+欢迎修正教材、补充更清楚的解释与实验、改进可访问性，或报告可复现的问题。
 
-## 接手与扩展
-
-GitHub CI 在main推送、PR及手动运行时校验类型、单元测试、83章代码、完整浏览器流程及三个独立Python工程。所有门槛通过后，main自动交付带源码SHA和校验值的Sites部署包；不会自动发布生产，现有Sites origin和站点保持原状。具体触发、产物、权限阻断与受支持发布方式见 [GITHUB_CICD](docs/GITHUB_CICD.md)。GitHub源码仓库为 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt)；实际校验结果查看仓库Actions，生产站点由既有Sites流程单独发布。
-
-先阅读 [PROGRESS](docs/PROGRESS.md)、[ARCHITECTURE](docs/ARCHITECTURE.md) 与 [DEVELOPMENT_PLAN](docs/DEVELOPMENT_PLAN.md)。课程和先修见 [CURRICULUM](docs/CURRICULUM.md)／[KNOWLEDGE_GRAPH](docs/KNOWLEDGE_GRAPH.md)。
-
-`src/data/stage*.ts` 保存教材，`LessonLab.tsx` 懒加载实验，`storage.ts` 验证数据，`server/tutor.ts` 处理导师策略与上游连接。新增内容须同时更新稳定 ID、依赖、课程、实验、验收和导入边界。
-
-当前尚无完整 i18n、Monaco、可拖拽缩放的全图编辑器、跨设备同步／多窗口冲突解决或 PWA。生产级多租户身份、全局配额、GPU／分布式训练、大规模模型质量均不在当前交付范围。浏览器 Worker 是响应性边界，不是运行恶意第三方代码的安全容器。
-
-依赖与运行时许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)。教材为原创中文讲解，逐章引用官方文档与论文，不复制受版权保护的整章教材。
+1. 在 [Issues](https://github.com/Thweki/from-zero-to-gpt/issues) 说明问题、预期行为与复现步骤；涉及界面时可附不含私人数据的截图。
+2. 从当前 `main` 创建自己的分支，保持一次改动围绕一个明确问题；课程引用应指向原始论文或官方资料，并保留第三方版权声明。
+3. 运行上面的类型检查、单元测试、课程验收和构建；涉及界面交互时补充相关浏览器回归。
+4. 在 Pull Request 中说明改动原因、验证结果与尚存限制。请勿提交密钥、个人学习备份、依赖目录、模型权重或生成的构建产物。
 
 ## 许可证
 
 Copyright (c) 2026 From Zero to GPT contributors。
 
-本次版本起，应用源码、原创中文教材及三个独立教学工程采用 **GNU General Public License v2.0 only（GPL-2.0-only，仅第 2 版）**，全文见 [LICENSE](LICENSE)。本项目不授予自动升级到后续 GPL 版本的许可。再分发修改版或构建产物时，须保留版权和许可声明，并按 GPL 第 2 版提供相应源码及构建所需文件；完整条款以许可证为准。
+应用源码、原创中文教材与三个教学工程采用 **[GPL-2.0-only](LICENSE)（GNU GPL 第 2 版，仅此版本）**。历史提交中的 MIT 声明保留，已按 MIT 授予的权利不被撤回。
 
-历史提交中的 MIT 声明保留，本次更改不撤回已按 MIT 授予的权利。第三方依赖、字体和引用内容仍适用各自许可；原创 tiny-GPT 语料继续使用 CC0-1.0，详见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md) 和[语料声明](projects/tiny-gpt/data/LICENSE.txt)。
+第三方依赖、字体和引用内容仍适用各自许可，详见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)。原创 tiny-GPT 语料继续采用 [CC0-1.0](projects/tiny-gpt/data/LICENSE.txt)。
+
+## README 编排参考
+
+本说明借鉴以下项目的文档组织方式，未复制其正文、图片或代码：
+
+- [LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch#readme)：清楚列出先决条件，并用章节表连接学习内容与源码。
+- [nanoGPT](https://github.com/karpathy/nanoGPT#readme)：提供可直接运行的快速开始，并说明示例输出的能力边界。
+- [llm-course](https://github.com/mlabonne/llm-course#readme)：以学习路线组织资料，让读者先找到适合自己的入口。
