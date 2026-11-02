@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import graph from '../src/data/knowledge-graph.json' with { type: 'json' };
 import { lessons } from '../src/data/lessons';
+import { expectFormula, expectMathText } from './math-helpers';
 
 async function noPageOverflow(page: Page, context: string) {
   const size = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: window.innerWidth }));
@@ -13,6 +14,18 @@ async function openLab(page: Page, id: string) {
   await expect(lab).toBeVisible();
   await expect(lab.locator('.lab-loading')).toHaveCount(0);
   return lab;
+}
+
+async function storedLabValue(page:Page,id:string,key:string){
+  return page.evaluate(async({id,key})=>{
+    const opening=indexedDB.open('from-zero-to-gpt',1);
+    const db=await new Promise<IDBDatabase>(resolve=>{opening.onsuccess=()=>resolve(opening.result);});
+    try{
+      const request=db.transaction('learning').objectStore('learning').get('state');
+      const state=await new Promise<any>(resolve=>{request.onsuccess=()=>resolve(request.result);});
+      return state?.progress?.[id]?.labValues?.[key];
+    }finally{db.close();}
+  },{id,key});
 }
 
 test('课程图与实际教材构成完整的 83 课，而不是规划占位页', () => {
@@ -49,12 +62,12 @@ test.describe('全部 83 个章节页面与四种解释模式', () => {
         await expect(content.locator('.code-lab')).toHaveCount(mode==='code'?1:0);
         await expect(content.locator('.references a')).toHaveCount(mode==='deep'?lesson.references.length:0);
         await expect(content.locator('.exercise-section')).toHaveCount(mode==='code'?1:0);
-        if(mode==='intuition')await expect(content.locator('.problem-callout')).toContainText(lesson.problem);
+        if(mode==='intuition')await expectMathText(content.locator('.problem-callout'),lesson.problem);
         else await expect(content.locator('.problem-callout')).toHaveCount(0);
         if (mode === 'code') {
           await expect(page.getByLabel('Python 代码编辑器', { exact: true })).toHaveValue(lesson.starter);
-          await expect(content.getByText(lesson.codeExplanation,{exact:true})).toHaveCount(1);
-          await expect(content.locator('.exercise-section')).toContainText(lesson.exercise);
+          await expectMathText(content.locator('.code-description'),lesson.codeExplanation);
+          await expectMathText(content.locator('.exercise-section'),lesson.exercise);
           await content.getByRole('button', { name: '对照参考', exact: true }).click();
           await expect(content.locator('.reference-code pre')).toContainText(lesson.reference);
           await content.getByText('查看实际运行的验收测试', { exact: true }).click();
@@ -63,7 +76,7 @@ test.describe('全部 83 个章节页面与四种解释模式', () => {
           const sections = mode === 'math' ? lesson.math : mode === 'deep' ? lesson.deep : lesson.intuition;
           await expect(content.locator('.prose-section')).toHaveCount(sections.length);
           for (let i = 0; i < sections.length; i++) {
-            await expect(content.locator('.prose-section').nth(i)).toContainText(sections[i].paragraphs[0]);
+            await expectMathText(content.locator('.prose-section').nth(i),sections[i].paragraphs[0]);
           }
           if(mode==='math')await expect(content.locator('.katex')).not.toHaveCount(0);
           await expect(content.locator('.katex-error')).toHaveCount(0);
@@ -81,12 +94,12 @@ test.describe('真实实验操作与刷新后的参数恢复', () => {
     await lab.getByRole('slider', { name: '系数 a', exact: true }).fill('2');
     await lab.getByRole('slider', { name: '常数 b', exact: true }).fill('-4');
     await lab.getByRole('slider', { name: '右侧 c', exact: true }).fill('10');
-    await expect(lab.locator('.am-stat').first().locator('strong')).toHaveText('唯一解 x=7');
+    await expectMathText(lab.locator('.am-stat').first().locator('strong'),'唯一解 x=7');
     const rhs = lab.getByRole('slider', { name: '右侧 c', exact: true });
     await rhs.focus();
     await rhs.press('ArrowRight');
     await expect(rhs).toHaveValue('10.5');
-    await expect(lab.locator('.am-stat').first().locator('strong')).toHaveText('唯一解 x=7.25');
+    await expectMathText(lab.locator('.am-stat').first().locator('strong'),'唯一解 x=7.25');
     await expect(lab.locator('.am-stat').nth(1).locator('strong')).toHaveText('0');
     await lab.getByRole('slider', { name: '系数 a', exact: true }).fill('0');
     await expect(lab.locator('.am-stat').first().locator('strong')).toHaveText('无解');
@@ -171,16 +184,17 @@ test.describe('真实实验操作与刷新后的参数恢复', () => {
     await expect(lab.locator('.nn-table-wrap tbody tr').nth(0).locator('td').nth(1)).toHaveText('8');
     await expect(lab.locator('.nn-table-wrap tbody tr').nth(0).locator('td').nth(2)).toHaveText('8');
     await lab.getByRole('button', { name: '反传一步', exact: true }).click();
-    await expect(lab.locator('.nn-status')).toContainText('平方节点');
+    await expectMathText(lab.locator('.nn-status'),'平方节点');
     await lab.getByRole('button', { name: '反传一步', exact: true }).click();
-    await expect(lab.locator('.nn-status')).toContainText('∂z/∂b = 4');
+    await expectMathText(lab.locator('.nn-status'),'∂z/∂b = 4');
     await lab.getByRole('button', { name: '反传一步', exact: true }).click();
-    await expect(lab.locator('.nn-status')).toContainText('∂z/∂w = x × 2u = 8');
+    await expectMathText(lab.locator('.nn-status'),'∂z/∂w = x × 2u = 8');
     await expect(lab.getByRole('button', { name: '反传一步', exact: true })).toBeDisabled();
     await expect(page.locator('.autosave')).toContainText('已本地保存');
+    await expect.poll(()=>storedLabValue(page,'backprop','nnStep')).toBe(3);
     await page.reload();
     await expect(page.getByRole('slider', { name: '权重 w', exact: true })).toHaveValue('0.5');
-    await expect(page.locator('.nn-status')).toContainText('∂z/∂w = x × 2u = 8');
+    await expectMathText(page.locator('.nn-status'),'∂z/∂w = x × 2u = 8');
   });
 
   test('因果注意力未来格严格为零；解除掩码和改变缩放后真实重算', async ({ page }) => {
@@ -210,7 +224,8 @@ test.describe('真实实验操作与刷新后的参数恢复', () => {
     await lab.getByRole('slider', { name: 'GPT Top-k', exact: true }).fill('1');
     await lab.getByRole('slider', { name: 'GPT 温度', exact: true }).fill('0.5');
     await lab.getByRole('slider', { name: 'GPT Top-p', exact: true }).fill('0.9');
-    await expect(lab.getByTestId('gpt-probability-sum')).toContainText('Σ q = 1.000000 · 保留 1/8');
+    await expectFormula(lab.getByTestId('gpt-probability-sum'),'\\sum q=1.000000');
+    await expect(lab.getByTestId('gpt-probability-sum')).toContainText('保留 1/8');
     await expect(lab.getByTestId('gpt-loss')).toHaveText(originalLoss!);
     await lab.getByRole('button', { name: '生成一步', exact: true }).click();
     await expect(lab.getByTestId('gpt-generated')).toHaveText('吹');
@@ -231,14 +246,14 @@ test.describe('真实实验操作与刷新后的参数恢复', () => {
     const lab = await openLab(page, 'kv-cache');
     await lab.getByRole('slider', { name: '连续增量位置 T', exact: true }).fill('8');
     const metric = (label: string) => lab.locator('.modern-metric').filter({ has: page.locator('span').filter({ hasText: label }) }).locator('strong');
-    await expect(metric('所有步最大输出绝对差')).toHaveText('0.00e+0');
+    await expectMathText(metric('所有步最大输出绝对差'),'0.00e+0');
     await expect(metric('完整 / 缓存 投影位置数')).toHaveText('36 / 8');
     await expect(metric('完整 / 缓存 分数点积次数')).toHaveText('120 / 36');
     await expect(lab.locator('tbody tr')).toHaveCount(8);
     await expect(page.locator('.autosave')).toContainText('已本地保存');
     await page.reload();
     await expect(page.getByRole('slider', { name: '连续增量位置 T', exact: true })).toHaveValue('8');
-    await expect(page.locator('.modern-metric').first().locator('strong')).toHaveText('0.00e+0');
+    await expectMathText(page.locator('.modern-metric').first().locator('strong'),'0.00e+0');
   });
 
   test('量化重建误差由七个元素计算，位数改变真实误差并持久化', async ({ page }) => {

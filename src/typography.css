@@ -153,6 +153,8 @@ body { font-family: var(--font-ui); }
 :root :is(.prose-section li, .goals-section li, .exercise-section p, .misconceptions p) { font-size: 14px; line-height: 1.95; }
 :root :is(.main-formula, .formula-card) { border-radius: 10px; padding: 22px 18px; }
 :root :is(.main-formula>p, .formula-card>p) { font-size: 12px; line-height: 1.9; }
+:root .formula:not(.block) { margin: 0 .04em; line-height: 1.2; }
+:root .formula:not(.block) .katex { font-size: 1.02em; }
 :root :is(.misconceptions, .exercise-section, .quiz-card, .lesson-completion, .settings-card, .note-card, .project-download) { border-radius: 11px; padding: 22px; }
 :root :is(.misconceptions h3, .exercise-section h2, .quiz-card h3, .settings-card h2) { font-size: 17px; line-height: 1.8; }
 :root .quiz-options label { font-size: 14px; padding: 12px 14px; line-height: 1.8; border-radius: 7px; }

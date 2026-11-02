@@ -1,26 +1,41 @@
 import {openNotebook,closeNotebook} from './focus-helpers';
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { lessons } from '../src/data/lessons';
+import { expectFormula, expectMathText } from './math-helpers';
+
+async function storedState(page:Page){
+  return page.evaluate(async()=>{
+    const opening=indexedDB.open('from-zero-to-gpt',1);
+    const db=await new Promise<IDBDatabase>(resolve=>{opening.onsuccess=()=>resolve(opening.result);});
+    try{
+      const request=db.transaction('learning').objectStore('learning').get('state');
+      return await new Promise<any>(resolve=>{request.onsuccess=()=>resolve(request.result);});
+    }finally{db.close();}
+  });
+}
+const storedProgress=async(page:Page,id:string)=>(await storedState(page))?.progress?.[id];
 test('map, real computations, shared context, persistent checkpoint and theme',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');await expect(page.locator('.stage-card')).toHaveCount(6);
   await page.getByRole('button',{name:'开始探索',exact:true}).click();
   await expect(page.getByRole('heading',{name:'函数是什么',exact:true})).toBeVisible();
   await page.getByRole('slider',{name:'输入 x',exact:true}).fill('-2');
-  await expect(page.getByTestId('lab-result')).toHaveText('f(-2) = 4');
+  await expectFormula(page.getByTestId('lab-result'),'f(-2) = 4');
   await page.getByRole('button',{name:'打开导航',exact:true}).click();await page.locator('.lesson-nav-link[href="#/lesson/linear"]').click();
   await page.getByRole('slider',{name:'斜率 k',exact:true}).fill('2');
   await page.getByRole('slider',{name:'截距 b',exact:true}).fill('1');
-  await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 5');
+  await expectFormula(page.getByTestId('lab-result'),'f(2) = 5');
   await openNotebook(page);await page.getByLabel('当前章节随手笔记').fill('斜率描述每单位输入的输出变化。');
   await closeNotebook(page);await page.getByRole('tab',{name:'数学推导'}).click();
   await expect(page.locator('.katex')).not.toHaveCount(0);
   await page.getByRole('button',{name:'自评为已掌握',exact:true}).click();
+  await expect(page.getByRole('button',{name:'取消掌握自评',exact:true})).toBeVisible();
+  await expect.poll(()=>storedProgress(page,'linear')).toMatchObject({status:'mastered'});
   await page.reload();
   await expect(page.getByRole('tab',{name:'数学推导'})).toHaveAttribute('aria-selected','true');
   await expect(page.locator('#lesson-experiment')).toHaveCount(0);
   await page.getByRole('tab',{name:'直觉理解',exact:true}).click();
-  await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 5');
+  await expectFormula(page.getByTestId('lab-result'),'f(2) = 5');
   await page.getByRole('tab',{name:'数学推导',exact:true}).click();
   await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('斜率描述每单位输入的输出变化。');
   await expect(page.getByRole('button',{name:'取消掌握自评'})).toBeVisible();
@@ -33,8 +48,10 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
   await page.getByRole('button',{name:'恢复学习'}).click();
   await expect(page.getByRole('tab',{name:'数学推导',exact:true})).toHaveAttribute('aria-selected','true');
   await page.getByRole('tab',{name:'直觉理解',exact:true}).click();
-  await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 5');
-  await page.getByRole('button',{name:'切换深色外观'}).click();await page.reload();
+  await expectFormula(page.getByTestId('lab-result'),'f(2) = 5');
+  await page.getByRole('button',{name:'切换深色外观'}).click();
+  await expect.poll(()=>storedState(page)).toMatchObject({theme:'dark'});
+  await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   expect(errors).toEqual([]);
 });
@@ -53,11 +70,14 @@ test('self check gives a hint for mistakes, records success, and review flag per
   const lesson=lessons[0];await page.goto('/#/lesson/functions');
   await page.locator('.quiz-options input').nth((lesson.quiz.correct+1)%4).check();
   await page.getByRole('button',{name:'检查我的理解'}).click();
-  await expect(page.locator('.quiz-feedback')).toContainText(lesson.quiz.hint);
+  await expectMathText(page.locator('.quiz-feedback'),lesson.quiz.hint);
   await page.locator('.quiz-options input').nth(lesson.quiz.correct).check();
   await page.getByRole('button',{name:'检查我的理解'}).click();
-  await expect(page.locator('.quiz-feedback')).toContainText(lesson.quiz.explanation);
-  await page.getByLabel('稍后复习本章').click();await page.reload();
+  await expectMathText(page.locator('.quiz-feedback'),lesson.quiz.explanation);
+  await page.getByLabel('稍后复习本章').click();
+  await expect(page.getByLabel('稍后复习本章')).toHaveClass(/bookmarked/);
+  await expect.poll(()=>storedProgress(page,'functions')).toMatchObject({review:true});
+  await page.reload();
   await expect(page.locator('.quiz-card .badge')).toContainText('已验证');
   await expect(page.getByLabel('稍后复习本章')).toHaveClass(/bookmarked/);
 });
@@ -79,12 +99,12 @@ test('vector and dot-product sliders use real arithmetic',async({page})=>{
   await page.goto('/#/lesson/vectors');
   await page.getByRole('slider',{name:'a 的 x 分量',exact:true}).fill('3');
   await page.getByRole('slider',{name:'a 的 y 分量',exact:true}).fill('4');
-  await expect(page.locator('.live-result')).toContainText('‖a‖ = 5');
+  await expectFormula(page.locator('.live-result>span'),'\\lVert\\mathbf a\\rVert=5,\\quad \\lVert\\mathbf b\\rVert=3.16');
   await page.goto('/#/lesson/dot-product');
   for(const [name,value] of [['a 的 x 分量','2'],['a 的 y 分量','0'],['b 的 x 分量','0'],['b 的 y 分量','2']])await page.getByRole('slider',{name,exact:true}).fill(value);
-  await expect(page.getByTestId('lab-result')).toHaveText('0');
+  await expectFormula(page.getByTestId('lab-result'),'\\mathbf a\\cdot\\mathbf b=0');
   await page.getByRole('slider',{name:'b 的 x 分量',exact:true}).fill('-2');
-  await expect(page.getByTestId('lab-result')).toHaveText('-4');
+  await expectFormula(page.getByTestId('lab-result'),'\\mathbf a\\cdot\\mathbf b=-4');
 });
 // Each chapter gets its own page/Worker, timeout and trace. A growing curriculum
 // must not share one aggregate wall-clock limit across all Python executions.

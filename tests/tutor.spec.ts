@@ -1,5 +1,6 @@
 import {openNotebook,closeNotebook} from './focus-helpers';
 import { expect, test, type Page, type Request, type Route } from '@playwright/test';
+import { expectFormula } from './math-helpers';
 
 /** These are deliberately mocked UI/HTTP transport tests. They do not contact a
  * model provider or verify model reasoning, pedagogy, credentials or availability.
@@ -197,7 +198,7 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     await expect(tutor.getByLabel('向 AI 导师提问')).not.toHaveValue('');
     await page.goto('/#/lesson/functions');
     await page.getByRole('slider', { name: '输入 x', exact: true }).fill('-2');
-    await expect(page.getByTestId('lab-result')).toHaveText('f(-2) = 4');
+    await expectFormula(page.getByTestId('lab-result'),'f(-2) = 4');
     expect(chats).toBe(0);
   });
 

@@ -1,5 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {lessons} from '../src/data/lessons';
+import {expectMathText} from './math-helpers';
 const metadata={configured:true,provider:'review fixture',model:'fixture',baseURL:'https://fixture.invalid'};
 const evidence=(page:Page)=>page.getByRole('region',{name:'本章学习记录'});
 async function saved(page:Page){return page.evaluate(async()=>{
@@ -29,9 +30,9 @@ test('wrong feedback and requested hints use exactly one area and can be collaps
  await page.goto('/#/lesson/functions');await page.locator('.quiz-options input').nth(0).check();
  await page.getByRole('button',{name:'检查我的理解',exact:true}).click();
  const hint=lessons.find(lesson=>lesson.id==='functions')!.quiz.hint;
- await expect(page.locator('.quiz-card').getByText(hint,{exact:true})).toHaveCount(1);
+ await expectMathText(page.locator('.quiz-hint'),hint);
  await page.getByRole('button',{name:'收起提示',exact:true}).click();await expect(page.locator('.quiz-hint')).toHaveCount(0);
- await page.getByRole('button',{name:'给我一个提示',exact:true}).click();await expect(page.locator('.quiz-card').getByText(hint,{exact:true})).toHaveCount(1);
+ await page.getByRole('button',{name:'给我一个提示',exact:true}).click();await expectMathText(page.locator('.quiz-hint'),hint);
 });
 
 test('recording an observation keeps existing notes, snapshots the function and restores the experiment location',async({page})=>{
@@ -43,14 +44,14 @@ test('recording an observation keeps existing notes, snapshots the function and 
  const trigger=page.getByRole('button',{name:'记录观察',exact:true});await trigger.scrollIntoViewIfNeeded();
  const before=await page.evaluate(()=>scrollY);await trigger.click();
  const note=page.getByRole('region',{name:'实验观察笔记'});
- await expect(note.getByLabel('这次实验的观察')).toBeFocused();await expect(note).toContainText('f(-2) = 4');
+ await expect(note.getByLabel('这次实验的观察')).toBeFocused();await expect(note).toContainText('$f(-2)=4$');
  await expect(note).not.toContainText('"ax"');
  await note.getByLabel('这次实验的观察').fill('输入 −2 和 2 都得到 4，函数不要求不同输入有不同输出。');
  await note.getByRole('button',{name:'保存观察，回到实验',exact:true}).click();
  await expect(page.locator('.context-panel')).not.toBeVisible();await expect(trigger).toBeFocused();
  expect(Math.abs(await page.evaluate(()=>scrollY)-before)).toBeLessThan(4);
  await expect.poll(async()=>{const s=await saved(page);return s.progress.functions.note;}).toContain('原有理解，请保留。');
- const state=await saved(page);expect(state.progress.functions.note).toContain('f(-2) = 4');expect(state.progress.functions.note).toContain('输入 −2 和 2');
+ const state=await saved(page);expect(state.progress.functions.note).toContain('$f(-2)=4$');expect(state.progress.functions.note).toContain('输入 −2 和 2');
  expect(state.progress.functions.observationDraft).toBe('');expect(connectionChecks).toBe(1);
 });
 
@@ -61,7 +62,7 @@ test('unfinished observation restores after refresh, and reopening never replace
  await page.reload();await page.getByLabel('输入 x',{exact:true}).fill('1');await page.getByRole('button',{name:'记录观察',exact:true}).click();
  await expect(page.getByLabel('这次实验的观察')).toHaveValue('还没想完，比较对称性。');
 
- await expect(page.locator('.observation-note')).toContainText('f(-2) = 4');
+ await expect(page.locator('.observation-note')).toContainText('$f(-2)=4$');
  await page.getByRole('button',{name:'暂存，继续实验',exact:true}).click();await expect(page.getByLabel('输入 x',{exact:true})).toHaveValue('1');
  await page.getByRole('button',{name:'全屏实验',exact:true}).click();
  await page.getByRole('button',{name:'记录观察',exact:true}).click();

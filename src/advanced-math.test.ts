@@ -73,7 +73,9 @@ describe('阶段一：完整教材与可渲染实验', () => {
   });
   it.each(stage1Lessons)('$id 的默认实验没有NaN或Infinity坐标', lesson => {
     const html=renderToStaticMarkup(createElement(AdvancedMathLab,{lesson,values:{},onChange:()=>{}}));
-    expect(html).toContain(lesson.labTask);
+    expect(html).toContain(lesson.labTask.slice(0,2));
+    expect(html).toContain('class="katex"');
+    expect(html).not.toContain('katex-error');
     expect(html).toContain('type="range"');
     expect(html).not.toMatch(/NaN|Infinity/);
   });

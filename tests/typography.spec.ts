@@ -1,5 +1,6 @@
 import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect} from '@playwright/test';
+import {expectFormula} from './math-helpers';
 
 test('Chinese, Latin and code fonts really load from this site; editor gutter and mathematical type remain correct',async({page})=>{
   const fontURLs:string[]=[];
@@ -78,7 +79,7 @@ test('font delivery failure still leaves the lesson and experiment usable',async
   await page.goto('/#/lesson/functions');
   await expect(page.getByRole('heading',{name:'函数是什么',exact:true})).toBeVisible();
   await page.getByRole('slider',{name:'输入 x',exact:true}).fill('-3');
-  await expect(page.getByTestId('lab-result')).toHaveText('f(-3) = 9');
+  await expectFormula(page.getByTestId('lab-result'),'f(-3) = 9');
   await closeNotebook(page);await page.getByRole('tab',{name:'代码实现',exact:true}).click();
   await expect(page.getByLabel('Python 代码编辑器')).toBeEditable();
 });

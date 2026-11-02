@@ -20,6 +20,7 @@ test('four distinct views keep code, experiments and quiz state when switching',
  await expect(page.locator('.quiz-options input').nth(1)).toBeChecked();
  await page.getByRole('tab',{name:'代码实现',exact:true}).click();
  await expect(page.getByLabel('Python 代码编辑器')).toHaveValue('draft = "继续验证斜率"');
+ await expect.poll(()=>page.evaluate(async()=>{const opening=indexedDB.open('from-zero-to-gpt',1);const db=await new Promise<IDBDatabase>(resolve=>{opening.onsuccess=()=>resolve(opening.result);});try{const request=db.transaction('learning').objectStore('learning').get('state');const state=await new Promise<any>(resolve=>{request.onsuccess=()=>resolve(request.result);});return state?.progress?.linear;}finally{db.close();}})).toMatchObject({mode:'code',code:'draft = "继续验证斜率"'});
  await page.reload();await expect(page.getByRole('tab',{name:'代码实现',exact:true})).toHaveAttribute('aria-selected','true');
  await expect(page.getByLabel('Python 代码编辑器')).toHaveValue('draft = "继续验证斜率"');
 });

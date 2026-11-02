@@ -24,28 +24,30 @@ test('text selection opens a nearby toolbar, preserves a draft, and sends only a
  await page.getByRole('button',{name:'问导师',exact:true}).click();
  await input(page).fill('先解释为什么需要这个概念。');
  await page.getByRole('button',{name:'关闭学习助手'}).click();
- const text=await selectText(page);
+ await selectText(page);
  await expect(ask(page)).toBeVisible();const bounds=await page.getByRole('toolbar',{name:'选中内容操作'}).boundingBox();
  expect(bounds!.x).toBeGreaterThanOrEqual(500);expect(bounds!.y).toBeGreaterThanOrEqual(350);
  await ask(page).click();
  await expect(input(page)).toBeFocused();await expect(input(page)).toHaveValue('先解释为什么需要这个概念。');
- await expect(page.locator('.tutor-composer .tutor-selection-card blockquote')).toHaveText(text!);
+ const reference=page.locator('.tutor-composer .tutor-selection-card blockquote');
+ await expect(reference).toContainText('给盒子一个数字 $x$');await expect(reference).toContainText('$f(3)=9$');
  expect(sent).toEqual([]);
  await input(page).press('Enter');
  await expect(page.locator('.tutor-message.assistant')).toBeVisible();
- expect(sent[0]).toMatchObject({message:'先解释为什么需要这个概念。',selection:{kind:'text',title:'函数是什么',text},shareCode:false,shareNote:false});
+ expect(sent[0]).toMatchObject({message:'先解释为什么需要这个概念。',selection:{kind:'text',title:'函数是什么'},shareCode:false,shareNote:false});
+ expect(sent[0].selection.text).toContain('$f(3)=9$');
  expect(sent[0]).not.toHaveProperty('code');expect(sent[0]).not.toHaveProperty('note');
  await expect(page.locator('.tutor-composer .tutor-selection-card')).toHaveCount(0);
- await expect(page.locator('.tutor-message.user .tutor-selection-card')).toContainText(text!);
+ await expect(page.locator('.tutor-message.user .tutor-selection-card')).toContainText('$f(3)=9$');
 });
 
 test('reference survives refresh and remains removable without deleting the question',async({page})=>{
  const sent=await setup(page);
- const text=await selectText(page);await ask(page).click();
+ await selectText(page);await ask(page).click();
  await input(page).fill('这里我还没想通。');
  await expect.poll(()=>page.evaluate(async()=>{const request=indexedDB.open('from-zero-to-gpt',1);const db=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});try{const read=db.transaction('learning').objectStore('learning').get('state');const state=await new Promise<any>(resolve=>{read.onsuccess=()=>resolve(read.result);});return state.progress.functions.tutorDraft;}finally{db.close();}})).toBe('这里我还没想通。');
  await page.reload();await page.getByRole('button',{name:'问导师',exact:true}).click();
- await expect(page.locator('.tutor-composer .tutor-selection-card')).toContainText(text!);
+ await expect(page.locator('.tutor-composer .tutor-selection-card')).toContainText('$f(3)=9$');
  await expect(input(page)).toHaveValue('这里我还没想通。');
  await page.getByRole('button',{name:'移除所选内容'}).click();
  await expect(input(page)).toHaveValue('这里我还没想通。');await input(page).press('Enter');
@@ -62,9 +64,9 @@ test('an experiment image freezes a real preview and numeric context; text model
  expect(await reference.locator('img').getAttribute('src')).toMatch(/^data:image\/jpeg;base64,\/9j\//);
  await expect(reference).toContainText('预览不上传');
  await reference.getByText('图表说明与选择时的参数').click();
- await expect(reference).toContainText('f(-3) = 9');
+ await expect(reference).toContainText('$f(-3)=9$');
  await page.getByLabel('输入 x',{exact:true}).fill('1');
- await expect(reference).toContainText('f(-3) = 9');
+ await expect(reference).toContainText('$f(-3)=9$');
  await input(page).press('Enter');await expect(page.locator('.tutor-message.assistant')).toBeVisible();
  expect(sent[0].selection.kind).toBe('image');expect(sent[0].selection.text).toContain('"x":-3');
  expect(sent[0].selection).not.toHaveProperty('image');

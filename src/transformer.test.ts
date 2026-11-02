@@ -50,7 +50,9 @@ describe('第四阶段教材与可执行练习', () => {
     expect(html).toContain('未训练');
     expect(html).toContain('Unicode');
     expect(html).toContain('Transformer 样本文本');
-    expect(html).toContain(lesson.labTask);
+    expect(html).toContain(lesson.labTask.slice(0,2));
+    expect(html).toContain('class="katex"');
+    expect(html).not.toContain('katex-error');
     expect(html).not.toContain('NaN');
     expect(html).not.toContain('Infinity');
   });

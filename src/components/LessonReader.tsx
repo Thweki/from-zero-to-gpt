@@ -4,7 +4,7 @@ import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
 import {lessons,lessonById} from '../data/lessons';
 import {LessonLab} from './LessonLab';
 import {CodeLab} from './CodeLab';
-import {Formula} from './Formula';
+import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
 
@@ -18,7 +18,7 @@ type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<
 
 function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
-  return <>{sections.map((section,i)=>{
+  return <MathContent>{sections.map((section,i)=>{
     const formula=section.formula?.trim();
     const showFormula=Boolean(formula&&!shown.has(formula));
     if(formula)shown.add(formula);
@@ -27,7 +27,7 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
       {section.paragraphs.map((paragraph,j)=><p key={j}>{paragraph}</p>)}
       {showFormula&&<div className="formula-card"><Formula>{formula!}</Formula>{formula===mainFormula?.trim()&&<p>{formulaCaption}</p>}</div>}
     </section>;
-  })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</>;
+  })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
 export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
@@ -80,7 +80,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const hintVisible=hint||(feedback&&answer!==lesson.quiz.correct);
   const pathDone=progress.readCompleted&&progress.experimented&&progress.quizPassed;
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
-  return <article className="page-content lesson-page">
+  return <MathContent><article className="page-content lesson-page">
     <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
     <section className="recommended-path" aria-label="新手推荐路径">
@@ -137,5 +137,5 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
     <section className="learning-evidence" aria-label="本章学习记录"><p>这些记录相互独立，不是必须做完的清单。</p><dl><div><dt>阅读（自记）</dt><dd>{progress.readCompleted?'已阅读':'未记录'}</dd></div><div><dt>自测</dt><dd>{progress.quizPassed?'已验证':'待验证'}</dd></div><div><dt>当前代码</dt><dd>{progress.codePassed?'验收通过':'未验证'}</dd></div><div><dt>掌握（自评）</dt><dd>{progress.status==='mastered'?'自评已掌握':'尚未自评'}</dd></div></dl></section>
     <div className="lesson-completion"><div><strong>{progress.status==='mastered'?'你已将本章自评为掌握。':'能用自己的话解释了吗？'}</strong><p>这是你的判断，不代表系统认证；无需完成所有扩展。</p></div><button className="button secondary" onClick={()=>patch({status:progress.status==='mastered'?'learning':'mastered'})}><Check size={16}/>{progress.status==='mastered'?'取消掌握自评':'自评为已掌握'}</button></div>
     <div className="lesson-pagination"><button className="text-button" onClick={onCheckpoint}><Pause size={14}/>保存思路，今天到这里</button>{next?<button className="text-button next-lesson" onClick={()=>navigate(next.id)}>下一步 · {next.title}<ArrowRight size={16}/></button>:<a className="text-button" href="#/map">回到学习路线<ArrowRight size={16}/></a>}</div>
-  </article>;
+  </article></MathContent>;
 }

@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {openNotebook,closeNotebook} from './focus-helpers';
+import {expectFormula} from './math-helpers';
 
 test('default lesson is a single reading column; requested tools never change the stored lesson',async({page})=>{
  await page.goto('/#/lesson/functions');
@@ -31,10 +32,10 @@ test('default lesson is a single reading column; requested tools never change th
  await page.getByRole('button',{name:'跳到交互实验'}).click();
  await expect(page.locator('#lesson-experiment')).toBeFocused();
  await expect(page.locator('.lesson-location')).not.toHaveAttribute('open');
- await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 4');
+ await expectFormula(page.getByTestId('lab-result'),'f(2) = 4');
  await page.reload();await expect(page.locator('.context-panel')).not.toBeVisible();
  await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('先专注观察斜率。');
- await closeNotebook(page);await expect(page.getByTestId('lab-result')).toHaveText('f(2) = 4');
+ await closeNotebook(page);await expectFormula(page.getByTestId('lab-result'),'f(2) = 4');
 });
 
 for(const theme of ['light','dark'])test(`${theme}: quiet primary actions and paper fit desktop and narrow reading`,async({page})=>{

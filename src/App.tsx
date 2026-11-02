@@ -14,6 +14,7 @@ import {ObservationNote} from './components/ObservationNote';
 import {experimentContext} from './experiment-context';
 import {useReadablePlots} from './use-readable-plots';
 import {SelectionTutor} from './components/SelectionTutor';
+import {MathContent} from './components/Formula';
 
 const stages:{title:string;english:string;description:string;icon:LucideIcon}[]=[
   {title:'数学基础',english:'THE LANGUAGE OF MODELS',description:'重新认识函数、向量与变化，建立理解模型的直觉。',icon:Sprout},
@@ -84,7 +85,7 @@ export default function App(){
   const importData=async(file?:File)=>{if(!file)return;try{if(file.size>67108864)throw new Error('请选择小于 64 MB 的学习数据文件');const data=validateImport(JSON.parse(await file.text()));await writeState(data);setState(data);setCanSave(true);setStorageError('');notify('学习数据已恢复');}catch(e){notify(e instanceof Error?e.message:'无法读取学习数据');}if(importRef.current)importRef.current.value='';};
   const total=Object.values(state.progress).filter(p=>p?.status==='mastered').length;
   if(!ready)return <div className="loading-screen"><Brand/><p>正在打开你的学习实验室…</p></div>;
-  return <div className={`app-shell ${rightOpen?'':'hide-context'}`}>
+  return <MathContent><div className={`app-shell ${rightOpen?'':'hide-context'}`}>
     <a className="skip-link" href="#main-content" onClick={e=>{e.preventDefault();document.getElementById('main-content')?.focus();document.getElementById('main-content')?.scrollIntoView();}}>跳到主要内容</a>
     {mobile&&<button className="mobile-scrim" aria-label="关闭导航" onClick={()=>setMobile(false)}/>}
     <aside id="course-navigation" inert={!mobile} className={`sidebar ${mobile?'is-open':''}`}><button className="icon-button navigation-close" aria-label="收起导航" onClick={()=>{setMobile(false);document.querySelector<HTMLButtonElement>('.mobile-menu')?.focus();}}><X size={19}/></button><a className="brand-link" href="#/map"><Brand/></a><div className="workspace-label"><span className="online-dot"/>个人工作空间 <span>LOCAL</span></div><nav aria-label="主导航">
@@ -116,7 +117,7 @@ export default function App(){
     {checkpointOpen&&<CheckpointModal lesson={lesson} state={state} onClose={()=>setCheckpointOpen(false)} onSave={async(question,next)=>{const s=stateRef.current;const checkpoint={lessonId:lesson.id,question,next,savedAt:new Date().toISOString(),code:s.progress[lesson.id]?.code??lesson.starter,runResult:s.progress[lesson.id]?.lastRun||'尚未运行'};const updated={...s,checkpoint,lastLesson:lesson.id,updatedAt:new Date().toISOString()};try{await writeState(updated);setState(updated);setCanSave(true);setStorageError('');setCheckpointOpen(false);location.hash='/map';notify('思路已保存，可以安心结束。下次回来，从这里继续。');}catch{setStorageError('断点保存失败，请先导出数据备份。');notify('保存失败，思路仍留在当前页面。');}}}/>}
     {planned&&<div className="modal-backdrop" onMouseDown={()=>setPlanned(null)}><section className="modal planned-modal" role="dialog" aria-modal="true" aria-label="课程依赖详情" onMouseDown={e=>e.stopPropagation()}><button autoFocus className="modal-close icon-button" aria-label="关闭课程详情" onClick={()=>setPlanned(null)}><X size={20}/></button><span className="eyebrow">PHASE 0{planned.stage} · 课程规划</span><h2>{planned.title}</h2><p>这一知识点已纳入课程依赖图，教材与实验将在后续里程碑完成。</p><h4>建议先理解</h4><div className="prerequisite-list">{planned.prerequisites.length?planned.prerequisites.map(id=>{const node=graph.nodes.find(n=>n.id===id);return <button className="button secondary" key={id} onClick={()=>{if(node?.available){navigate(id as LessonId);setPlanned(null);}else if(node)setPlanned(node);}}>{node?.title||id}<ArrowUpRight size={14}/></button>;}):<p>无需额外先修知识。</p>}</div><button className="button primary" onClick={()=>{setPlanned(null);navigate(state.lastLesson);}}>继续当前可学课程<ArrowRight size={15}/></button></section></div>}
     {toast&&<div className="toast" role="status"><CheckCheck size={18}/>{toast}<button className="icon-button" aria-label="关闭提示" onClick={()=>setToast('')}><X size={15}/></button></div>}
-  </div>;
+  </div></MathContent>;
 }
 
 function Roadmap({state,navigate,onPlanned}:{state:LearningState;navigate:(id:LessonId)=>void;onPlanned:(node:(typeof graph.nodes)[number])=>void}){

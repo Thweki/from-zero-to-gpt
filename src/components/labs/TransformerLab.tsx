@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { ExtendedLabProps } from '../../types';
 import './TransformerLab.css';
+import {MathContent} from '../Formula';
 
 export type Matrix = number[][];
 const initialEmbedding = [[1, 0, .5], [0, 1, -.5], [-1, .5, 1], [.5, -1, 0], [.2, .7, -.8], [-.6, -.4, .9]];
@@ -90,7 +91,7 @@ const steps = ['Token', 'Embedding', 'Q / K / V', '分数与缩放', 'Softmax', 
 const focus: Record<string, number> = { 'text-representation': 0, tokenization: 0, embeddings: 1, 'rnn-lstm': 1, softmax: 4, attention: 5, qkv: 2, 'scaled-attention': 3, 'self-attention': 4, 'multi-head': 5, positions: 1, residual: 6, layernorm: 7, 'encoder-decoder': 2, 'causal-mask': 4, 'decoder-only': 8 };
 
 function MatrixView({ title, rows, rowLabels, columnLabels, heat = false, masked }: { title: string; rows: Matrix; rowLabels?: string[]; columnLabels?: string[]; heat?: boolean; masked?: boolean[][] }) {
-  return <div className="tf-matrix"><div className="tf-matrix-heading"><strong>{title}</strong><span>[{rows.length}, {rows[0]?.length ?? 0}]</span></div><div className="tf-table-scroll" tabIndex={0} aria-label={`${title} 数据表，可横向滚动`}><table><caption className="visually-hidden">{title}，形状 {rows.length} 行 {rows[0]?.length ?? 0} 列</caption><thead><tr><th scope="col">位置</th>{rows[0]?.map((_, j) => <th scope="col" key={j}>{columnLabels?.[j] ?? `d${j}`}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}><th scope="row">{rowLabels?.[i] ?? i}</th>{row.map((x, j) => <td key={j} title={masked?.[i]?.[j] ? '未来位置，权重严格为 0' : String(x)} className={masked?.[i]?.[j] ? 'tf-masked' : heat ? 'tf-heat' : ''} style={heat && !masked?.[i]?.[j] ? { '--tf-weight': x } as CSSProperties : undefined}>{masked?.[i]?.[j] ? <><span>0</span><small>屏蔽</small></> : rounded(x)}</td>)}</tr>)}</tbody></table></div></div>;
+  return <MathContent><div className="tf-matrix"><div className="tf-matrix-heading"><strong>{title}</strong><span>[{rows.length}, {rows[0]?.length ?? 0}]</span></div><div className="tf-table-scroll" tabIndex={0} aria-label={`${title} 数据表，可横向滚动`}><table><caption className="visually-hidden">{title}，形状 {rows.length} 行 {rows[0]?.length ?? 0} 列</caption><thead><tr><th scope="col">位置</th>{rows[0]?.map((_, j) => <th scope="col" key={j}>{columnLabels?.[j] ?? `d${j}`}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}><th scope="row">{rowLabels?.[i] ?? i}</th>{row.map((x, j) => <td key={j} title={masked?.[i]?.[j] ? '未来位置，权重严格为 0' : String(x)} className={masked?.[i]?.[j] ? 'tf-masked' : heat ? 'tf-heat' : ''} style={heat && !masked?.[i]?.[j] ? { '--tf-weight': x } as CSSProperties : undefined}>{masked?.[i]?.[j] ? <><span>0</span><small>屏蔽</small></> : rounded(x)}</td>)}</tr>)}</tbody></table></div></div></MathContent>;
 }
 
 export function TransformerLab({ lesson, values, onChange }: ExtendedLabProps) {
@@ -137,7 +138,7 @@ export function TransformerLab({ lesson, values, onChange }: ExtendedLabProps) {
   const py = (a: number) => 100 - a / extent * 75;
   let h = 0;
   const states = x.map(r => { h = Math.tanh(r[0] + v.tfRnn * h); return [r[0], h]; });
-  return <section className="tf-lab" aria-label={`${lesson.title} 的实时 Transformer 实验`}>
+  return <MathContent><section className="tf-lab" aria-label={`${lesson.title} 的实时 Transformer 实验`}>
     <header className="tf-header"><div><strong>数值实验室</strong><span>LIVE · 所有矩阵实时计算</span></div><button type="button" onClick={() => { onChange({ ...defaults }); setText('我爱学习'); }}>重置实验</button></header>
     <div className="tf-content"><p className="tf-notice">这是未训练的三维玩具模型，用于检查计算。按当前样本的 Unicode 码点排序建立字符表，最多计算前 6 个码点；它不是任何商业模型的 Tokenizer，向量不带预训练语义。样本文本仅在本次页面内保留，数值参数随学习进度保存。</p>
       <label className="tf-text-label">样本文本<input type="text" aria-label="Transformer 样本文本" value={text} maxLength={80} onChange={e => setText(e.target.value)} /></label>
@@ -163,5 +164,5 @@ export function TransformerLab({ lesson, values, onChange }: ExtendedLabProps) {
       <details className="tf-parameters"><summary>随时编辑 Embedding 与基础 QKV 参数</summary>{editor('E', 'Embedding E', embedding.slice(0, data.vocabulary.length), data.vocabulary.map(labelToken))}<div className="tf-three">{editor('Q', '基础 Wq', wq)}{editor('K', '基础 Wk', wk)}{editor('V', '基础 Wv', wv)}</div></details>
       </>}
     </div><footer className="tf-task"><strong>本节实验任务</strong><p>{lesson.labTask}</p></footer>
-  </section>;
+  </section></MathContent>;
 }

@@ -2,6 +2,7 @@ import { useId, useRef, type ReactNode } from 'react';
 import { FlaskConical, RotateCcw } from 'lucide-react';
 import type { ExtendedLabProps } from '../../types';
 import {FullscreenButton} from '../FullscreenButton';
+import {MathContent} from '../Formula';
 
 type Vector2 = [number, number];
 type Matrix2 = [Vector2, Vector2];
@@ -135,7 +136,7 @@ function Bars({probs,labels,label}:{probs:number[];labels:string[];label:string}
     <path d="M38 252H450" stroke="var(--axis)"/><text x="38" y="24">概率 P</text></svg>;
 }
 function MatrixView({matrix,label}:{matrix:number[][];label:string}) {
-  return <div className="am-matrix"><span>{label}</span><table aria-label={label}><tbody>{matrix.map((row,i)=><tr key={i}>{row.map((n,j)=><td key={j}>{fmt(n)}</td>)}</tr>)}</tbody></table></div>;
+  return <MathContent><div className="am-matrix"><span>{label}</span><table aria-label={label}><tbody>{matrix.map((row,i)=><tr key={i}>{row.map((n,j)=><td key={j}>{fmt(n)}</td>)}</tr>)}</tbody></table></div></MathContent>;
 }
 const loss=(x:number,y:number)=>(x-1)**2+2*(y+1)**2;
 const surface=(x:number,y:number)=>x*x+x*y+2*y*y;
@@ -240,7 +241,7 @@ export function AdvancedMathLab({lesson,values,onChange,onObserve}:ExtendedLabPr
     const curves:ChartCurve[]=[{fn:current.f},{fn:x=>left+estimate*(x-a+h),color:GOLD,dash:true}];
     if(Number.isFinite(analytic))curves.push({fn:x=>fa+analytic*(x-a),color:BLUE,dash:true});
     visual=<Cartesian label={`${current.name} 的切线与中心割线`} xmin={-3.5} xmax={3.5} ymin={ymin} ymax={ymax} curves={curves} points={[{at:[a,fa],label:'切点'},{at:[a-h,left],color:GOLD},{at:[a+h,right],color:GOLD}]}/>;
-    controls=<>{select('kind','函数',['f(x)=x²','f(x)=x³','f(x)=|x|','f(x)=sin x'])}{range('point','切点 a',-3,3,0.1)}{range('h','正步长 h',0.01,1,0.01)}</>;
+    controls=<>{select('kind','函数',['平方函数','立方函数','绝对值函数','正弦函数'])}{range('point','切点 a',-3,3,0.1)}{range('h','正步长 h',0.01,1,0.01)}</>;
     result=<>{stat('解析导数 f′(a)',Number.isFinite(analytic)?fmt(analytic):'不存在：左右导数不同')}{stat('中心差分近似',fmt(estimate))}{Number.isFinite(analytic)?stat('差分绝对误差',fmt(Math.abs(estimate-analytic),6)):<p className="am-warning">对称差分在尖角得到0，但这不是存在的导数。左导数为−1，右导数为1。</p>}</>;
     caption='绿线为函数，蓝色虚线为解析切线，金色虚线通过左右采样点。两条直线重合时只显出最上层颜色。';
   } else if(lesson.id==='chain-rule') {
@@ -273,7 +274,7 @@ export function AdvancedMathLab({lesson,values,onChange,onObserve}:ExtendedLabPr
     ];
     const current=functions[v.kind],x=clamp(v.point,-2,2),height=current.f(x),first=current.first(x),second=current.second(x);
     visual=<Cartesian label={`${current.name} 的地形、驻点和当前位置切线`} xmin={-2.1} xmax={2.1} ymin={current.ymin} ymax={current.ymax} curves={[{fn:current.f},{fn:t=>height+first*(t-x),color:GOLD,dash:true}]} points={[...current.stationary.map(p=>({at:[p,current.f(p)] as Vector2,color:BLUE,label:'驻点'})),{at:[x,height],label:'当前点'}]}/>;
-    controls=<>{select('kind','损失地形',['双井：(x²−1)²','水平穿过：x³','平坦谷底：x⁴','山顶：−x²'])}{range('point','检查位置 x',-2,2,0.1)}<div className="am-presets"><button onClick={()=>preset({point:-1})}>x=−1</button><button onClick={()=>preset({point:0})}>x=0</button><button onClick={()=>preset({point:1})}>x=1</button></div></>;
+    controls=<>{select('kind','损失地形',['双井地形','水平穿过的立方曲线','平坦谷底','二次山顶'])}{range('point','检查位置 x',-2,2,0.1)}<div className="am-presets"><button onClick={()=>preset({point:-1})}>x=−1</button><button onClick={()=>preset({point:0})}>x=0</button><button onClick={()=>preset({point:1})}>x=1</button></div></>;
     result=<>{stat('当前位置损失',fmt(height))}{stat('一阶导数 / 二阶导数',`${fmt(first)} / ${fmt(second)}`)}{stat('二阶检验',classifyCriticalPoint(first,second))}{v.kind===0&&<p>该函数处处非负，在 ±1 达到0，所以两处也是全局最小。x=0虽然一阶导数为0，却是局部最大。</p>}{(v.kind===1||v.kind===2)&&Math.abs(x)<1e-8&&<p>二阶信息相同但图像不同：x³ 在0不是极值，x⁴ 在0是全局最小。二阶检验对此保留不确定。</p>}</>;
     caption='蓝点是解析驻点，绿点是当前位置，金色虚线是切线。分类只说明当前位置的局部检验。';
   } else {
@@ -284,13 +285,13 @@ export function AdvancedMathLab({lesson,values,onChange,onObserve}:ExtendedLabPr
     result=<>{stat('末点 (x,y)',`(${fmt(last[0])}, ${fmt(last[1])})`)}{stat('初始损失 → 当前损失',`${fmt(losses[0])} → ${fmt(losses[losses.length-1])}`)}{stat('x / y 误差每步的因子',`${fmt(1-2*v.rate)} / ${fmt(1-4*v.rate)}`)}{stat('当前学习率的一般稳定性',v.rate<0.5?'两方向误差都会收缩':v.rate===0.5?'y误差幅度通常不减':'y误差通常放大')}{outside&&<p className="am-warning">末点已超出图中 ±6 的窗口，计算仍保留完整轨迹与损失。增大学习率可能使参数迅速发散。</p>}</>;
     caption='地形 L=(x−1)²+2(y+1)²；金点起点、蓝点最小值、绿线更新轨迹。调整起点或学习率会重新计算整条轨迹。';
   }
-  return <section className="am-lab" ref={ref} aria-label={`${lesson.title}交互实验`}>
+  return <MathContent><section className="am-lab" ref={ref} aria-label={`${lesson.title}交互实验`}>
     <style>{labStyles}</style>
     <div className="am-header"><span><FlaskConical size={16}/>交互实验 <small>LIVE</small></span><div><button type="button" aria-label="重置本章数学实验" onClick={()=>onChange(defaultsFor(lesson.id))}><RotateCcw size={16}/></button><FullscreenButton target={ref} label="全屏数学实验"/></div></div>
     <div className="am-body"><div className="am-visual">{visual}<p className="am-caption">{caption}</p></div><div className="am-controls">{controls}</div></div>
     <div className="am-results" aria-live="polite" data-testid="lab-result">{result}</div>
     <div className="am-task"><strong>试一试</strong><p>{lesson.labTask}</p>{onObserve&&<button type="button" className="text-button observation-trigger" onClick={event=>onObserve(event.currentTarget)}>记录观察</button>}</div>
-  </section>;
+  </section></MathContent>;
 }
 
 const labStyles=`

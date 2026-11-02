@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ExtendedLabProps } from '../../types';
 import './MachineLearningLab.css';
+import {MathContent} from '../Formula';
 
 export type MLPoint = { x: number; y: number; id: number };
 export type MLTask = 'regression' | 'polynomial' | 'classification';
@@ -203,7 +204,7 @@ export function MachineLearningLab({ lesson, values, onChange }: ExtendedLabProp
   const clipId = `ml-plot-${lesson.id}`;
   const showDataControls = ['datasets', 'generalization', 'loss-functions'].includes(lesson.id);
 
-  return <section className="ml-lab" aria-label="机器学习交互实验">
+  return <MathContent><section className="ml-lab" aria-label="机器学习交互实验">
     <div className="ml-header"><div><span className="ml-live-dot"/> 实时计算实验 <small>{polynomial ? '最小二乘 · QR 求解' : classification ? 'SIGMOID / BCE' : 'LINEAR REGRESSION'}</small></div><button type="button" onClick={reset}>重置实验</button></div>
     <div className="ml-main"><div className="ml-visual">
       <div className="ml-equation">{polynomial ? `${v.mlDegree} 次多项式 · ${coefficients.length} 个系数` : classification ? `p = sigmoid(${f(w, 2)}x ${b >= 0 ? '+' : '−'} ${f(Math.abs(b), 2)})` : `ŷ = ${f(w, 2)}x ${b >= 0 ? '+' : '−'} ${f(Math.abs(b), 2)}`}</div>
@@ -226,7 +227,7 @@ export function MachineLearningLab({ lesson, values, onChange }: ExtendedLabProp
       {!polynomial && <div className="ml-actions"><button type="button" disabled={fixedRule} onClick={() => run(1)}>单步训练</button><button type="button" disabled={fixedRule} onClick={() => run(60)}>连续训练 60 步</button>{!classification && <button type="button" disabled={fixedRule} onClick={fit}>最小二乘拟合</button>}<span>已更新 {currentStep} 步</span></div>}
     </div>
     <div className="ml-controls">
-      {lesson.id === 'rules-vs-learning' && <label className="ml-select">规则来源<select value={v.mlRuleMode} onChange={event => set('mlRuleMode', Number(event.target.value))}><option value={0}>手写固定规则：ŷ=x</option><option value={1}>从样本学习：ŷ=wx+b</option></select></label>}
+      {lesson.id === 'rules-vs-learning' && <label className="ml-select">规则来源<select value={v.mlRuleMode} onChange={event => set('mlRuleMode', Number(event.target.value))}><option value={0}>手写固定规则</option><option value={1}>从样本学习</option></select></label>}
       {polynomial ? slider('mlDegree', '多项式次数 d', 1, 9, 1) : <>{slider('mlWeight', '权重 w', -20, 20, 0.1)}{slider('mlBias', '偏置 b', -20, 20, 0.1)}{slider('mlLearningRate', '学习率 η', 0.01, 1.5, 0.01)}</>}
       {fixedRule && <p className="ml-control-note">当前使用固定规则 ŷ=x。切换到“从样本学习”后，w、b 与训练按钮生效。</p>}
       {(showDataControls || polynomial) && <>{slider('mlNoise', '标签噪声强度', 0, 1, 0.05)}{slider('mlTrainFraction', '训练集比例', 0.5, 0.85, 0.05)}{slider('mlSeed', '数据与划分种子', 1, 31, 1)}</>}
@@ -239,5 +240,5 @@ export function MachineLearningLab({ lesson, values, onChange }: ExtendedLabProp
     {!polynomial && <LossChart history={history} classification={classification}/>}
     <p className="ml-notice" role="status">{notice}</p>
     <div className="ml-task"><strong>试一试</strong><p>{lesson.labTask}</p></div>
-  </section>;
+  </section></MathContent>;
 }

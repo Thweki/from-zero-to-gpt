@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Download, RotateCcw, StepForward } from 'lucide-react';
 import type { ExtendedLabProps } from '../../types';
 import './GPTLab.css';
+import {Formula,MathContent} from '../Formula';
 
 export const toyVocabulary = ['〈起始〉', '春', '风', '吹', '过', '山', '海', '。'];
 // Authored transition scores. These are fixed pedagogical numbers, never trained weights.
@@ -89,7 +90,7 @@ export function GPTLab({ lesson, values, onChange }: ExtendedLabProps) {
       context: context.map(id => toyVocabulary[id]).join(''), temperature, topK, topP }]);
   };
   const idPrefix = `gpt-${lesson.id}`;
-  return <section className="gpt-lab" aria-label="GPT 生成与采样实验">
+  return <MathContent><section className="gpt-lab" aria-label="GPT 生成与采样实验">
     <div className="gpt-heading"><div><span className="gpt-eyebrow">生成实验 · 概率可追踪</span><h3>一步一步，看见下一个 token</h3></div><button className="gpt-icon" aria-label="重置 GPT 实验" onClick={() => { onChange({ ...values, gptTemperature: .8, gptTopK: 0, gptTopP: 1, gptSeed: 42, gptTarget: 3 }); setPrompt('春风'); resetSequence(); }}><RotateCcw size={17} /></button></div>
     <p className="gpt-disclosure"><strong>浏览器：固定概率表玩具模型。</strong>仅按最后一个 token 查 8×8 分数表；这里没有训练 Transformer，没有 GPT 权重，也不会理解任意提示。采样计算与真实生成使用相同的概率规则。</p>
     <div className="gpt-prompt"><label htmlFor={`${idPrefix}-prompt`}>编辑提示词 <small>词表：春 · 风 · 吹 · 过 · 山 · 海 · 。</small></label><input id={`${idPrefix}-prompt`} value={prompt} maxLength={40} onChange={event => { setPrompt(event.target.value); resetSequence(); }} placeholder="春风" /><p className="gpt-tokenization">提示 ID：{ids.length ? ids.join(' · ') : '0（空提示使用起始符）'}{unknown.length > 0 && <span role="status"> · 未知字符 {Array.from(new Set(unknown)).join('、')} 映射为 0，空白忽略</span>}</p></div>
@@ -102,7 +103,7 @@ export function GPTLab({ lesson, values, onChange }: ExtendedLabProps) {
     <p className="gpt-order">实际顺序：logits ÷ τ → softmax → top-k → 归一化 → top-p（包含跨阈值项）→ 再归一化。参数调整从下一步生效。</p>
     <div className="gpt-output" aria-live="polite" aria-atomic="true"><span className="gpt-output-label">当前序列 · {generated.length}/40 个新增 token</span><div><span>{prompt || '〈起始〉'}</span><strong data-testid="gpt-generated">{generated.map(i => toyVocabulary[i]).join('')}</strong><span className="gpt-caret" aria-hidden="true">▍</span></div><small>下一步仅看最后一个 token：{toyVocabulary[lastId]}（ID {lastId}）</small></div>
     <div className="gpt-actions"><button className="gpt-primary" onClick={generateOne} disabled={generated.length >= 40}><StepForward size={16} />生成一步</button><button onClick={resetSequence}>重置序列与随机步数</button></div>
-    <div className="gpt-distribution"><div className="gpt-table-caption"><h4>下一步候选分布</h4><span data-testid="gpt-probability-sum">Σ q = {distribution.final.reduce((a, b) => a + b, 0).toFixed(6)} · 保留 {distribution.kept.length}/8</span></div><div className="gpt-table-scroll"><table><caption className="gpt-sr-only">固定玩具模型的原分数、温度概率和过滤后采样概率</caption><thead><tr><th scope="col">Token / ID</th><th scope="col">Logit</th><th scope="col">温度概率</th><th scope="col">采样概率 q</th></tr></thead><tbody>{toyVocabulary.map((token, i) => <tr key={token} className={distribution.kept.includes(i) ? '' : 'gpt-filtered'}><th scope="row">{token} <small>{i}</small></th><td>{distribution.logits[i].toFixed(1)}</td><td>{percentage(distribution.tempered[i])}</td><td><div className="gpt-bar-track"><span style={{ width: `${distribution.final[i] * 100}%` }} /></div><span>{percentage(distribution.final[i])}{!distribution.kept.includes(i) && ' · 过滤'}</span></td></tr>)}</tbody></table></div></div>
+    <div className="gpt-distribution"><div className="gpt-table-caption"><h4>下一步候选分布</h4><span data-testid="gpt-probability-sum"><Formula block={false}>{`\\sum q=${distribution.final.reduce((a, b) => a + b, 0).toFixed(6)}`}</Formula> · 保留 {distribution.kept.length}/8</span></div><div className="gpt-table-scroll"><table><caption className="gpt-sr-only">固定玩具模型的原分数、温度概率和过滤后采样概率</caption><thead><tr><th scope="col">Token / ID</th><th scope="col">Logit</th><th scope="col">温度概率</th><th scope="col">采样概率 q</th></tr></thead><tbody>{toyVocabulary.map((token, i) => <tr key={token} className={distribution.kept.includes(i) ? '' : 'gpt-filtered'}><th scope="row">{token} <small>{i}</small></th><td>{distribution.logits[i].toFixed(1)}</td><td>{percentage(distribution.tempered[i])}</td><td><div className="gpt-bar-track"><span style={{ width: `${distribution.final[i] * 100}%` }} /></div><span>{percentage(distribution.final[i])}{!distribution.kept.includes(i) && ' · 过滤'}</span></td></tr>)}</tbody></table></div></div>
     <div className="gpt-loss"><label htmlFor={`${idPrefix}-target`}>假设真实下一个 token 是 <select id={`${idPrefix}-target`} value={target} onChange={event => set('gptTarget', Number(event.target.value))}>{toyVocabulary.slice(1).map((token, i) => <option key={token} value={i + 1}>{token}</option>)}</select></label><p>原模型 p = <strong>{targetProbability.toFixed(6)}</strong>，训练式损失 −ln p = <strong data-testid="gpt-loss">{(-Math.log(targetProbability)).toFixed(4)} nats</strong></p><p>解码后 q = {adjustedProbability.toFixed(6)}，−ln q = {adjustedProbability === 0 ? '∞（被过滤）' : (-Math.log(adjustedProbability)).toFixed(4)}。<small>解码过滤不改变原模型参数；训练损失用未加温、未截断的 p。</small></p></div>
     {traces.length > 0 && <div className="gpt-trace"><h4>最近生成记录 <small>最新在上，保留完整前缀快照</small></h4><ol reversed start={traces.length}>{traces.slice(-4).reverse().map((trace, i) => <li key={traces.length - i}><strong>{toyVocabulary[trace.token]}</strong><span>q={trace.probability.toFixed(5)} · r={trace.random.toFixed(5)} · τ={trace.temperature.toFixed(2)} · k={trace.topK} · p={trace.topP.toFixed(2)}</span><small>前缀：{trace.context}</small></li>)}</ol></div>}
     <button className="gpt-details-toggle" aria-expanded={openDetails} aria-controls={`${idPrefix}-shapes`} onClick={() => setOpenDetails(!openDetails)}>{openDetails ? '收起' : '展开'}真实 GPT 的张量形状对照</button>
@@ -110,5 +111,5 @@ export function GPTLab({ lesson, values, onChange }: ExtendedLabProps) {
     <a className="gpt-download" href="/downloads/tiny-gpt.zip" download><Download size={17} /><span><strong>下载真正可训练的本地微型 GPT</strong><small>自定义因果多头注意力 · CPU PyTorch · 原创 CC0 语料 · README 与 8 项自检</small></span></a>
     <p className="gpt-project-note">本地运行：<code>python tiny_gpt.py train --steps 250</code>，随后 <code>evaluate</code>、<code>generate</code>、<code>inspect</code>。仅能学习小语料的局部句式，不能提供可靠知识问答。</p>
     <div className="gpt-task"><strong>本章任务</strong><p>{lesson.labTask}</p></div>
-  </section>;
+  </section></MathContent>;
 }

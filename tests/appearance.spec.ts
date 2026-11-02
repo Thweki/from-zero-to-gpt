@@ -1,5 +1,6 @@
 import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect,type Locator,type Page} from '@playwright/test';
+import {expectFormula} from './math-helpers';
 
 // Measure rendered foreground/background, including inherited and alpha colors.
 // This catches the original bug: dark tokens existed but root text/canvas stayed light.
@@ -107,7 +108,7 @@ test('dark search, toast, phone navigation and experiment stay usable',async({pa
   await page.keyboard.press('Escape');
   await expect(page.locator('.sidebar')).not.toHaveClass(/is-open/);
   await page.getByRole('slider',{name:'a 的 x 分量'}).fill('4');
-  await expect(page.getByTestId('lab-result')).toHaveText('10');
+  await expectFormula(page.getByTestId('lab-result'),'\\mathbf a\\cdot\\mathbf b=10');
   await readable(page,['.lesson-title-row h1','.plot-equation']);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.screenshot({path:'artifacts/dark-appearance/mobile.png',fullPage:true});

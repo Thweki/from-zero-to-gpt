@@ -2,10 +2,19 @@ import type {Lesson} from './types';
 /** Freeze only the selected experiment's controls, never notes or editor code. */
 export function experimentContext(lesson:Lesson,root:Element|null,values:Record<string,number>){
   const clean=(text:string)=>text.replace(/\s+/g,' ').trim();
+  const text=(element?:Element|null)=>{
+    if(!element)return '';
+    const copy=element.cloneNode(true) as Element;
+    copy.querySelectorAll('.formula').forEach(formula=>{
+      const latex=formula.querySelector('annotation[encoding="application/x-tex"]')?.textContent;
+      if(latex)formula.replaceWith(` $${latex}$ `);
+    });
+    return copy.textContent||'';
+  };
   const relevant=lesson.lab==='function'?['x','kind']:lesson.lab==='linear'?['x','k','b']:['vector','dot'].includes(lesson.lab)?['ax','ay','bx','by']:Object.keys(values);
   const parameters=Object.fromEntries(relevant.filter(key=>values[key]!==undefined).map(key=>[key,values[key]]));
-  const equation=root?.querySelector('.plot-equation')?.textContent;
-  const result=root?.querySelector('[data-testid="lab-result"],.live-result strong,[data-testid="modern-lab-results"]')?.textContent||root?.querySelector('.live-result')?.textContent;
+  const equation=text(root?.querySelector('.plot-equation'));
+  const result=text(root?.querySelector('[data-testid="lab-result"],.live-result strong,[data-testid="modern-lab-results"]'))||text(root?.querySelector('.live-result'));
   const controls=Object.keys(parameters).length?'':Array.from(root?.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input[type="range"],input[type="number"],select')||[]).slice(0,12).map(control=>{
     const name=control.getAttribute('aria-label')||control.labels?.[0]?.textContent||'实验控件';
     const value=control instanceof HTMLSelectElement?control.selectedOptions[0]?.textContent||control.value:control.value;

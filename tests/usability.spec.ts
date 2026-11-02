@@ -1,6 +1,7 @@
 import {expectSectionAligned} from './layout-helpers';
 import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect} from '@playwright/test';
+import {expectFormula} from './math-helpers';
 
 test('平方函数有效端点在桌面和500×757窄屏桌面内可见',async({page})=>{
   await page.goto('/#/lesson/functions');
@@ -8,7 +9,7 @@ test('平方函数有效端点在桌面和500×757窄屏桌面内可见',async({
     await page.setViewportSize(viewport);
     for(const x of ['-3','3']){
       await page.getByRole('slider',{name:'输入 x',exact:true}).fill(x);
-      await expect(page.getByTestId('lab-result')).toHaveText(`f(${x}) = 9`);
+      await expectFormula(page.getByTestId('lab-result'),`f(${x}) = 9`);
       const geometry=await page.getByTestId('function-target').evaluate(n=>({cx:Number(n.getAttribute('cx')),cy:Number(n.getAttribute('cy')),r:Number(n.getAttribute('r'))}));
       await expect(page.getByTestId('function-projection')).toHaveAttribute('fill','none');
       expect(geometry.cy-geometry.r).toBeGreaterThan(5);

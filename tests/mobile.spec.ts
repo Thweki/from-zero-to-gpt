@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 import {expectNoPageOverflow,expectSectionAligned} from './layout-helpers';
+import {expectFormula} from './math-helpers';
 test('mobile navigation, interactive learning, checkpoint and no horizontal overflow',async({page})=>{
   await page.goto('/');await expect(page.locator('.stage-card')).toHaveCount(6);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
   await page.getByLabel('打开导航').click();await page.locator('.lesson-nav-link[href="#/lesson/linear"]').click();
   await page.getByRole('slider',{name:'斜率 k',exact:true}).fill('-1');
-  await expect(page.getByTestId('lab-result')).toHaveText('f(2) = -2');
+  await expectFormula(page.getByTestId('lab-result'),'f(2) = -2');
   for(const mode of ['直觉理解','数学推导','代码实现','深入研究']){
     await page.getByRole('tab',{name:mode}).click();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();

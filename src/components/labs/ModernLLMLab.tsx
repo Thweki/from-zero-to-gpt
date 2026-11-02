@@ -3,6 +3,7 @@ import { FlaskConical, RotateCcw } from 'lucide-react';
 import type { ExtendedLabProps } from '../../types';
 import './ModernLLMLab.css';
 import {FullscreenButton} from '../FullscreenButton';
+import {MathContent} from '../Formula';
 
 export const modernLabDefaults: Record<string, number> = {
   scalingBudget: 6, scalingParameters: 8,
@@ -191,12 +192,12 @@ export function pairedSummary(baseline: number[], treatment: number[]) {
 }
 
 function Metrics({ children }: { children: ReactNode }) { return <div className="modern-metrics" aria-live="polite">{children}</div>; }
-function Metric({ label, children }: { label: string; children: ReactNode }) { return <div className="modern-metric"><span>{label}</span><strong>{children}</strong></div>; }
+function Metric({ label, children }: { label: string; children: ReactNode }) { return <MathContent><div className="modern-metric"><span>{label}</span><strong>{children}</strong></div></MathContent>; }
 function Table({ caption, headings, rows }: { caption: string; headings: string[]; rows: ReactNode[][] }) {
-  return <div className="modern-table-wrap"><table className="modern-table"><caption>{caption}</caption><thead><tr>{headings.map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody></table></div>;
+  return <MathContent><div className="modern-table-wrap"><table className="modern-table"><caption>{caption}</caption><thead><tr>{headings.map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody></table></div></MathContent>;
 }
 function Distribution({ values, labels }: { values: number[]; labels: string[] }) {
-  return <div className="modern-distribution" aria-label="归一化概率分布">{values.map((p, i) => <div className="modern-probability" key={labels[i]}><span>{labels[i]}</span><div className="modern-bar-track"><div className="modern-bar-fill" style={{ width: `${100 * p}%` }} /></div><output>{percent(p)}</output></div>)}</div>;
+  return <MathContent><div className="modern-distribution" aria-label="归一化概率分布">{values.map((p, i) => <div className="modern-probability" key={labels[i]}><span>{labels[i]}</span><div className="modern-bar-track"><div className="modern-bar-fill" style={{ width: `${100 * p}%` }} /></div><output>{percent(p)}</output></div>)}</div></MathContent>;
 }
 
 export function ModernLLMLab({ lesson, values, onChange, onObserve }: ExtendedLabProps) {
@@ -293,10 +294,10 @@ export function ModernLLMLab({ lesson, values, onChange, onObserve }: ExtendedLa
     content = <><Metrics><Metric label="配对均值差 / 分">{fixed(r.mean, 4)}</Metric><Metric label="差值均值的标准误">{fixed(r.se, 4)}</Metric><Metric label="正态近似教学区间">[{fixed(r.interval[0], 3)}, {fixed(r.interval[1], 3)}]</Metric></Metrics><Table caption="合成配对记录：共享运行条件，一次只比较一项改动" headings={['记录', '基线分数', '改动分数', '配对差']} rows={baseline.map((b, i) => [i + 1, b, treatment[i], fixed(r.differences[i], 3)])} /><p className="modern-detail">没有真实实验被执行。正式复现还需固定数据、模型版本、预算、随机种子、评测脚本，并记录每次运行日志与失败案例。</p></>;
   }
 
-  return <section ref={ref} className="modern-lab" aria-label={`${lesson.title}交互实验`} data-modern-lesson={lesson.id}>
+  return <MathContent><section ref={ref} className="modern-lab" aria-label={`${lesson.title}交互实验`} data-modern-lesson={lesson.id}>
     <div className="modern-header"><span><FlaskConical size={16} />计算实验 <small>LIVE</small></span><div><button type="button" aria-label="重置现代 LLM 实验参数" onClick={() => onChange({ ...modernLabDefaults })}><RotateCcw size={16} /></button><FullscreenButton target={ref} label="全屏现代 LLM 实验"/></div></div>
     <div className="modern-heading"><h3>{title}</h3><p>{assumption}</p></div>
     <div className="modern-layout"><div className="modern-controls">{controls}</div><div className="modern-results" data-testid="modern-lab-results">{content}</div></div>
     <div className="modern-task"><strong>试一试</strong><p>{lesson.labTask}</p>{onObserve&&<button type="button" className="text-button observation-trigger" onClick={event=>onObserve(event.currentTarget)}>记录观察</button>}</div>
-  </section>;
+  </section></MathContent>;
 }
