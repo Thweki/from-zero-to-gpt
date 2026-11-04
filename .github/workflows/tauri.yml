@@ -79,6 +79,13 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - name: Build desktop bundles
         run: npm run desktop:build -- ${{ matrix.args }}
+      - name: Install and validate the Linux package
+        if: matrix.name == 'Linux'
+        shell: bash
+        run: |
+          sudo dpkg -i src-tauri/target/release/bundle/deb/*.deb
+          test "$(dpkg-query -W -f='${Version}' from-zero-to-gpt)" = "$(node -p 'require("./package.json").version')"
+          test -x /usr/bin/from-zero-to-gpt
       - name: Collect named release assets
         run: node scripts/release-assets.mjs stage ${{ matrix.name }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
