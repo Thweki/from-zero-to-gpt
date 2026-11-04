@@ -70,7 +70,7 @@ async function rasterPreview(graphic:Graphic):Promise<string|undefined> {
 
 export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson;resetKey:string;values:Record<string,number>;onPick:(selection:TutorSelection)=>void}) {
   const [pick,setPick] = useState<Pick|null>(null), [busy,setBusy] = useState(false);
-  const popup = useRef<HTMLDivElement>(null), generation = useRef(0), transferring=useRef(false), dismissedSelection=useRef<string|null>(null);
+  const popup = useRef<HTMLDivElement>(null), generation = useRef(0), transferring=useRef(false), dismissedSelection=useRef<string|null>(null), graphicSelection=useRef<Graphic|null>(null);
   useEffect(() => {
     generation.current++;transferring.current=false;dismissedSelection.current=null;setPick(null);setBusy(false);
     const root = document.getElementById('main-content');
@@ -96,12 +96,15 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
       setPick({selection:{kind:'text',title:lesson.title,text:text.length>3000?`${text.slice(0,2960)}\n（选区较长，以上为前 2960 字。）`:text},x:point?.x??rect.right,y:point?.y??rect.bottom});
       return true;
     };
+    const chooseGraphic=(graphic:Graphic,x:number,y:number)=>{
+      graphicSelection.current=graphic;rememberScroll();setPick({graphic,x,y});
+    };
     const pointerUp = (event:PointerEvent) => {
       if (popup.current?.contains(event.target as Node)) return;
       clearTimeout(timer);
       if (read({x:event.clientX,y:event.clientY},true)) return;
       const target = event.target instanceof Element ? event.target.closest(graphicSelector) : null;
-      if (target && eligible(target) && !target.closest('button,a,[role="button"]')) {rememberScroll();setPick({graphic:target as Graphic,x:event.clientX,y:event.clientY});}
+      if (target && eligible(target) && !target.closest('button,a,[role="button"]')) chooseGraphic(target as Graphic,event.clientX,event.clientY);
     };
     const selectionChange = () => {
       clearTimeout(timer);
@@ -114,16 +117,20 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
         event.preventDefault();requestAnimationFrame(()=>popup.current?.querySelector('button')?.focus());return;
       }
       if (event.key === 'Enter' && event.target instanceof Element && event.target.matches(graphicSelector)) {
-        event.preventDefault();const rect=event.target.getBoundingClientRect();
-        rememberScroll();
-        setPick({graphic:event.target as Graphic,x:rect.right,y:rect.bottom});
+        event.preventDefault();event.target.scrollIntoView({block:'center',behavior:'instant'});const rect=event.target.getBoundingClientRect();
+        chooseGraphic(event.target as Graphic,rect.right,rect.bottom);
         requestAnimationFrame(()=>popup.current?.querySelector('button')?.focus());
       }
     };
     const dismiss = (event:Event) => {
       if (transferring.current || popup.current?.contains(event.target as Node)) return;
-      // Focusing a graph can queue a scroll event after pointerup even though
-      // the viewport already moved before the popup was positioned.
+      const graphic=graphicSelection.current;
+      if(event.type==='scroll'&&graphic&&popup.current?.dataset.kind!=='text'){
+        const rect=graphic.getBoundingClientRect();
+        if(graphic.isConnected&&rect.bottom>=0&&rect.top<=innerHeight&&rect.right>=0&&rect.left<=innerWidth){
+          rememberScroll();setPick(current=>current?.graphic===graphic?{...current,x:rect.right,y:rect.bottom}:current);return;
+        }
+      }
       if(event.type==='scroll'&&event.target===document&&window.scrollX===scrollX&&window.scrollY===scrollY)return;
       dismissedSelection.current=window.getSelection()?.toString()||'';
       generation.current++;setPick(null);setBusy(false);
@@ -160,7 +167,7 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
     if (token!==generation.current) return;
     onPick(selection);window.getSelection()?.removeAllRanges();transferring.current=false;setPick(null);setBusy(false);
   };
-  return createPortal(<div ref={popup} className="tutor-selection-popup" role="toolbar" aria-label="选中内容操作" aria-keyshortcuts="Alt+Enter" style={{left,top}} onPointerDown={event=>event.preventDefault()}>
+  return createPortal(<div ref={popup} data-kind={pick.graphic?'image':'text'} className="tutor-selection-popup" role="toolbar" aria-label="选中内容操作" aria-keyshortcuts="Alt+Enter" style={{left,top}} onPointerDown={event=>event.preventDefault()}>
     <button type="button" disabled={busy} aria-label="将选中内容带到 AI 导师" onClick={()=>void transfer()}>{busy?<LoaderCircle size={15}/>:<Sparkles size={15}/>}<span>{busy?'正在带入…':'问导师'}</span></button>
     <button type="button" className="selection-dismiss" aria-label="取消选中内容操作" onClick={()=>{dismissedSelection.current=window.getSelection()?.toString()||'';generation.current++;transferring.current=false;setPick(null);setBusy(false);}}><X size={15}/></button>
   </div>,document.fullscreenElement || document.body);

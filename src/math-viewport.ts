@@ -1,7 +1,13 @@
 /** Equal x/y scale, fitted to the whole permitted input interval, not one sample. */
+export function functionPlotViewport(fn:(x:number)=>number,currentX:number){
+  const samples=[-3,0,3,currentX].map(fn);
+  const originY=samples.every(y=>y>=0)?275:samples.every(y=>y<=0)?35:155;
+  const availableY=originY===155?130:260;
+  const extent=Math.max(5,Math.abs(currentX),...samples.map(Math.abs));
+  return {originY,unit:Math.min(60,availableY/extent)};
+}
 export function functionPlotScale(fn:(x:number)=>number,currentX:number){
-  const extent=Math.max(5,Math.abs(currentX),...[-3,0,3,currentX].map(x=>Math.abs(fn(x))));
-  return Math.min(26,130/extent);
+  return functionPlotViewport(fn,currentX).unit;
 }
 export function axisTicks(halfPixels:number,unit:number){
   const limit=halfPixels/unit;

@@ -109,6 +109,18 @@ test('keyboard selection shortcut and focused graph both reach the same composer
  await expect(page.locator('.tutor-composer .tutor-selection-card')).toContainText('已选图表');
 });
 
+test('graph popup follows intentional scroll and closes after the graph leaves the viewport',async({page})=>{
+ await setup(page);
+ const graphic=page.getByRole('img',{name:'函数图像，随参数实时更新'});
+ await graphic.focus();await graphic.press('Enter');await expect(ask(page)).toBeFocused();
+ const before=(await page.getByRole('toolbar',{name:'选中内容操作'}).boundingBox())!;
+ await page.mouse.wheel(0,140);
+ await expect.poll(async()=>Math.abs(((await page.getByRole('toolbar',{name:'选中内容操作'}).boundingBox())?.y??before.y)-before.y)).toBeGreaterThan(20);
+ await expect(ask(page)).toBeVisible();
+ await page.evaluate(()=>scrollTo(0,document.documentElement.scrollHeight));
+ await expect(ask(page)).toHaveCount(0);
+});
+
 test('fullscreen graph selection exits fullscreen and opens the visible mentor',async({page})=>{
  await setup(page);
  await page.getByRole('button',{name:'全屏实验',exact:true}).click();

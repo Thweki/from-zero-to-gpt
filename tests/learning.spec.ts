@@ -21,7 +21,7 @@ test('map, real computations, shared context, persistent checkpoint and theme',a
   await expect(page.getByRole('heading',{name:'函数是什么',exact:true})).toBeVisible();
   await page.getByRole('slider',{name:'输入 x',exact:true}).fill('-2');
   await expectFormula(page.getByTestId('lab-result'),'f(-2) = 4');
-  await page.getByRole('button',{name:'打开导航',exact:true}).click();await page.locator('.lesson-nav-link[href="#/lesson/linear"]').click();
+  await page.locator('.lesson-nav-link[href="#/lesson/linear"]').click();
   await page.getByRole('slider',{name:'斜率 k',exact:true}).fill('2');
   await page.getByRole('slider',{name:'截距 b',exact:true}).fill('1');
   await expectFormula(page.getByTestId('lab-result'),'f(2) = 5');
@@ -94,6 +94,21 @@ test('JSON export and import restore actual data; invalid input leaves data inta
   await expect(page.getByRole('status')).toContainText('学习数据已恢复');
   await page.goto('/#/lesson/functions');await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('从文件恢复的思路');
   await page.reload();await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('从文件恢复的思路');
+});
+test('save indicator marks every new edit pending before confirming persistence',async({page})=>{
+  await page.goto('/#/lesson/functions');await openNotebook(page);
+  const input=page.getByLabel('当前章节随手笔记');
+  for(let i=0;i<3;i++){
+    const note=`连续编辑保存状态 ${i}`;
+    const immediate=await input.evaluate((element,value)=>{
+      const setter=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')!.set!;
+      setter.call(element,value);element.dispatchEvent(new Event('input',{bubbles:true}));
+      return document.querySelector('.autosave')!.textContent;
+    },note);
+    expect(immediate).toBe('保存中');
+    await expect(page.locator('.autosave')).toHaveText('已本地保存');
+    await expect.poll(()=>storedProgress(page,'functions')).toMatchObject({note});
+  }
 });
 test('vector and dot-product sliders use real arithmetic',async({page})=>{
   await page.goto('/#/lesson/vectors');

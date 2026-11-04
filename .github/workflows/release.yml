@@ -1,0 +1,78 @@
+name: Desktop release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Require matching version tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          test "$REF_TYPE" = tag
+          node scripts/release-assets.mjs version "$RELEASE_TAG"
+          test -f "docs/releases/$RELEASE_TAG.md"
+
+  checks:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+
+  builds:
+    needs: version
+    uses: ./.github/workflows/tauri.yml
+    with:
+      build_android: false
+
+  publish:
+    needs: [checks, builds]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: tauri-*-${{ github.sha }}
+          merge-multiple: true
+          path: artifacts/desktop-release/
+      - name: Verify complete asset set and generate checksums
+        run: node scripts/release-assets.mjs verify
+      - name: Upload all assets to a draft, then publish
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft > "$RUNNER_TEMP/release.json"; then
+            node -e 'if (!JSON.parse(require("fs").readFileSync(process.argv[1])).isDraft) throw new Error("Refusing to overwrite a published release")' "$RUNNER_TEMP/release.json"
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "From Zero to GPT $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
+          fi
+          gh release upload "$RELEASE_TAG" artifacts/desktop-release/* --clobber
+          gh release edit "$RELEASE_TAG" --draft=false --latest

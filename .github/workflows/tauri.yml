@@ -1,0 +1,129 @@
+name: Tauri application builds
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      build_android:
+        description: Also build the experimental Android APK
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      build_android:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tauri-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: ${{ matrix.name }} unsigned application
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-15
+            args: --target universal-apple-darwin --bundles app,dmg --ci -- --locked
+          - name: Windows
+            os: windows-2025
+            args: --bundles nsis --ci -- --locked
+          - name: Linux
+            os: ubuntu-24.04
+            args: --bundles appimage,deb --ci -- --locked
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install Linux WebView dependencies
+        if: matrix.name == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils
+      - name: Select stable Rust
+        run: rustup update stable && rustup default stable
+      - name: Install both macOS architectures
+        if: matrix.name == 'macOS'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - run: npm ci
+      - name: Test native code
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - name: Build desktop bundles
+        run: npm run desktop:build -- ${{ matrix.args }}
+      - name: Collect named release assets
+        run: node scripts/release-assets.mjs stage ${{ matrix.name }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tauri-${{ matrix.name }}-${{ github.sha }}
+          path: artifacts/desktop-release/*
+          if-no-files-found: error
+          retention-days: 14
+
+  android:
+    if: ${{ inputs.build_android == true }}
+    name: Android unsigned APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      NDK_VERSION: 28.2.13676358
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Select Rust Android targets
+        run: |
+          rustup update stable
+          rustup default stable
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+      - name: Install Android SDK and NDK
+        run: |
+          sdkmanager --licenses >/dev/null <<EOF
+          y
+          y
+          y
+          y
+          y
+          y
+          y
+          y
+          y
+          y
+          EOF
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;${NDK_VERSION}"
+          echo "NDK_HOME=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+      - run: npm ci
+      - run: npm run android:init
+      - name: Build Android APK
+        run: npm run android:build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tauri-android-${{ github.sha }}
+          path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Record artifact scope
+        run: echo 'Unsigned build artifacts only. No release was created and no signing credentials were used.' >> "$GITHUB_STEP_SUMMARY"

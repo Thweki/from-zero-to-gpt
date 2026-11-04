@@ -129,3 +129,25 @@ test('dark matrix vectors and attention heatmaps use visible colors and preserve
   await readable(page,['.tf-heat']);
   await page.locator('.tf-lab').scrollIntoViewIfNeeded();await page.screenshot({path:'artifacts/dark-appearance/attention.png'});
 });
+
+test('glass has real blur over an ambient layer, opaque reading, and reduced-transparency fallback',async({page})=>{
+ await page.goto('/#/lesson/functions');
+ await expect(page.locator('.sidebar')).toBeAttached();
+ for(const theme of ['light','dark'] as const){
+  if(theme==='dark')await page.getByRole('button',{name:'切换深色外观'}).click();
+  const metrics=await page.evaluate(()=>({
+   sidebarFilter:getComputedStyle(document.querySelector('.sidebar')!).backdropFilter,
+   topbarFilter:getComputedStyle(document.querySelector('.topbar')!).backdropFilter,
+   ambient:getComputedStyle(document.querySelector('.app-shell')!,'::before').backgroundImage,
+   mainBackground:getComputedStyle(document.querySelector('main')!).backgroundColor,
+  }));
+  expect(metrics.sidebarFilter).toContain('blur(');expect(metrics.topbarFilter).toContain('blur(');
+  expect(metrics.ambient).toContain('radial-gradient');
+  expect(metrics.mainBackground).toBe(theme==='dark'?'rgb(32, 35, 31)':'rgb(247, 247, 242)');
+ }
+ await page.setViewportSize({width:390,height:844});
+ const client=await page.context().newCDPSession(page);
+ await client.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+ await expect.poll(()=>page.evaluate(()=>getComputedStyle(document.querySelector('.sidebar')!).backdropFilter)).toBe('none');
+ expect(await page.locator('.sidebar').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(38, 42, 37)');
+});

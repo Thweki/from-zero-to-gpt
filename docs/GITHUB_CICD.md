@@ -1,6 +1,6 @@
 # GitHub CI、交付与现有 Sites 的边界
 
-更新：2026-10-31。项目源码仓库为 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt)，默认分支为 `main`，当前本地 `origin` 指向此 GitHub 仓库。应用、原创教材和独立工程从本次版本起采用 GPL-2.0-only；完整历史保留，第三方声明见 [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md)。仓库公开状态以 GitHub 页面为准。
+更新：2026-11-04。项目源码仓库为 [Thweki/from-zero-to-gpt](https://github.com/Thweki/from-zero-to-gpt)，默认分支为 `main`，当前本地 `origin` 指向此 GitHub 仓库。应用、原创教材和独立工程从本次版本起采用 GPL-2.0-only；完整历史保留，第三方声明见 [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md)。仓库公开状态以 GitHub 页面为准。
 
 `.openai/hosting.json` 记录的是既有站点的绑定，不是可供其他贡献者复用的部署身份。开源源码与站点生产部署是独立操作；自行部署应使用自己的站点及凭证，不应把运行时密钥写入仓库或 Actions 日志。
 
@@ -49,11 +49,11 @@ npm run package:delivery
 
 交付脚本要求工作区干净，CI中的checkout与GITHUB_SHA一致。校验拒绝被修改的归档、错误提交、路径逃逸、错误Site身份和缺失运行文件。直接运行 `node scripts/verify-delivery.mjs <产物目录>` 可重新核对。产物是构建输出，不包含环境变量、Git配置、API密钥、node_modules、虚拟环境、训练权重或学习备份。
 
-Actions上传的候选产物保留7天，verified产物14天；浏览器结果保留7天。它们沿用仓库的访问控制，仓库公开后工作流、日志和产物也可能公开；不要在其中保存私人数据或凭证。此工作流不会创建GitHub Release、GitHub Pages或新站点。
+Actions上传的候选产物保留7天，verified产物14天；浏览器结果保留7天。它们沿用仓库的访问控制，仓库公开后工作流、日志和产物也可能公开；不要在其中保存私人数据或凭证。`ci.yml` 不创建 GitHub Release、GitHub Pages 或新站点；桌面发布由下述独立工作流负责。
 
 ## CD实际范围
 
-当前是**通过CI门槛后的自动产物交付**，不是自动上线。既有Sites流程要求使用站点自己的源仓库与身份，保存匹配源码及归档的版本，再部署返回的版本ID。当前本地 `origin` 是GitHub仓库，不能把它视为Sites源仓库。这里没有配置可供GitHub Actions使用的Sites持续部署身份，不能把短时源仓库凭证当作持久CD凭证。
+网站部分是**通过CI门槛后的自动产物交付**；桌面安装包通过下述 Release 流程自动公开发布。既有Sites流程要求使用站点自己的源仓库与身份，保存匹配源码及归档的版本，再部署返回的版本ID。当前本地 `origin` 是GitHub仓库，不能把它视为Sites源仓库。这里没有配置可供GitHub Actions使用的Sites持续部署身份，不能把短时源仓库凭证当作持久CD凭证。
 
 贡献时从当前 `main` 建分支并提交PR；维护者推送前应核对目标remote、远程分支及待推送提交，使用普通push，不强推覆盖他人内容。推送GitHub不会自动修改Sites源仓库或现有生产部署。分发构建产物时保留GPL与第三方声明，并提供与清单提交一致的相应源码和构建文件。
 
@@ -70,3 +70,18 @@ Actions上传的候选产物保留7天，verified产物14天；浏览器结果�
 `check-repository.mjs` 是仓库文件策略及常见提供商凭证格式检查，不是对所有秘密或个人信息的完备识别。不得靠忽略整个tests目录或把匹配行打印到日志来处理发现；需要逐项核对，真实泄漏必须先处理再推送。本轮仅记录命中规则／路径和扫描统计，不输出凭证。
 
 浏览器手机参数和触控仍是Chromium模拟，不能声称完成iOS／Android实机或软键盘验收。完整CI的真实GitHub托管环境结果以实际运行及回执为准，本地测试不代替该结果。
+
+## 桌面 Release
+
+`tauri.yml` 对 main / PR 构建 Linux x86_64（AppImage、DEB）、macOS Universal（Apple Silicon + Intel DMG）、Windows x64（NSIS）。每个平台先运行 Rust 测试，构建使用 Cargo 锁文件，产物保留 14 天。Android 仅在手动运行时选择 `build_android`；不阻塞桌面发行。
+
+`release.yml` 的 `v*` 标签触发发布，手动重试也必须选择版本标签。流程先检查 `package.json`、npm 锁文件、Tauri 配置、Cargo 清单及锁文件的版本，再复用完整 `ci.yml` 与桌面构建。发布 job 必须等待两者成功，严格检查同次运行的四个安装包及格式，生成 `SHA256SUMS` 和源码清单，附上许可证及第三方说明，先上传草稿再公开。只有发布 job 申请 `contents: write`，使用当前运行的 `GITHUB_TOKEN`，无需个人发布令牌。已公开版本拒绝覆盖，失败的草稿可重试。
+
+发布步骤：
+
+1. 同步上述五处版本，更新 README 和 `docs/releases/vX.Y.Z.md`。
+2. 运行 `npm run check`、`npm test`、`npm run test:tauri`、`npm run test:release`、`npm run validate:course` 和 `npm run build`，检查工作流语法。
+3. 提交并推送源码，再创建同版本标签：`git tag -a vX.Y.Z -m "Release vX.Y.Z"`，`git push origin vX.Y.Z`。
+4. 等待 [Desktop release](https://github.com/Thweki/from-zero-to-gpt/actions/workflows/release.yml) 完成，核对 Release 的四个安装包、源码 SHA 与 SHA-256。
+
+安装包不包含正式 Apple / Windows 发布签名。CI 证明构建、测试和文件校验成功，不代表三平台全部用户界面、系统版本及安装环境均已实机验收。桌面 Release 不修改网站生产部署。

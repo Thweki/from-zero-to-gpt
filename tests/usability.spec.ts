@@ -3,20 +3,25 @@ import {openNotebook,closeNotebook} from './focus-helpers';
 import {test,expect} from '@playwright/test';
 import {expectFormula} from './math-helpers';
 
-test('平方函数有效端点在桌面和500×757窄屏桌面内可见',async({page})=>{
+test('平方函数在桌面和窄屏保持数值、有效端点与紧凑坐标范围',async({page})=>{
   await page.goto('/#/lesson/functions');
   for(const viewport of [{width:1440,height:1000},{width:500,height:757}]){
     await page.setViewportSize(viewport);
+    const endpointXs:number[]=[];
     for(const x of ['-3','3']){
       await page.getByRole('slider',{name:'输入 x',exact:true}).fill(x);
       await expectFormula(page.getByTestId('lab-result'),`f(${x}) = 9`);
       const geometry=await page.getByTestId('function-target').evaluate(n=>({cx:Number(n.getAttribute('cx')),cy:Number(n.getAttribute('cy')),r:Number(n.getAttribute('r'))}));
+      endpointXs.push(geometry.cx);
       await expect(page.getByTestId('function-projection')).toHaveAttribute('fill','none');
       expect(geometry.cy-geometry.r).toBeGreaterThan(5);
       expect(geometry.cy+geometry.r).toBeLessThan(305);
       expect(geometry.cx-geometry.r).toBeGreaterThan(6);
       expect(geometry.cx+geometry.r).toBeLessThan(631);
     }
+    expect(endpointXs[1]-endpointXs[0]).toBeGreaterThan(170);
+    const tickLabels=await page.getByRole('img',{name:'函数图像，随参数实时更新'}).locator('text').allTextContents();
+    expect(tickLabels).toContain('5');expect(tickLabels).not.toContain('15');expect(tickLabels).not.toContain('20');
     await closeNotebook(page);await page.getByText('本章定位',{exact:true}).click();await page.getByRole('button',{name:'跳到交互实验'}).click();
     await expect(page.locator('#lesson-experiment')).toBeFocused();
     await expectSectionAligned(page,'lesson-experiment');

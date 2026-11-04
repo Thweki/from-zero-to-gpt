@@ -1,13 +1,16 @@
 import {describe,it,expect} from 'vitest';
-import {functionPlotScale,axisTicks} from './math-viewport';
+import {functionPlotScale,functionPlotViewport,axisTicks} from './math-viewport';
 import {analyzePythonFailure} from './python-errors';
 
 describe('函数视口覆盖有效参数',()=>{
-  it('修复 (-3,9)，并让移动输入时的比例保持稳定',()=>{
+  it('平方函数利用非负纵向空间，并让移动输入时的比例保持稳定',()=>{
     expect(155-9*26).toBeLessThan(5); // Recorded defect in the former fixed viewport.
     const fn=(x:number)=>x*x;
-    const unit=functionPlotScale(fn,-3);
-    expect(155-9*unit).toBeGreaterThanOrEqual(15);
+    const viewport=functionPlotViewport(fn,-3),unit=viewport.unit;
+    expect(viewport.originY).toBe(275);
+    expect(275-9*unit).toBeGreaterThanOrEqual(15);
+    expect(unit).toBeGreaterThan((130/9)*1.9);
+    expect(Math.max(...axisTicks(285,unit).map(Math.abs))).toBeLessThanOrEqual(10);
     expect(functionPlotScale(fn,3)).toBe(unit);
     expect(functionPlotScale(fn,0)).toBe(unit);
   });
@@ -15,7 +18,7 @@ describe('函数视口覆盖有效参数',()=>{
     const functions=[(x:number)=>x*x,(x:number)=>Math.abs(x)];
     for(const k of [-3,-2,0,1,3])for(const b of [-4,0,4])functions.push((x:number)=>k*x+b);
     for(const fn of functions)for(let i=-30;i<=30;i++){
-      const x=i/10,unit=functionPlotScale(fn,x),cx=320+x*unit,cy=155-fn(x)*unit;
+      const x=i/10,viewport=functionPlotViewport(fn,x),unit=viewport.unit,cx=320+x*unit,cy=viewport.originY-fn(x)*unit;
       expect(cx).toBeGreaterThan(12);expect(cx).toBeLessThan(625);
       expect(cy).toBeGreaterThan(11);expect(cy).toBeLessThan(299);
     }

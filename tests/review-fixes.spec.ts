@@ -17,7 +17,7 @@ test('a beginner can finish three recommended activities without optional work o
  await page.getByRole('slider',{name:'输入 x',exact:true}).fill('-2');
  await page.getByRole('button',{name:'3 · 自测理解',exact:true}).click();
  await page.locator('.quiz-options input').nth(1).check();await page.getByRole('button',{name:'检查我的理解',exact:true}).click();
- await expect(page.getByRole('region',{name:'新手推荐路径'})).toContainText('推荐的这一小轮，已经完成');
+ await expect(page.getByRole('region',{name:'新手推荐路径'})).toContainText('这一小轮已完成');
  await expect(evidence(page)).toContainText('已阅读');await expect(evidence(page)).toContainText('已验证');
  await expect(evidence(page)).toContainText('未验证');await expect(evidence(page)).toContainText('尚未自评');
  await page.getByRole('tab',{name:'代码实现',exact:true}).click();await expect(page.locator('.mode-estimate')).toContainText('可选扩展');

@@ -1,152 +1,103 @@
-/* Semantic colors shared by the workspace and lazy-loaded experiment panels. */
 :root {
   color-scheme: light;
-  --bg: #f0efe9;
-  --panel: #f6f5ef;
-  --panel-soft: #eeeee7;
-  --panel-raised: #e6e7de;
-  --text: #343830;
-  --secondary: #5c6257;
-  --muted: #656c60;
-  --border: #dadcd1;
-  --control-border: #8b9382;
-  --accent: #56664e;
-  --accent-dark: #46573f;
-  --accent-soft: #e6ebdf;
-  --action-bg: #e0e7d7;
-  --action-hover: #d5dfc9;
-  --on-accent: #35462f;
-  --grid: #dfe2d7;
-  --axis: #929c88;
-  --hero: #e9ecdf;
-  --hero-ink: #65765b;
-  --plot-secondary: #896239;
-  --plot-tertiary: #487575;
-  --warning: #8a631b;
-  --error: #a83d49;
-  --error-bg: #fff0f1;
-  --success: #2d644f;
-  --success-bg: #edf7f1;
-  --warning-bg: #fff6e7;
-  --editor-bg: #242722;
-  --editor-text: #ced3c7;
-  --editor-muted: #a3ad9c;
-  --sidebar-bg: #eceee5;
-  --sidebar-text: #505b49;
-  --sidebar-muted: #606b59;
-  --sidebar-active: #dfe6d5;
-  --chrome-bg: #f0efe9;
-  --shadow: 0 16px 48px #202c4b0a, 0 2px 8px #202c4b04;
+  --bg: #f7f7f2;
+  --panel: #fdfdf9;
+  --panel-soft: #f1f3ed;
+  --panel-raised: #e9ede5;
+  --text: #29332d;
+  --secondary: #5c675f;
+  --muted: #707a71;
+  --border: #dfe4dc;
+  --control-border: #a7b2a7;
+  --accent: #346b4e;
+  --accent-dark: #28583f;
+  --accent-soft: #e7efe7;
+  --action-bg: #315f47;
+  --action-hover: #284f3b;
+  --on-accent: #f2f5ed;
+  --grid: #e2e7df;
+  --axis: #a3aea1;
+  --hero: #edf1e8;
+  --hero-ink: #54745e;
+  --plot-secondary: #987044;
+  --plot-tertiary: #527c78;
+  --warning: #806020;
+  --error: #9c3e45;
+  --error-bg: #f9eded;
+  --success: #2f654d;
+  --success-bg: #eaf3ec;
+  --warning-bg: #f7f0df;
+  --editor-bg: #202823;
+  --editor-text: #d0d5c9;
+  --editor-muted: #98a696;
+  --sidebar-bg: #eef1ea;
+  --sidebar-text: #46534a;
+  --sidebar-muted: #68766a;
+  --sidebar-active: #dfe9dd;
+  --glass-bg: rgb(247 249 244 / 58%);
+  --glass-highlight: rgb(255 255 255 / 62%);
+  --ambient: radial-gradient(ellipse 620px 430px at 4% 0%, rgb(174 195 157 / 88%), transparent 72%), radial-gradient(ellipse 700px 420px at 100% 4%, rgb(230 207 163 / 90%), transparent 72%), radial-gradient(ellipse 520px 500px at 12% 100%, rgb(153 184 151 / 78%), transparent 74%);
+  --chrome-bg: #f7f7f2;
+  --scrim: rgb(28 37 31 / 32%);
+  --shadow: 0 18px 55px rgb(35 49 39 / 10%), 0 2px 10px rgb(35 49 39 / 4%);
+  --glass-shadow: 0 12px 40px rgb(35 49 39 / 7%);
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #1b1d1a;
-  --panel: #22251f;
-  --panel-soft: #282c25;
-  --panel-raised: #30362c;
-  --text: #c8cdbf;
-  --secondary: #b0b8a5;
-  --muted: #a1ab96;
-  --border: #373e32;
-  --control-border: #69755f;
-  --accent: #acb69e;
-  --accent-dark: #bac4ac;
-  --accent-soft: #2d3628;
-  --action-bg: #343f2e;
-  --action-hover: #404d39;
-  --on-accent: #d0d7c6;
-  --grid: #343a2f;
-  --axis: #818f73;
-  --hero: #262e22;
-  --hero-ink: #99a78b;
-  --plot-secondary: #c5a67e;
-  --plot-tertiary: #90b8b0;
-  --warning: #e8c68d;
-  --error: #f0b5ba;
-  --error-bg: #35252c;
-  --success: #b8ddc8;
-  --success-bg: #20332e;
-  --warning-bg: #332e24;
-  --editor-bg: #1a1e17;
-  --editor-text: #c8cfbf;
-  --editor-muted: #a1ad96;
-  --sidebar-bg: #20241c;
-  --sidebar-text: #b2bda5;
-  --sidebar-muted: #9ba98e;
-  --sidebar-active: #303b28;
-  --chrome-bg: #1b1d1a;
-  --shadow: 0 20px 64px #0008, 0 2px 8px #0004;
-  scrollbar-color: #5b6980 var(--bg);
+  --bg: #20231f;
+  --panel: #262a25;
+  --panel-soft: #2b302a;
+  --panel-raised: #323830;
+  --text: #cbc7bb;
+  --secondary: #afaea2;
+  --muted: #999d91;
+  --border: #3b4239;
+  --control-border: #697567;
+  --accent: #86b798;
+  --accent-dark: #a1c5ac;
+  --accent-soft: #2d3b30;
+  --action-bg: #38674e;
+  --action-hover: #43775b;
+  --on-accent: #e0e8dc;
+  --grid: #383f36;
+  --axis: #778472;
+  --hero: #293229;
+  --hero-ink: #86a68d;
+  --plot-secondary: #c6a476;
+  --plot-tertiary: #8fb5aa;
+  --warning: #dbc18f;
+  --error: #e3aaad;
+  --error-bg: #38282a;
+  --success: #b2d2ba;
+  --success-bg: #26382d;
+  --warning-bg: #373225;
+  --editor-bg: #191e1a;
+  --editor-text: #c9cabe;
+  --editor-muted: #969f90;
+  --sidebar-bg: #242923;
+  --sidebar-text: #b8bbae;
+  --sidebar-muted: #999f92;
+  --sidebar-active: #324235;
+  --glass-bg: rgb(35 40 34 / 64%);
+  --glass-highlight: rgb(255 255 255 / 14%);
+  --ambient: radial-gradient(ellipse 640px 450px at 3% 0%, rgb(92 125 81 / 58%), transparent 72%), radial-gradient(ellipse 700px 430px at 100% 5%, rgb(128 103 66 / 52%), transparent 72%), radial-gradient(ellipse 540px 500px at 12% 100%, rgb(63 105 74 / 60%), transparent 74%);
+  --chrome-bg: #20231f;
+  --scrim: rgb(8 12 9 / 66%);
+  --shadow: 0 22px 65px rgb(0 0 0 / 38%), 0 2px 10px rgb(0 0 0 / 20%);
+  --glass-shadow: 0 14px 44px rgb(0 0 0 / 24%);
+  scrollbar-color: #596458 var(--bg);
 }
 
-/* The quiet frame, reading canvas and raised controls have distinct surfaces. */
-:root[data-theme='dark'] .sidebar {
-  background: var(--sidebar-bg);
-  border-right-color: var(--border);
-}
-:root[data-theme='dark'] .topbar { background: var(--chrome-bg); }
-:root[data-theme='dark'] .context-panel { background: var(--chrome-bg); }
-:root[data-theme='dark'] .sidebar :is(.brand small, .nav-section-label,
-  .nav-section-label span, .sidebar-notice>span, .local-status) { color: var(--muted); }
-:root[data-theme='dark'] .lesson-nav-link { color: var(--sidebar-text); }
-:root[data-theme='dark'] .lesson-nav-link.active { color: var(--accent-dark); }
-:root[data-theme='dark'] .nav-link.active { background: var(--sidebar-active); color: var(--accent-dark); }
-:root[data-theme='dark'] .nav-link:hover { background: var(--panel-soft); }
-:root[data-theme='dark'] .stage-nav-select select {
-  background: var(--panel-soft);
-  color: var(--text);
-}
-:root[data-theme='dark'] .sidebar nav { scrollbar-color: #5b6980 transparent; }
-:root[data-theme='dark'] .continue-card { border-color: var(--border); }
-:root[data-theme='dark'] .hero-visual { color: var(--hero-ink); }
-:root[data-theme='dark'] .stage-card.expanded { border-color: var(--border); box-shadow: 0 3px 18px #0002; }
-:root[data-theme='dark'] .chapter-row:hover { background: var(--panel-raised); }
-:root[data-theme='dark'] .chapter-row.current { background: var(--accent-soft); }
-:root[data-theme='dark'] .stage-number { color: var(--muted); }
-:root[data-theme='dark'] :is(.status-mastered, .chapter-badge.mastered) { color: var(--accent); }
-:root[data-theme='dark'] .status-new,
-:root[data-theme='dark'] .lesson-nav .status-new { color: #8897af; }
-:root[data-theme='dark'] .status-learning { border-color: var(--accent); }
-:root[data-theme='dark'] .status-learning:after { background: var(--accent); }
-
-/* Keep the six stages recognizable without light-colored tiles. */
-:root[data-theme='dark'] .stage-icon { background: #243a34; color: #9dd7bf; }
-:root[data-theme='dark'] .stage-2 { background: #25364e; color: #a9c9f3; }
-:root[data-theme='dark'] .stage-3 { background: #352e4b; color: #cab4ef; }
-:root[data-theme='dark'] .stage-4 { background: #3a3326; color: #e3c38c; }
-:root[data-theme='dark'] .stage-5 { background: #213b41; color: #9ed7dd; }
-:root[data-theme='dark'] .stage-6 { background: #3c2d39; color: #e3b4cd; }
-
-/* Controls, writing and focus remain legible on every surface. */
-:root[data-theme='dark'] :is(textarea, select,
-  input:not([type='range']):not([type='checkbox']):not([type='radio'])) {
+:root[data-theme='dark'] :is(textarea, select, input:not([type='range']):not([type='checkbox']):not([type='radio'])) {
   border-color: var(--control-border);
-  caret-color: var(--accent);
 }
 :root[data-theme='dark'] ::placeholder { color: var(--muted); opacity: 1; }
-:root[data-theme='dark'] :is(.quiz-options label, .tutor-quick button) { border-color: var(--control-border); }
-:root[data-theme='dark'] .quiz-options label.chosen { border-color: var(--accent); }
-:root[data-theme='dark'] .button.primary:hover { filter: none; background: var(--action-hover); }
-:root[data-theme='dark'] .button.secondary:hover { border-color: var(--accent); }
-:root[data-theme='dark'] .lightbulb-icon { background: var(--accent-soft); color: var(--accent); }
-:root[data-theme='dark'] .avatar { background: var(--accent-soft); color: var(--accent-dark); }
-:root[data-theme='dark'] .editor-wrap { background: var(--editor-bg); color: var(--editor-text); }
-:root[data-theme='dark'] .editor-wrap:focus-within { box-shadow: inset 0 0 0 1px var(--accent); }
-:root[data-theme='dark'] .code-editor { color: var(--editor-text); }
-:root[data-theme='dark'] .line-numbers { color: var(--editor-muted); border-color: var(--border); }
-:root[data-theme='dark'] .reference-code pre,
-:root[data-theme='dark'] .test-source pre { color: var(--editor-text); }
-:root[data-theme='dark'] .code-output { background: var(--error-bg); color: var(--error); }
-:root[data-theme='dark'] .code-output.success { background: var(--success-bg); color: var(--success); }
-:root[data-theme='dark'] .tutor-error { background: var(--warning-bg); color: var(--warning); border-color: var(--warning); }
-:root[data-theme='dark'] .storage-warning { background: var(--warning-bg); color: var(--warning); }
-:root[data-theme='dark'] .tutor-message.user { background: var(--accent-soft); }
-:root[data-theme='dark'] .tutor-markdown pre { background: var(--editor-bg); color: var(--editor-text); }
-:root[data-theme='dark'] .misconceptions h3 svg { color: var(--warning); }
-
-/* Dialogs sit above the workspace without a pale scrim or bright borders. */
-:root[data-theme='dark'] :is(.modal-backdrop, .search-overlay, .mobile-scrim) { background: #070a12b8; }
-:root[data-theme='dark'] :is(.modal, .search-results) { background: var(--panel-soft); border-color: var(--control-border); }
-:root[data-theme='dark'] .search-results>.search-modal-input { background: var(--panel-soft); }
+:root[data-theme='dark'] :is(.modal-backdrop, .search-overlay, .mobile-scrim) { background: var(--scrim); }
 :root[data-theme='dark'] .math-lab { border-color: var(--control-border); }
+
+:root[data-native-material='true']{--glass-bg:rgb(247 249 244 / 16%)}
+:root[data-theme='dark'][data-native-material='true']{--glass-bg:rgb(35 40 34 / 20%)}
+
+@media(prefers-reduced-transparency:reduce){:root,:root[data-theme],:root[data-theme][data-native-material]{--glass-bg:var(--panel);--glass-highlight:var(--border)}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root,:root[data-theme]{--glass-bg:var(--panel);--glass-highlight:var(--border)}}

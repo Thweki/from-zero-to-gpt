@@ -4,7 +4,7 @@
 
 一个中文优先、本地优先的交互式 LLM 学习项目：用六阶段、83 章教材，把数学直觉、图形实验、Python 练习和三个独立工程连起来。适合有一些编程经验、希望从数学基础重新走到 Transformer 与 GPT 的自学者；无需先配置 AI 密钥，也不要求 GPU。
 
-[快速开始](#快速开始) · [界面预览](#界面预览) · [学习路线](#学习路线) · [参与贡献](#参与贡献) · [许可证](#许可证)
+[下载安装](#下载安装) · [快速开始](#快速开始) · [界面预览](#界面预览) · [学习路线](#学习路线) · [参与贡献](#参与贡献) · [许可证](#许可证)
 
 ![From Zero to GPT 学习首页：六阶段学习路线与第一组数学课程](docs/assets/readme/overview.png)
 
@@ -17,7 +17,23 @@
 - **保存学习现场**：进度、笔记、代码、实验参数和导师对话保存在浏览器；支持导出、导入，以及记录问题与下一步后暂停。
 - **按需使用 AI 导师**：接入 OpenAI 兼容接口，围绕当前章节提问；选中文字或实验图后可将引用带入草稿。
 
-当前版本为 **0.3.8**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
+当前版本为 **0.4.0**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
+
+## 下载安装
+
+从 [最新 Release](https://github.com/Thweki/from-zero-to-gpt/releases/latest) 下载桌面应用，安装后即可学习，无需先安装 Node.js、Python 或配置模型密钥。
+
+| 平台 | 下载文件 | 安装方式 |
+| --- | --- | --- |
+| Linux x86_64 | `from-zero-to-gpt-0.4.0-linux-amd64.deb` / `linux-x86_64.AppImage` | Ubuntu 24.04 或兼容环境优先使用 DEB；AppImage 添加执行权限后运行 |
+| macOS（Apple Silicon / Intel） | `from-zero-to-gpt-0.4.0-macos-universal.dmg` | 打开 DMG，将应用拖入 Applications |
+| Windows x64 | `from-zero-to-gpt-0.4.0-windows-x64-setup.exe` | 运行安装程序；需要 WebView2，安装器可按需下载 |
+
+本版安装包未配置 Apple Developer ID 签名、公证或 Windows 代码签名，系统可能提示未识别的开发者。Linux 需要图形桌面；AppImage 仍受系统库与 FUSE 支持限制，使用 Ubuntu 24.04 构建，不承诺兼容更早发行版。三平台自动构建成功不等同于所有系统版本的实机验收。
+
+Release 同时提供 `SHA256SUMS`、记录源码提交与安装包摘要的 `release-manifest.json`，以及许可证。下载后可在文件所在目录运行 `sha256sum -c SHA256SUMS --ignore-missing`（Linux），或用 `shasum -a 256 <文件>`（macOS）、`Get-FileHash <文件> -Algorithm SHA256`（PowerShell）核对对应摘要。
+
+桌面应用内置课程、公式、字体和 Python 练习运行时，可离线学习。AI 导师需联网，打开应用中的「模型服务」配置 OpenAI 兼容接口；桌面凭据由系统凭据存储保存。学习数据保存在当前应用的 WebView 中，浏览器与桌面应用之间请通过导出／导入迁移。完整说明见 [桌面应用](docs/TAURI.md)。
 
 ## 快速开始
 
@@ -147,7 +163,7 @@ npm run test:e2e
 
 已有系统 Chromium 时，可将 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 设置为本机浏览器可执行文件的路径。
 
-独立 Python 工程按各自 README 运行测试；tiny-GPT 需先安装 CPU PyTorch。GitHub Actions 配置见 [ci.yml](.github/workflows/ci.yml)，实际结果查看 [Actions](https://github.com/Thweki/from-zero-to-gpt/actions/workflows/ci.yml)。验证范围与历史记录见 [测试报告](docs/TEST_REPORT.md)。
+独立 Python 工程按各自 README 运行测试；tiny-GPT 需先安装 CPU PyTorch。GitHub Actions 分为 [完整 CI](.github/workflows/ci.yml)、[三平台桌面构建](.github/workflows/tauri.yml) 和 [Release 发布](.github/workflows/release.yml)。版本标签触发完整检查和三平台打包，全部成功后才发布安装包与校验文件；实际结果查看 [Actions](https://github.com/Thweki/from-zero-to-gpt/actions)。验证范围与历史记录见 [测试报告](docs/TEST_REPORT.md)。
 
 ### 目录导航
 
@@ -161,7 +177,7 @@ scripts/            启动、课程验证、构建与打包工具
 docs/               课程规划、架构、使用说明与验证记录
 ```
 
-架构与内容扩展先读 [ARCHITECTURE](docs/ARCHITECTURE.md) 和 [DEVELOPMENT_PLAN](docs/DEVELOPMENT_PLAN.md)；新增课程需要同步章节 ID、先修关系、实验和验收。
+架构与内容扩展先读 [ARCHITECTURE](docs/ARCHITECTURE.md) 和 [DEVELOPMENT_PLAN](docs/DEVELOPMENT_PLAN.md)；新增课程需要同步章节 ID、先修关系、实验和验收。Tauri 桌面运行、离线数据、可选导师与实验性 Android 构建见 [TAURI](docs/TAURI.md)。
 
 ### 自行部署
 
@@ -173,7 +189,7 @@ npm start
 
 Node 服务默认监听 `127.0.0.1:8787`，可通过 `HOST`、`PORT` 配置。对外部署应使用 HTTPS 反向代理，并设置 `TUTOR_PUBLIC_ORIGIN`。纯静态托管可以发布 `dist/`，但不包含导师 API；浏览器 Python、字体和工程 ZIP 需完整保留。
 
-Cloudflare 配置见 [wrangler.json](wrangler.json)，构建与交付方式见 [CI / 交付说明](docs/GITHUB_CICD.md)。如使用 Sites，请配置自己的项目身份，勿复用仓库中的既有站点绑定。当前 CI 交付构建产物，不自动发布生产站点。
+Cloudflare 配置见 [wrangler.json](wrangler.json)，构建与交付方式见 [CI / 交付说明](docs/GITHUB_CICD.md)。如使用 Sites，请配置自己的项目身份，勿复用仓库中的既有站点绑定。桌面 Release 自动发布安装包；网站 CI 交付构建产物，不自动发布生产站点。
 
 ## 参与贡献
 

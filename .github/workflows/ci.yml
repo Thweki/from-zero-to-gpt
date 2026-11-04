@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -47,6 +48,8 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run test:delivery
+      - run: npm run test:tauri
+      - run: npm run test:release
       - run: npm run validate:course
       - run: npm run build
       - run: npm run package:delivery

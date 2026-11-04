@@ -7,7 +7,7 @@ test('Chromium触控模拟：导航、主题、章节定位与暂停恢复',asyn
   expect(await page.evaluate(()=>navigator.maxTouchPoints)).toBeGreaterThan(0);
   await page.getByRole('button',{name:'切换深色外观'}).tap();
   await page.getByRole('button',{name:'打开导航',exact:true}).tap();
-  await page.getByRole('link',{name:'学习路线'}).first().tap();
+  await page.getByRole('link',{name:'学习首页'}).first().tap();
   // The route can already be /map; Escape closes navigation without a fake click.
   await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'开始探索',exact:true}).tap();

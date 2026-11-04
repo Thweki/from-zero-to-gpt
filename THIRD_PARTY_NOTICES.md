@@ -6,6 +6,8 @@ The original synthetic tiny-GPT corpus remains CC0-1.0, see projects/tiny-gpt/da
 
 Runtime dependencies:
 
+- Tauri / tauri-build / tauri-plugin-log / window-vibrancy: MIT or Apache-2.0, Tauri Programme and contributors. Rust dependencies and exact versions are recorded in src-tauri/Cargo.lock; platform WebViews retain their respective system licenses.
+
 - React / React DOM: MIT, Meta Platforms, Inc. and affiliates.
 - Vite: MIT, Vite contributors.
 - Lucide: ISC, Lucide contributors (icons derived from Feather).
