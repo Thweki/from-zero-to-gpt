@@ -75,13 +75,13 @@ Actions上传的候选产物保留7天，verified产物14天；浏览器结果�
 
 `tauri.yml` 对 main / PR 构建 Linux x86_64（AppImage、DEB）、macOS Universal（Apple Silicon + Intel DMG）、Windows x64（NSIS）。每个平台先运行 Rust 测试，构建使用 Cargo 锁文件，产物保留 14 天。Android 仅在手动运行时选择 `build_android`；不阻塞桌面发行。
 
-`release.yml` 的 `v*` 标签触发发布，手动重试也必须选择版本标签。流程先检查 `package.json`、npm 锁文件、Tauri 配置、Cargo 清单及锁文件的版本，再复用完整 `ci.yml` 与桌面构建。发布 job 必须等待两者成功，严格检查同次运行的四个安装包及格式，生成 `SHA256SUMS` 和源码清单，附上许可证及第三方说明，先上传草稿再公开。只有发布 job 申请 `contents: write`，使用当前运行的 `GITHUB_TOKEN`，无需个人发布令牌。已公开版本拒绝覆盖，失败的草稿可重试。
+`release.yml` 的 `v*` 标签触发发布，手动重试也必须选择版本标签。流程先检查 `package.json`、npm 锁文件、Tauri 配置、Cargo 清单及锁文件的版本，再通过 GitHub API 核验该标签源码 SHA 在 main 的 push 事件上已有成功的 `ci.yml` 与 `tauri.yml` 运行。拒绝其他提交、PR、其他工作流或未成功的运行。发布 job 只下载已验证桌面运行 ID 的四个安装包，严格检查文件集合及格式，生成 `SHA256SUMS` 和源码清单，附上许可证及第三方说明，先上传草稿再公开。只有发布 job 申请 `contents: write`，使用当前运行的 `GITHUB_TOKEN`，无需个人发布令牌。已公开版本拒绝覆盖，失败的草稿可重试。
 
 发布步骤：
 
 1. 同步上述五处版本，更新 README 和 `docs/releases/vX.Y.Z.md`。
 2. 运行 `npm run check`、`npm test`、`npm run test:tauri`、`npm run test:release`、`npm run validate:course` 和 `npm run build`，检查工作流语法。
-3. 提交并推送源码，再创建同版本标签：`git tag -a vX.Y.Z -m "Release vX.Y.Z"`，`git push origin vX.Y.Z`。
-4. 等待 [Desktop release](https://github.com/Thweki/from-zero-to-gpt/actions/workflows/release.yml) 完成，核对 Release 的四个安装包、源码 SHA 与 SHA-256。
+3. 提交并推送源码，等待 main 的完整 CI 和三平台构建全部成功，再创建同版本标签：`git tag -a vX.Y.Z -m "Release vX.Y.Z"`，`git push origin vX.Y.Z`。
+4. 标签必须指向已通过验收的同一提交；失败或产物过期时需先重跑对应 main 工作流。等待 [Desktop release](https://github.com/Thweki/from-zero-to-gpt/actions/workflows/release.yml) 完成，核对 Release 的四个安装包、源码 SHA 与 SHA-256。
 
 安装包不包含正式 Apple / Windows 发布签名。CI 证明构建、测试和文件校验成功，不代表三平台全部用户界面、系统版本及安装环境均已实机验收。桌面 Release 不修改网站生产部署。

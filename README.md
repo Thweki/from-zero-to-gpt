@@ -163,7 +163,7 @@ npm run test:e2e
 
 已有系统 Chromium 时，可将 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 设置为本机浏览器可执行文件的路径。
 
-独立 Python 工程按各自 README 运行测试；tiny-GPT 需先安装 CPU PyTorch。GitHub Actions 分为 [完整 CI](.github/workflows/ci.yml)、[三平台桌面构建](.github/workflows/tauri.yml) 和 [Release 发布](.github/workflows/release.yml)。版本标签触发完整检查和三平台打包，全部成功后才发布安装包与校验文件；实际结果查看 [Actions](https://github.com/Thweki/from-zero-to-gpt/actions)。验证范围与历史记录见 [测试报告](docs/TEST_REPORT.md)。
+独立 Python 工程按各自 README 运行测试；tiny-GPT 需先安装 CPU PyTorch。GitHub Actions 分为 [完整 CI](.github/workflows/ci.yml)、[三平台桌面构建](.github/workflows/tauri.yml) 和 [Release 发布](.github/workflows/release.yml)。版本标签核对同一源码提交在主分支上的完整 CI 与三平台构建结果，全部成功后才发布对应安装包与校验文件；实际结果查看 [Actions](https://github.com/Thweki/from-zero-to-gpt/actions)。验证范围与历史记录见 [测试报告](docs/TEST_REPORT.md)。
 
 ### 目录导航
 

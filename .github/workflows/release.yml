@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -16,6 +17,8 @@ jobs:
   version:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    outputs:
+      build_run: ${{ steps.verified.outputs.build_run }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -31,23 +34,19 @@ jobs:
           test "$REF_TYPE" = tag
           node scripts/release-assets.mjs version "$RELEASE_TAG"
           test -f "docs/releases/$RELEASE_TAG.md"
-
-  checks:
-    needs: version
-    uses: ./.github/workflows/ci.yml
-
-  builds:
-    needs: version
-    uses: ./.github/workflows/tauri.yml
-    with:
-      build_android: false
+      - name: Require successful CI and desktop builds for this exact commit
+        id: verified
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release-runs.mjs
 
   publish:
-    needs: [checks, builds]
+    needs: version
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: write
+      actions: read
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -61,6 +60,8 @@ jobs:
           node-version: 24
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
+          github-token: ${{ github.token }}
+          run-id: ${{ needs.version.outputs.build_run }}
           pattern: tauri-*-${{ github.sha }}
           merge-multiple: true
           path: artifacts/desktop-release/

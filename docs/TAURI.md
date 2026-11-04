@@ -73,7 +73,7 @@ macOS 另使用 `titleBarStyle: Overlay` 与 `hiddenTitle: true`，让原生交�
 | Windows x64 | NSIS `.exe` |
 | Linux x86_64（Ubuntu 24.04 构建） | AppImage 与 DEB |
 
-[release.yml](../.github/workflows/release.yml) 在推送 `vX.Y.Z` 标签时校验 npm、Tauri、Cargo 与标签版本一致，复用完整 CI 和桌面构建。只有全部成功，才汇集同次运行的四个安装包，检查文件格式，生成 SHA-256 与源码清单，上传到草稿再公开 Release。构建只有 `contents: read`，仅最终发布 job 有 `contents: write`。已公开的版本不能被工作流覆盖。操作步骤见 [CI / CD](GITHUB_CICD.md)。
+[release.yml](../.github/workflows/release.yml) 在推送 `vX.Y.Z` 标签时校验 npm、Tauri、Cargo 与标签版本一致，验证同一源码提交在 main 上的完整 CI 和桌面构建已成功。只有全部成功，才从该次桌面构建运行中汇集四个安装包，检查文件格式，生成 SHA-256 与源码清单，上传到草稿再公开 Release。构建只有 `contents: read`，仅最终发布 job 有 `contents: write`。已公开的版本不能被工作流覆盖。操作步骤见 [CI / CD](GITHUB_CICD.md)。
 
 产物未配置 Apple Developer ID 签名、公证或 Windows 代码签名，不能据此声称已通过应用商店审核。Linux 最低兼容环境以 Ubuntu 24.04 和系统 WebKitGTK 依赖为基线；AppImage 仍需满足宿主运行库与 FUSE 条件。
 

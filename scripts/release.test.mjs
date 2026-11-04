@@ -6,6 +6,17 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'node:test';
 import {checkVersion,expectedAssets,validateAssets} from './release-assets.mjs';
+import {verifiedRun} from './release-runs.mjs';
+
+test('release accepts only successful main runs for the exact source and workflow',()=>{
+  const sha='a'.repeat(40);
+  const good={id:123,head_sha:sha,head_branch:'main',event:'push',status:'completed',conclusion:'success',path:'.github/workflows/tauri.yml'};
+  assert.equal(verifiedRun([good],sha,'tauri.yml'),123);
+  for(const patch of [{head_sha:'b'.repeat(40)},{head_branch:'feature'},{event:'pull_request'},{status:'in_progress'},{conclusion:'failure'},{path:'.github/workflows/other.yml'}]){
+    assert.throws(()=>verifiedRun([{...good,...patch}],sha,'tauri.yml'),/No successful main/);
+  }
+  assert.throws(()=>verifiedRun([],sha,'tauri.yml'),/No successful main/);
+});
 
 test('release tag must match npm, Tauri and Cargo versions',()=>{
   const version=checkVersion();
