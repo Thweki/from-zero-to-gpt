@@ -88,10 +88,10 @@ test('JSON export and import restore actual data; invalid input leaves data inta
   const file=await downloading,fs=await import('node:fs/promises');const backup=JSON.parse(await fs.readFile((await file.path())!,'utf8'));
   expect(backup.progress.functions.note).toBe('用于验证数据往返的笔记');
   await page.getByLabel('导入学习数据文件').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":99}')});
-  await expect(page.getByRole('status')).toContainText('不支持的学习数据格式');
+  await expect(page.locator('.toast[role="status"]')).toContainText('不支持的学习数据格式');
   backup.progress.functions.note='从文件恢复的思路';
   await page.getByLabel('导入学习数据文件').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
-  await expect(page.getByRole('status')).toContainText('学习数据已恢复');
+  await expect(page.locator('.toast[role="status"]')).toContainText('学习数据已恢复');
   await page.goto('/#/lesson/functions');await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('从文件恢复的思路');
   await page.reload();await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('从文件恢复的思路');
 });
