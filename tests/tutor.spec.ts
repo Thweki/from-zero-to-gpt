@@ -188,7 +188,7 @@ test.describe('AI 导师 UI/HTTP transport — deliberately mocked, no provider 
     await mockTutor(page, async route => { chats++; await route.fulfill({ json: { answer: '不应请求' } }); }, false);
     await page.goto('/#/tutor');
     const tutor = panel(page);
-    await expect(tutor.locator('.tutor-unavailable')).toContainText('服务端尚未配置模型密钥');
+    await expect(tutor.locator('.tutor-unavailable')).toContainText('当前服务尚未配置凭据');
     await expect(tutor.getByRole('link', { name: '查看模型连接说明' })).toHaveAttribute('href', '#/settings');
     await tutor.getByLabel('向 AI 导师提问').fill('可以先保留草稿，但不应发送。');
     await expect(tutor.getByRole('button', { name: '发送', exact: true })).toBeDisabled();

@@ -109,11 +109,12 @@ for(const [route,label] of [['labs','选择实验章节'],['notes','选择笔记
 test('pending status is shared across routes, with no false missing-key message or repeated request',async({page})=>{
  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let requests=0;
  await page.route('**/api/tutor/status',async route=>{requests++;await gate;await route.fulfill({json:metadata});});
+ await page.route('**/api/tutor/services',route=>route.fulfill({json:{services:[],activeId:null}}));
  await page.goto('/#/tutor');await expect(page.locator('.tutor-model summary')).toHaveText('正在检测连接');
  await expect(page.locator('.tutor-unavailable')).toHaveCount(0);
- await page.goto('/#/settings');await expect(page.locator('.settings-card').filter({has:page.getByRole('heading',{name:'AI 导师连接'})})).toContainText('正在检测连接');
+ await page.goto('/#/settings');await expect(page.locator('.settings-card').filter({has:page.getByRole('heading',{name:'模型服务'})})).toContainText('正在检测连接');
  expect(requests).toBe(1);release();
- await expect(page.locator('.tutor-config')).toContainText('review fixture');
+ await expect(page.locator('.provider-connection')).toContainText('review fixture');
  await page.goto('/#/tutor');await expect(page.locator('.tutor-model summary')).toHaveText('服务端已配置 · 查看模型');
  expect(requests).toBe(1);await expect(page.locator('.tutor-unavailable')).toHaveCount(0);
 });

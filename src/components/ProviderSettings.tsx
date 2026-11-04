@@ -10,7 +10,7 @@ const blank=():ProviderServiceDraft=>({name:'',baseUrl:'',model:'',authMethod:'a
 const authLabels:Record<ServiceAuthMethod,string>={'api-key':'API key','github-copilot':'GitHub Copilot 订阅 · OAuth 设备登录','none':'无需凭据（仅限你信任的服务）'};
 
 export function ProviderSettings(){
-  const {refresh}=useTutorConnection();
+  const {refresh,checking,status,error:connectionError}=useTutorConnection();
   const [snapshot,setSnapshot]=useState<ProviderServiceSnapshot|null>(null);
   const [draft,setDraft]=useState<ProviderServiceDraft>(blank);
   const [secret,setSecret]=useState('');
@@ -47,6 +47,7 @@ export function ProviderSettings(){
   };
   return <div className="provider-settings">
     <div className="section-title"><h2>模型服务</h2><button className="text-button" onClick={()=>{setDraft(blank());setSecret('');setMessage('');}}><Plus size={14}/>新增服务</button></div>
+    <p className="provider-connection" role="status">{checking?'正在检测连接':status?.configured?`当前服务已配置：${status.provider} · ${status.model}`:connectionError}</p>
     <p className="provider-intro">地址、模型和当前选择保存在本地配置中；凭据单独保存，不进入学习数据或导出备份。</p>
     {loading?<p role="status">正在读取本地服务配置…</p>:snapshot&&<>
       <div className="provider-list" aria-label="已保存的模型服务">
