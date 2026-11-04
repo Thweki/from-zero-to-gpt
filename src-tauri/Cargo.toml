@@ -1,6 +1,6 @@
 [package]
 name = "from-zero-to-gpt"
-version = "0.4.2"
+version = "0.4.3"
 description = "本地优先的交互式 GPT 学习实验室"
 authors = ["From Zero to GPT contributors"]
 license = "GPL-2.0-only"

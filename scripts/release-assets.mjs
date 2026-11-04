@@ -11,7 +11,7 @@ export function checkVersion(tag) {
   assert.equal(JSON.parse(readFileSync('package-lock.json','utf8')).packages[''].version,version);
   assert.equal(JSON.parse(readFileSync('src-tauri/tauri.conf.json','utf8')).version,version);
   assert.equal(readFileSync('src-tauri/Cargo.toml','utf8').match(/^version = "([^"]+)"/m)?.[1],version);
-  assert.equal(readFileSync('src-tauri/Cargo.lock','utf8').match(/name = "from-zero-to-gpt"\nversion = "([^"]+)"/)?.[1],version);
+  assert.equal(readFileSync('src-tauri/Cargo.lock','utf8').match(/name = "from-zero-to-gpt"\r?\nversion = "([^"]+)"/)?.[1],version);
   if(tag)assert.equal(tag,`v${version}`,'Release tag must match every application manifest');
   return version;
 }
