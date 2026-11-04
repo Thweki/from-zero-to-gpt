@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "从零到 GPT",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "identifier": "org.fromzerotogpt.learning",
   "build": {
     "frontendDist": "../dist",
