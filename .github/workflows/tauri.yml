@@ -77,6 +77,8 @@ jobs:
           key: desktop-${{ runner.os }}-${{ runner.arch }}-${{ steps.rust.outputs.version }}-${{ hashFiles('src-tauri/Cargo.lock') }}
       - name: Test native code
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - name: Clear cached installer outputs before bundling
+        run: node -e "for (const dir of ['src-tauri/target/release/bundle', 'src-tauri/target/universal-apple-darwin/release/bundle']) require('node:fs').rmSync(dir, {recursive:true, force:true})"
       - name: Build desktop bundles
         run: npm run desktop:build -- ${{ matrix.args }}
       - name: Install and validate the Linux package
