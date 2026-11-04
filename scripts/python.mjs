@@ -3,9 +3,9 @@ import {spawnSync} from 'node:child_process';
 /** No shell splitting: an interpreter path may contain spaces. */
 export function findPython(override=process.env.FROM_ZERO_PYTHON){
   const candidates=override?[[override,[]]]:process.platform==='win32'
-    ?[['py',['-3']],['python',[]],['python3',[]]]:[['python3',[]],['python',[]]];
+    ?[['python',[]],['py',['-3']],['python3',[]]]:[['python3',[]],['python',[]]];
   for(const [command,args] of candidates){
-    const result=spawnSync(command,[...args,'-I','-c','import json,sys; print(json.dumps(list(sys.version_info[:3])))'],{encoding:'utf8',timeout:5000,windowsHide:true});
+    const result=spawnSync(command,[...args,'-I','-c','import json,sys; print(json.dumps(list(sys.version_info[:3])))'],{encoding:'utf8',timeout:15000,windowsHide:true});
     if(result.error||result.status!==0)continue;
     try{
       const version=JSON.parse(result.stdout.trim());

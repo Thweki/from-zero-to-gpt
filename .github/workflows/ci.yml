@@ -138,6 +138,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: node --test scripts/launcher.test.mjs scripts/launcher-smoke.test.mjs
+        env:
+          FROM_ZERO_PYTHON: ${{ runner.os == 'Windows' && format('{0}\python.exe', env.pythonLocation) || format('{0}/bin/python', env.pythonLocation) }}
 
   delivery:
     name: Verified deployment artifact (no production deployment)

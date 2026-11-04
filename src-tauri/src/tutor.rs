@@ -167,7 +167,7 @@ pub async fn native_tutor_chat(
       let client = reqwest::Client::builder().redirect(reqwest::redirect::Policy::none()).timeout(Duration::from_secs(60)).build().map_err(|_| "无法创建原生网络客户端。")?;
       let mut request = client.post(endpoint)
         .header(reqwest::header::CONTENT_TYPE, "application/json")
-        .header(reqwest::header::USER_AGENT, "FromZeroToGPT-LearningTutor/0.4.0")
+        .header(reqwest::header::USER_AGENT, "FromZeroToGPT-LearningTutor/0.4.1")
         .header("x-opencode-session", &payload.session_id)
         .json(&json!({"model": service.model, "messages": messages, "max_tokens": 2400, "temperature": 0.3, "stream": false}));
       if let Some(secret) = secret { request = request.header(reqwest::header::AUTHORIZATION, format!("Bearer {secret}")); }

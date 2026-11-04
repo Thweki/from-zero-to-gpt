@@ -17,7 +17,7 @@
 - **保存学习现场**：进度、笔记、代码、实验参数和导师对话保存在浏览器；支持导出、导入，以及记录问题与下一步后暂停。
 - **按需使用 AI 导师**：接入 OpenAI 兼容接口，围绕当前章节提问；选中文字或实验图后可将引用带入草稿。
 
-当前版本为 **0.4.0**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
+当前版本为 **0.4.1**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
 
 ## 下载安装
 
@@ -25,9 +25,9 @@
 
 | 平台 | 下载文件 | 安装方式 |
 | --- | --- | --- |
-| Linux x86_64 | `from-zero-to-gpt-0.4.0-linux-amd64.deb` / `linux-x86_64.AppImage` | Ubuntu 24.04 或兼容环境优先使用 DEB；AppImage 添加执行权限后运行 |
-| macOS（Apple Silicon / Intel） | `from-zero-to-gpt-0.4.0-macos-universal.dmg` | 打开 DMG，将应用拖入 Applications |
-| Windows x64 | `from-zero-to-gpt-0.4.0-windows-x64-setup.exe` | 运行安装程序；需要 WebView2，安装器可按需下载 |
+| Linux x86_64 | `from-zero-to-gpt-0.4.1-linux-amd64.deb` / `linux-x86_64.AppImage` | Ubuntu 24.04 或兼容环境优先使用 DEB；AppImage 添加执行权限后运行 |
+| macOS（Apple Silicon / Intel） | `from-zero-to-gpt-0.4.1-macos-universal.dmg` | 打开 DMG，将应用拖入 Applications |
+| Windows x64 | `from-zero-to-gpt-0.4.1-windows-x64-setup.exe` | 运行安装程序；需要 WebView2，安装器可按需下载 |
 
 本版安装包未配置 Apple Developer ID 签名、公证或 Windows 代码签名，系统可能提示未识别的开发者。Linux 需要图形桌面；AppImage 仍受系统库与 FUSE 支持限制，使用 Ubuntu 24.04 构建，不承诺兼容更早发行版。三平台自动构建成功不等同于所有系统版本的实机验收。
 
