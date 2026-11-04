@@ -92,7 +92,12 @@ test('a nearly full notebook keeps its original data and observation draft when 
 
 for(const [route,label] of [['labs','选择实验章节'],['notes','选择笔记章节'],['tutor','导师关联章节']])test(`${route} uses the same two-level, searchable chapter picker with recents`,async({page})=>{
  await page.route('**/api/tutor/status',r=>r.fulfill({json:metadata}));
- await page.goto('/#/lesson/functions');await page.goto('/#/lesson/linear');await page.goto(`/#/${route}`);
+ for(const id of ['functions','linear']){
+  await page.goto(`/#/lesson/${id}`);
+  await expect(page.locator('.lesson-title-row h1')).toHaveText(lessons.find(lesson=>lesson.id===id)!.title);
+  await expect.poll(()=>saved(page)).toMatchObject({lastLesson:id,progress:{[id]:{lastVisited:expect.any(String)}}});
+ }
+ await page.goto(`/#/${route}`);
  await expect(page.getByLabel(`${label}：阶段`,{exact:true}).locator('option')).toHaveCount(6);
  expect(await page.getByLabel(label,{exact:true}).locator('option').count()).toBeLessThanOrEqual(23);
  await page.getByText('搜索与最近学习',{exact:true}).click();await expect(page.locator('.chapter-recent')).toContainText('线性函数与参数');
