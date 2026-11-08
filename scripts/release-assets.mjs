@@ -41,7 +41,10 @@ export function createUpdateManifest(directory,version,notes='',repository='Thwe
 
 export function validateAssets(directory,version) {
   const allNames=readdirSync(directory).sort();
-  const names=allNames.filter(name=>!expectedUpdateAssets(version).includes(name));
+  // Tauri also signs DEBs when updater artifacts are enabled, although the
+  // updater consumes the AppImage. Keep that optional detached signature.
+  const signatures=[...expectedUpdateAssets(version),`from-zero-to-gpt-${version}-linux-amd64.deb.sig`];
+  const names=allNames.filter(name=>!signatures.includes(name));
   assert.deepEqual(names,expectedAssets(version).sort(),'All three platforms and all four installers are required');
   return names.map(name=>{
     const path=join(directory,name);

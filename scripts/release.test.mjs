@@ -50,6 +50,8 @@ test('release requires all platforms and valid installer formats',()=>{
       writeFileSync(join(directory,name),buffer);
     }
     assert.equal(validateAssets(directory,version).length,4);
+    writeFileSync(join(directory,`from-zero-to-gpt-${version}-linux-amd64.deb.sig`),'detached signature');
+    assert.equal(validateAssets(directory,version).length,4);
     writeFileSync(join(directory,expectedAssets(version)[0]),Buffer.alloc(2048));
     assert.throws(()=>validateAssets(directory,version),/Invalid installer format/);
     writeFileSync(join(directory,'unexpected.txt'),'unexpected');
