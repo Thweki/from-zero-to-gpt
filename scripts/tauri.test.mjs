@@ -1,6 +1,20 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
+import {compileArguments} from './build-provider-engine.mjs';
+
+test('native Windows builds reuse the locked baseline runtime without another download',()=>{
+  const target='x86_64-pc-windows-msvc';
+  const args=compileArguments(target,()=>true);
+  assert.ok(args.includes('--target=bun-windows-x64-baseline'));
+  const executable=args[args.indexOf('--compile-executable-path')+1].replaceAll('\\','/');
+  assert.ok(executable.endsWith('/@oven/bun-windows-x64-baseline/bin/bun.exe'));
+  const native=compileArguments('aarch64-apple-darwin',()=>false);
+  assert.ok(!native.includes('--compile-executable-path'));
+  const cross=compileArguments('x86_64-apple-darwin',()=>false);
+  assert.ok(cross.includes('--target=bun-darwin-x64'));
+  assert.ok(!cross.includes('--compile-executable-path'));
+});
 
 const config=JSON.parse(readFileSync('src-tauri/tauri.conf.json','utf8'));
 const manifest=JSON.parse(readFileSync('package.json','utf8'));
