@@ -150,6 +150,8 @@ pub fn native_tutor_cancel(requests: State<'_, Mutex<HashMap<String, Cancellatio
 
 #[tauri::command]
 pub async fn native_tutor_chat(
+  app: tauri::AppHandle,
+  engine: State<'_, crate::provider_engine::EngineState>,
   state: State<'_, Mutex<ServicesState>>,
   requests: State<'_, Mutex<HashMap<String, CancellationToken>>>,
   payload: TutorPayload,
@@ -161,6 +163,26 @@ pub async fn native_tutor_chat(
   let endpoint = if service.base_url.ends_with("/chat/completions") { service.base_url.clone() } else { format!("{}/chat/completions", service.base_url) };
   let token = CancellationToken::new();
   requests.lock().map_err(|_| "无法跟踪请求。")?.insert(payload.session_id.clone(), token.clone());
+  if service.auth_method == "managed" {
+        let managed=async {
+        let _guard=engine.gate.lock().await;
+        if token.is_cancelled(){return Err("已停止回复。".into());}
+        let (current,current_secret)=crate::services::managed_service(&state,&service.id)?;
+        let credential:Value=serde_json::from_str(&current_secret).map_err(|_|"凭据格式无效。")?;
+        let call=engine.call(&app,"chat",json!({"providerId":current.provider_id,"model":service.model,"credential":credential,"messages":messages,"jobId":payload.session_id}));
+        tokio::pin!(call);
+        let result=tokio::select! {
+          biased;
+          result=&mut call=>result,
+          _=token.cancelled()=>{let _=engine.call(&app,"cancel",json!({"jobId":payload.session_id})).await;call.await}
+        }?;
+        if let Some(value)=result.get("credential").filter(|v|!v.is_null()){crate::services::persist_managed_credential(&state,&service.id,value)?;}
+        if result.get("error").is_some(){return Err("模型未完成回答，请检查模型权限、订阅额度或重新登录。".into());}
+        Ok(NativeChatResponse {answer:result["answer"].as_str().ok_or("模型没有返回回答。")?.into(),model:service.model,provider:service.name})
+        }.await;
+        if let Ok(mut requests)=requests.lock(){requests.remove(&payload.session_id);}
+        return managed;
+  }
   let result = tokio::select! {
     _ = token.cancelled() => Err("已停止回复。问题已保留，可以重试。".into()),
     result = async {
@@ -185,6 +207,7 @@ pub async fn native_tutor_chat(
       Ok(NativeChatResponse { answer: answer.chars().take(24_000).collect(), model: service.model, provider: service.name })
     } => result,
   };
+  if token.is_cancelled() {let _=engine.call(&app,"cancel",json!({"jobId":payload.session_id})).await;}
   if let Ok(mut requests) = requests.lock() { requests.remove(&payload.session_id); }
   result
 }

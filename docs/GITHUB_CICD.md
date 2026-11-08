@@ -29,6 +29,23 @@
 
 ## 构建产物与本地复现
 
+### 推送前的本地 CI
+
+推送前运行 `npm run ci:local`。要求与 Actions 一致的 Node 24、Python 3.12，另需 Rust、当前系统的 Tauri 构建依赖、`actionlint` 和 `shellcheck`；macOS 还需安装 `x86_64-apple-darwin` Rust target，以构建 Universal 应用。可通过 `FROM_ZERO_PYTHON` 指定 Python 解释器。
+
+macOS Homebrew 环境示例：
+
+```bash
+PATH="/opt/homebrew/opt/node@24/bin:/opt/homebrew/opt/rustup/bin:$PATH" \
+FROM_ZERO_PYTHON=/opt/homebrew/bin/python3.12 npm run ci:local
+```
+
+预检将已追踪的改动和未忽略的新文件复制到临时 Git 快照，包含删除，不复制 `.env`、个人凭据或原有依赖。不会提交原工作区或推送临时提交。随后执行干净 `npm ci`、历史安全检查、工作流/脚本检查、类型与单元测试、全部课程验收、生产与交付打包、三个 Python 工程、干净安装/热启动、两个完整浏览器分片、Rust 测试、当前系统桌面打包与独立模型运行时检查。浏览器使用独立端口，不复用正在开发的页面。
+
+日志与结果保存在 `artifacts/local-ci/`。失败即停止并保留快照以便排查；成功记录源码 Git tree。通过 `git config core.hooksPath .githooks` 启用本仓库的 `pre-push` 检查后，只有待推送提交的源码树与通过预检的版本一致才允许推送；修改源码后需重新预检。检查不会自动提交、推送、发布或关闭 GitHub CI。
+
+本地桌面和启动测试只代表当前主机系统：macOS 无法替代 Windows NSIS 或 Linux AppImage/DEB 的原生构建与安装。Android 是另行选择的工作流，不在这项桌面预检中。报告保留这些边界，不能把本地通过表述成三平台 Actions 已通过。
+
 ```bash
 npm ci
 npm run check:repository -- --history

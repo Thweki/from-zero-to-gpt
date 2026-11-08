@@ -17,10 +17,11 @@ test('Tauri uses the existing production frontend and matching public version',(
   assert.match(config.app.security.csp,/worker-src 'self' blob:/);
 });
 
-test('all requested platform build and artifact paths are configured without release credentials',()=>{
+test('all requested platform build and artifact paths retain local builds and optional update signing',()=>{
   for(const value of ['macos-15','windows-2025','ubuntu-24.04','npm run android:build','actions/upload-artifact'])assert.ok(workflow.includes(value),value);
   for(const value of ['tauri-action','contents: write','tagName:','releaseDraft:','gh release','APPLE_CERTIFICATE','ANDROID_KEYSTORE'])assert.ok(!workflow.includes(value),value);
-  assert.equal(manifest.scripts['desktop:build'],'tauri build');
+  assert.equal(manifest.scripts['desktop:build'],'node scripts/desktop-build.mjs');
+  assert.match(readFileSync('scripts/desktop-build.mjs','utf8'),/createUpdaterArtifacts:Boolean\(process.env.TAURI_SIGNING_PRIVATE_KEY\)/);
   assert.match(manifest.scripts['android:build'],/--apk/);
 });
 

@@ -7,6 +7,8 @@ use url::Url;
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProviderService {
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub provider_id: Option<String>,
   pub id: String,
   pub name: String,
   pub base_url: String,
@@ -19,6 +21,8 @@ pub struct ProviderService {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServiceDraft {
+  #[serde(default)]
+  pub provider_id: Option<String>,
   pub id: Option<String>,
   pub name: String,
   pub base_url: String,
@@ -31,6 +35,7 @@ pub struct ServiceDraft {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServiceStatus {
+  pub provider_id: Option<String>,
   pub id: String,
   pub name: String,
   pub base_url: String,
@@ -102,7 +107,7 @@ impl ServicesState {
   fn snapshot(&self) -> Result<ServiceSnapshot, String> {
     let services = self.services.iter().map(|service| {
       Ok(ServiceStatus {
-        id: service.id.clone(), name: service.name.clone(), base_url: service.base_url.clone(), model: service.model.clone(),
+        provider_id: service.provider_id.clone(), id: service.id.clone(), name: service.name.clone(), base_url: service.base_url.clone(), model: service.model.clone(),
         auth_method: service.auth_method.clone(), allow_local_http: service.allow_local_http,
         has_credential: service.auth_method == "none" || credential(service.id.as_str())?.is_some(),
       })
@@ -119,7 +124,7 @@ mod tests {
   fn restart_restores_selected_service_instead_of_first_service() {
     let directory = std::env::temp_dir().join(format!("from-zero-services-{}", uuid::Uuid::new_v4()));
     let services = ["first", "second"].into_iter().map(|id| ProviderService {
-      id: id.into(), name: id.into(), base_url: "https://example.com/v1".into(),
+      provider_id: None, id: id.into(), name: id.into(), base_url: "https://example.com/v1".into(),
       model: "test".into(), auth_method: "none".into(), allow_local_http: false,
     }).collect();
     let state = ServicesState { directory: directory.clone(), services, active_id: Some("second".into()), read_only: false };
@@ -141,7 +146,7 @@ fn validate(draft: ServiceDraft) -> Result<ProviderService, String> {
   if name.is_empty() || name.len() > 60 || model.is_empty() || model.len() > 160 {
     return Err("服务名称或模型格式无效。".into());
   }
-  if !["api-key", "github-copilot", "none"].contains(&draft.auth_method.as_str()) {
+  if !["api-key", "github-copilot", "none", "managed"].contains(&draft.auth_method.as_str()) {
     return Err("认证方式无效。".into());
   }
   let url = Url::parse(draft.base_url.trim()).map_err(|_| "服务地址无效。")?;
@@ -151,7 +156,7 @@ fn validate(draft: ServiceDraft) -> Result<ProviderService, String> {
     return Err("服务地址必须使用 HTTPS；本地 HTTP 需要单独允许。".into());
   }
   Ok(ProviderService {
-    id, name, model, auth_method: draft.auth_method, allow_local_http: draft.allow_local_http,
+    provider_id: draft.provider_id, id, name, model, auth_method: draft.auth_method, allow_local_http: draft.allow_local_http,
     base_url: url.to_string().trim_end_matches('/').to_string(),
   })
 }
@@ -187,6 +192,12 @@ pub fn provider_services_snapshot(state: State<'_, Mutex<ServicesState>>) -> Res
 pub fn provider_service_save(state: State<'_, Mutex<ServicesState>>, service: ServiceDraft, secret: Option<String>) -> Result<ServiceSnapshot, String> {
   let mut state = state.lock().map_err(|_| "服务状态不可用。")?;
   state.writable()?;
+  if service.auth_method == "managed" {
+    let old = state.services.iter().find(|s| Some(&s.id) == service.id.as_ref());
+    if !old.is_some_and(|s| s.auth_method == "managed" && s.provider_id == service.provider_id) || secret.is_some() {
+      return Err("请使用服务商登录流程。".into());
+    }
+  }
   let service = validate(service)?;
   if secret.is_some() && service.auth_method != "api-key" { return Err("此认证方式不接受 API key。".into()); }
   if secret.is_some() { save_credential(&service.id, secret)?; }
@@ -244,4 +255,36 @@ pub fn active_service(state: &State<'_, Mutex<ServicesState>>) -> Result<(Provid
 pub fn register(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
   app.manage(Mutex::new(ServicesState::load(app)));
   Ok(())
+}
+
+// These helpers never return credentials to the WebView.
+pub fn managed_service(state: &State<'_, Mutex<ServicesState>>, id: &str) -> Result<(ProviderService, String), String> {
+  let state = state.lock().map_err(|_| "服务状态不可用。")?;
+  let service = state.services.iter().find(|s| s.id == id && s.auth_method == "managed").cloned().ok_or("请先连接服务商。")?;
+  let secret = credential(id)?.ok_or("登录已失效，请重新连接。")?;
+  Ok((service, secret))
+}
+pub fn persist_managed_credential(state: &State<'_, Mutex<ServicesState>>, id: &str, value: &serde_json::Value) -> Result<(), String> {
+  let state = state.lock().map_err(|_| "服务状态不可用。")?;
+  if state.services.iter().any(|s| s.id == id) { save_credential(id, Some(value.to_string()))?; }
+  Ok(())
+}
+pub fn store_managed_login(state: &State<'_, Mutex<ServicesState>>, result: &serde_json::Value, model: &str, credential: &serde_json::Value) -> Result<ServiceSnapshot, String> {
+  let mut state = state.lock().map_err(|_| "服务状态不可用。")?;state.writable()?;
+  let service = validate(ServiceDraft { id: result["serviceId"].as_str().map(String::from), name: result["name"].as_str().unwrap_or("模型服务").into(), provider_id: result["providerId"].as_str().map(String::from), base_url: "https://managed.invalid".into(), model:model.into(), auth_method:"managed".into(), allow_local_http:false })?;
+  save_credential(&service.id, Some(credential.to_string()))?;
+  let previous = state.services.clone();let active = state.active_id.clone();
+  state.services.retain(|s| s.id != service.id);state.services.push(service.clone());state.active_id=Some(service.id);
+  if let Err(error)=state.write(){state.services=previous;state.active_id=active;return Err(error);}
+  state.snapshot()
+}
+pub fn managed_host_id(state: &State<'_, Mutex<ServicesState>>) -> Result<String, String> {
+  let state=state.lock().map_err(|_| "服务状态不可用。")?;
+  let path=state.directory.join("host-id.json");
+  if let Ok(bytes)=fs::read(&path){if let Ok(value)=serde_json::from_slice::<String>(&bytes){return Ok(value);}}
+  fs::create_dir_all(&state.directory).map_err(|_| "无法创建配置目录。")?;
+  let value=format!("urn:uuid:{}",uuid::Uuid::new_v4());
+  let bytes=serde_json::to_vec(&value).map_err(|_| "无法生成设备标识。")?;
+  AtomicFile::new(path, OverwriteBehavior::AllowOverwrite).write(|f|f.write_all(&bytes)).map_err(|_| "无法保存设备标识。")?;
+  Ok(value)
 }

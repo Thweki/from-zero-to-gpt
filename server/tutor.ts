@@ -99,11 +99,12 @@ async function handleTutorRequestInternal(request:Request,env:TutorEnvironment,f
     if(request.method!=='POST')return reply({error:'请使用 POST。'},405);
     try{
       const data=JSON.parse(await limitedText(request.body,64000)) as Record<string,unknown>;
+      if(path==='/api/tutor/services/engine'&&serviceStore.managedRequest&&typeof data.action==='string')return reply(await serviceStore.managedRequest(data.action,(data.data||{}) as Record<string,unknown>));
       if(path==='/api/tutor/services/save')return reply(await serviceStore.save(data.service as ProviderServiceDraft,typeof data.secret==='string'?data.secret:undefined));
       if(path==='/api/tutor/services/activate'&&typeof data.id==='string')return reply(await serviceStore.activate(data.id));
       if(path==='/api/tutor/services/remove'&&typeof data.id==='string')return reply(await serviceStore.remove(data.id));
       return reply({error:'服务操作不存在或格式无效。'},400);
-    }catch{return reply({error:'无法保存服务配置，请检查地址、模型和认证字段。'},400);}
+    }catch{return reply({error:path==='/api/tutor/services/engine'?'模型服务操作未完成。请检查网络，或取消后重新连接。':'无法保存服务配置，请检查地址、模型和认证字段。'},400);}
   }
   if(path==='/api/tutor/status'&&request.method==='GET'){
     const configured=serviceStore?Boolean(active&&(active.service.authMethod==='none'||active.secret)):!!env.TUTOR_API_KEY;
@@ -128,6 +129,10 @@ async function handleTutorRequestInternal(request:Request,env:TutorEnvironment,f
   if(request.signal.aborted)controller.abort();
   const timer=setTimeout(cancel,60000);
   try{
+    if(active?.service.authMethod==='managed'&&serviceStore?.managedChat){
+      const answer=await serviceStore.managedChat(buildTutorMessages(body),body.sessionId,controller.signal,active.service.id);
+      return reply({answer,model:settings.model,provider:settings.provider,mode:body.mode});
+    }
     const upstream=await fetcher(settings.endpoint,{method:'POST',redirect:'manual',signal:controller.signal,headers:{'Content-Type':'application/json',...(credential?{Authorization:`Bearer ${credential}`}:{}),'User-Agent':'FromZeroToGPT-LearningTutor/0.2.0','x-opencode-session':body.sessionId},body:JSON.stringify({model:settings.model,messages:buildTutorMessages(body),max_tokens:2400,temperature:0.3,stream:false,...(new URL(settings.endpoint).hostname==='opencode.ai'&&settings.model.startsWith('deepseek-')?{thinking:{type:'disabled'}}:{})})});
     if(!upstream.ok){await upstream.body?.cancel();return reply({error:upstream.status===429?'模型提供商暂时限流，请稍后重试。':[401,403].includes(upstream.status)?'模型服务拒绝了服务端凭证，请在服务端检查密钥及订阅。':'模型提供商暂时不可用，请稍后重试。',providerStatus:upstream.status},upstream.status===429?429:502);}
     const data=JSON.parse(await limitedText(upstream.body,2000000));

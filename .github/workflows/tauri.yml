@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   desktop:
-    name: ${{ matrix.name }} unsigned application
+    name: ${{ matrix.name }} desktop application
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -80,7 +80,12 @@ jobs:
       - name: Clear cached installer outputs before bundling
         run: node -e "for (const dir of ['src-tauri/target/release/bundle', 'src-tauri/target/universal-apple-darwin/release/bundle']) require('node:fs').rmSync(dir, {recursive:true, force:true})"
       - name: Build desktop bundles
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run desktop:build -- ${{ matrix.args }}
+      - name: Verify standalone provider runtime
+        run: node scripts/provider-engine-smoke.mjs
       - name: Install and validate the Linux package
         if: matrix.name == 'Linux'
         shell: bash

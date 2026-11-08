@@ -6,7 +6,10 @@ The original synthetic tiny-GPT corpus remains CC0-1.0, see projects/tiny-gpt/da
 
 Runtime dependencies:
 
-- Tauri / tauri-build / tauri-plugin-log / window-vibrancy: MIT or Apache-2.0, Tauri Programme and contributors. Rust dependencies and exact versions are recorded in src-tauri/Cargo.lock; platform WebViews retain their respective system licenses.
+- Tauri / tauri-build / tauri-plugin-log / tauri-plugin-updater / tauri-plugin-process / window-vibrancy: MIT or Apache-2.0, Tauri Programme and contributors. Rust dependencies and exact versions are recorded in src-tauri/Cargo.lock; platform WebViews retain their respective system licenses.
+- pi-ai / pi-schema / pi-telemetry 1.5.0: MIT, Mario Zechner and contributors, https://github.com/earendil-works/pi/tree/v1.5.0 . The unmodified pi runtime handles provider catalogs, authentication and inference. Its MIT text is retained in `third_party/provider-engine/pi-LICENSE`; pi-schema's additional dependency notices are copied from its LICENSES directory.
+- The standalone provider process embeds Bun 1.3.11. Bun's own code is MIT; its embedded JavaScriptCore/WebKit and linked libraries retain their respective licenses, including LGPL. The upstream notice is retained in `third_party/provider-engine/bun-LICENSE.md`. Corresponding source and submodules: https://github.com/oven-sh/bun/tree/bun-v1.3.11 . Follow that tag's build instructions to rebuild/relink Bun, then compile `server/provider-worker.ts` using `scripts/build-provider-engine.mjs`. Users may replace the adjacent `provider-engine` executable in their installed application. Bun is a separately executed process, not linked into the Rust application.
+- Provider SDKs (OpenAI, Anthropic, Google, AWS/Smithy), proxy libraries and other bundled npm production dependencies retain their upstream licenses. Their license/notice files are copied from the exact lockfile packages into `dist/licenses/dependencies/`; pi and Bun notices are included in `dist/licenses/provider-engine/`. No provider SDK is relicensed by this application.
 
 - React / React DOM: MIT, Meta Platforms, Inc. and affiliates.
 - Vite: MIT, Vite contributors.

@@ -1,0 +1,16 @@
+{
+  "identifier": "desktop-updater",
+  "description": "Check signed GitHub releases and restart after installation",
+  "windows": [
+    "main"
+  ],
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "permissions": [
+    "updater:default",
+    "process:allow-restart"
+  ]
+}

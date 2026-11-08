@@ -45,48 +45,48 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #20231f;
-  --panel: #262a25;
-  --panel-soft: #2b302a;
-  --panel-raised: #323830;
-  --text: #cbc7bb;
-  --secondary: #afaea2;
-  --muted: #999d91;
-  --border: #3b4239;
-  --control-border: #697567;
-  --accent: #86b798;
-  --accent-dark: #a1c5ac;
-  --accent-soft: #2d3b30;
+  --bg: #191b1d;
+  --panel: #222527;
+  --panel-soft: #292d30;
+  --panel-raised: #33383b;
+  --text: #e0e3e1;
+  --secondary: #b7bfbb;
+  --muted: #9ca7a1;
+  --border: #3c4343;
+  --control-border: #75827c;
+  --accent: #91c7a7;
+  --accent-dark: #b0d9bf;
+  --accent-soft: #293c33;
   --action-bg: #38674e;
-  --action-hover: #43775b;
-  --on-accent: #e0e8dc;
-  --grid: #383f36;
-  --axis: #778472;
-  --hero: #293229;
-  --hero-ink: #86a68d;
-  --plot-secondary: #c6a476;
-  --plot-tertiary: #8fb5aa;
-  --warning: #dbc18f;
-  --error: #e3aaad;
-  --error-bg: #38282a;
-  --success: #b2d2ba;
-  --success-bg: #26382d;
-  --warning-bg: #373225;
-  --editor-bg: #191e1a;
-  --editor-text: #c9cabe;
-  --editor-muted: #969f90;
-  --sidebar-bg: #242923;
-  --sidebar-text: #b8bbae;
-  --sidebar-muted: #999f92;
-  --sidebar-active: #324235;
-  --glass-bg: rgb(35 40 34 / 64%);
-  --glass-highlight: rgb(255 255 255 / 14%);
-  --ambient: radial-gradient(ellipse 640px 450px at 3% 0%, rgb(92 125 81 / 58%), transparent 72%), radial-gradient(ellipse 700px 430px at 100% 5%, rgb(128 103 66 / 52%), transparent 72%), radial-gradient(ellipse 540px 500px at 12% 100%, rgb(63 105 74 / 60%), transparent 74%);
-  --chrome-bg: #20231f;
-  --scrim: rgb(8 12 9 / 66%);
+  --action-hover: #407257;
+  --on-accent: #f0f5f1;
+  --grid: #363d3f;
+  --axis: #7e8d86;
+  --hero: #252f2b;
+  --hero-ink: #9abda8;
+  --plot-secondary: #d1ae80;
+  --plot-tertiary: #91bebd;
+  --warning: #e0c593;
+  --error: #edb3b7;
+  --error-bg: #392b30;
+  --success: #b4d8c0;
+  --success-bg: #26382f;
+  --warning-bg: #383327;
+  --editor-bg: #151819;
+  --editor-text: #d9e1dc;
+  --editor-muted: #9daaa3;
+  --sidebar-bg: #1e2224;
+  --sidebar-text: #c3cdc7;
+  --sidebar-muted: #a3b0a8;
+  --sidebar-active: #2e4338;
+  --glass-bg: rgb(30 34 36 / 86%);
+  --glass-highlight: rgb(255 255 255 / 7%);
+  --ambient: radial-gradient(ellipse 640px 450px at 3% 0%, rgb(72 103 89 / 24%), transparent 72%), radial-gradient(ellipse 700px 430px at 100% 5%, rgb(87 103 112 / 18%), transparent 72%), radial-gradient(ellipse 540px 500px at 12% 100%, rgb(60 95 79 / 22%), transparent 74%);
+  --chrome-bg: #191b1d;
+  --scrim: rgb(5 8 10 / 72%);
   --shadow: 0 22px 65px rgb(0 0 0 / 38%), 0 2px 10px rgb(0 0 0 / 20%);
   --glass-shadow: 0 14px 44px rgb(0 0 0 / 24%);
-  scrollbar-color: #596458 var(--bg);
+  scrollbar-color: var(--control-border) var(--bg);
 }
 
 :root[data-theme='dark'] :is(textarea, select, input:not([type='range']):not([type='checkbox']):not([type='radio'])) {
@@ -97,7 +97,38 @@
 :root[data-theme='dark'] .math-lab { border-color: var(--control-border); }
 
 :root[data-native-material='true']{--glass-bg:rgb(247 249 244 / 16%)}
-:root[data-theme='dark'][data-native-material='true']{--glass-bg:rgb(35 40 34 / 20%)}
+:root[data-theme='dark'][data-native-material='true']{--glass-bg:rgb(30 34 36 / 72%)}
+
+/* Dark navigation must remain legible without an OS compositor or blur. */
+:root[data-theme='dark'] :is(.sidebar, .context-panel) {
+  background: var(--sidebar-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+:root[data-theme='dark'] .sidebar :is(.nav-link, .lesson-nav-link).active {
+  background: var(--sidebar-active);
+  color: var(--accent-dark);
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+/* Windows native material may be light even when the app theme is dark. */
+:root[data-theme='dark'][data-app-platform='other'] :is(.topbar, .lesson-sticky-tools) {
+  background: var(--sidebar-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Only confirmed macOS desktop vibrancy opts into translucent dark rails. */
+@media (min-width: 901px) and (prefers-reduced-transparency: no-preference) {
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root[data-theme='dark'][data-app-platform='macos'][data-native-material='true'] :is(.sidebar, .context-panel) {
+      background: var(--glass-bg);
+      backdrop-filter: blur(38px) saturate(110%);
+      -webkit-backdrop-filter: blur(38px) saturate(110%);
+    }
+  }
+}
 
 @media(prefers-reduced-transparency:reduce){:root,:root[data-theme],:root[data-theme][data-native-material]{--glass-bg:var(--panel);--glass-highlight:var(--border)}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root,:root[data-theme]{--glass-bg:var(--panel);--glass-highlight:var(--border)}}

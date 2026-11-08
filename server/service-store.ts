@@ -1,3 +1,4 @@
+import {ProviderEngine} from './provider-engine';
 import {randomUUID} from 'node:crypto';
 import {chmod,mkdir,readFile,rename,writeFile} from 'node:fs/promises';
 import os from 'node:os';
@@ -13,11 +14,12 @@ export function validateProviderService(draft:ProviderServiceDraft):ProviderServ
   if(!/^[a-z0-9][a-z0-9-]{0,48}$/.test(id))throw new Error('服务 ID 格式无效');
   const name=draft.name.trim(),model=draft.model.trim();
   if(!name||name.length>60||!model||model.length>160)throw new Error('服务名称或模型格式无效');
-  if(!['api-key','github-copilot','none'].includes(draft.authMethod))throw new Error('认证方式无效');
+  if(!['api-key','github-copilot','none','managed'].includes(draft.authMethod))throw new Error('认证方式无效');
   const url=new URL(draft.baseUrl);
   const local=['localhost','127.0.0.1','[::1]'].includes(url.hostname);
   if(url.username||url.password||url.search||url.hash||(url.protocol!=='https:'&&!(draft.allowLocalHttp&&local&&url.protocol==='http:')))throw new Error('服务地址必须使用 HTTPS；本地 HTTP 需要单独允许');
-  return {id,name,baseUrl:url.toString().replace(/\/$/,''),model,authMethod:draft.authMethod,allowLocalHttp:draft.allowLocalHttp===true};
+  if(draft.authMethod==='managed'&&(!draft.providerId||!/^[a-z0-9-]+$/.test(draft.providerId)))throw new Error('服务商无效');
+  return {id,name,...(draft.providerId?{providerId:draft.providerId}:{}),baseUrl:url.toString().replace(/\/$/,''),model,authMethod:draft.authMethod,allowLocalHttp:draft.allowLocalHttp===true};
 }
 
 export function providerEndpoint(service:ProviderService){
@@ -41,6 +43,9 @@ export class NodeProviderServiceStore implements ProviderServiceStore{
   private credentials?:Record<string,string>;
   private activeId?:string|null;
   private queue=Promise.resolve();
+  private engine=new ProviderEngine();
+  private completedLogins=new Map<string,ProviderServiceSnapshot>();
+  private engineQueue=Promise.resolve();
   private readonly configPath:string;
   private readonly credentialsPath:string;
   constructor(private readonly env:Env=process.env,root=defaultDataDirectory(env)){
@@ -83,24 +88,88 @@ export class NodeProviderServiceStore implements ProviderServiceStore{
     const services=this.services!.map(service=>({...service,hasCredential:service.authMethod==='none'||Boolean(this.credentials![service.id]||(service.id==='opencode-go'&&this.env.TUTOR_API_KEY))}));
     return {services,activeId:this.activeId??null};
   }
-  async save(draft:ProviderServiceDraft,secret?:string){
+  async save(draft:ProviderServiceDraft,secret?:string,internal=false){
     return this.mutate(async()=>{
       await this.load();
+      if(draft.authMethod==='managed'&&!internal){
+        const existing=this.services!.find(s=>s.id===draft.id);
+        if(!existing||existing.authMethod!=='managed'||existing.providerId!==draft.providerId||secret!==undefined)throw new Error('请使用服务商登录流程。');
+      }
       const service=validateProviderService(draft),services=[...this.services!],credentials={...this.credentials!};
       const index=services.findIndex(item=>item.id===service.id);
       if(index>=0)services[index]=service;else services.push(service);
       if(secret!==undefined){
         if(!secret.trim()||secret.length>16000)throw new Error('API key 为空或过长');
-        if(service.authMethod!=='api-key')throw new Error('此认证方式不接受 API key');
+        if(!['api-key','managed'].includes(service.authMethod))throw new Error('此认证方式不接受 API key');
         credentials[service.id]=secret.trim();
       }
-      if(service.authMethod!=='api-key')delete credentials[service.id];
-      if(secret!==undefined||service.authMethod!=='api-key')await this.writeJson(this.credentialsPath,credentials);
+      if(!['api-key','managed'].includes(service.authMethod))delete credentials[service.id];
+      if(secret!==undefined||!['api-key','managed'].includes(service.authMethod))await this.writeJson(this.credentialsPath,credentials);
       await this.writeJson(this.configPath,services);
       await this.writeJson(path.join(path.dirname(this.configPath),'active-service.json'),service.id);
       this.services=services;this.credentials=credentials;this.activeId=service.id;
       return this.snapshot();
     });
+  }
+  private async hostId(){
+    return this.mutate(async()=>{
+    const filename=path.join(path.dirname(this.configPath),'host-id.json');
+    const value=await readJson(filename);
+    if(typeof value==='string'&&value.startsWith('urn:uuid:'))return value;
+    const id=`urn:uuid:${randomUUID()}`;await this.writeJson(filename,id);return id;
+    });
+  }
+  async managedRequest(action:string,data:Record<string,unknown>){
+    if(!['catalog','loginStart','loginPoll','loginInput','loginCancel','models'].includes(action))throw new Error('无效操作');
+    if(action==='loginStart')return this.engine.request(action,{providerId:data.providerId,method:data.method,hostId:await this.hostId()});
+    if(action==='loginPoll'){
+      const task=async()=>{
+      const id=String(data.sessionId);
+      const cached=this.completedLogins.get(id);if(cached)return {sessionId:id,state:'complete',snapshot:cached};
+      const result=await this.engine.request(action,{sessionId:id});
+      if(result.state==='complete'){
+        const found=await this.engine.request('models',{providerId:result.providerId,credential:result.credential});
+        const model=found.models[0]?.id;
+        if(!model)throw new Error('该账号暂无可选择的模型。');
+        const snapshot=await this.save({id:result.serviceId,name:result.name,providerId:result.providerId,authMethod:'managed',baseUrl:'https://managed.invalid',model},JSON.stringify(found.credential||result.credential),true);
+        this.completedLogins.set(id,snapshot);if(this.completedLogins.size>8)this.completedLogins.delete(this.completedLogins.keys().next().value!);
+        await this.engine.request('loginForget',{sessionId:id});
+        return {sessionId:id,providerId:result.providerId,state:'complete',snapshot};
+      }
+      return result;
+      };
+      const result=this.engineQueue.then(task);this.engineQueue=result.then(()=>undefined,()=>undefined);return result;
+    }
+    if(action==='models'){
+      const task=async()=>{
+        await this.load();const service=this.services!.find(s=>s.id===data.id);
+        if(!service||service.authMethod!=='managed')throw new Error('请先连接服务。');
+        const result=await this.engine.request('models',{providerId:service.providerId,credential:JSON.parse(this.credentials![service.id])});
+        if(result.credential)await this.persistManagedCredential(service.id,result.credential);
+        return {models:result.models,catalogOnly:result.catalogOnly};
+      };
+      const result=this.engineQueue.then(task);this.engineQueue=result.then(()=>undefined,()=>undefined);return result;
+    }
+    return this.engine.request(action,{sessionId:data.sessionId,promptId:data.promptId,value:data.value});
+  }
+  private persistManagedCredential(id:string,value:unknown){
+    return this.mutate(async()=>{if(!this.services!.some(s=>s.id===id))return;const next={...this.credentials!,[id]:JSON.stringify(value)};await this.writeJson(this.credentialsPath,next);this.credentials=next;});
+  }
+  async managedChat(messages:unknown,jobId:string,signal:AbortSignal,serviceId:string){
+    const task=async()=>{
+      if(signal.aborted)throw new Error('已取消');
+      await this.load();const service=this.services!.find(s=>s.id===serviceId),secret=this.credentials![serviceId];
+      if(!service?.providerId||!secret)throw new Error('请先连接服务。');
+      const active={service,secret};
+      const cancel=()=>{void this.engine.request('cancel',{jobId});};signal.addEventListener('abort',cancel,{once:true});
+      try{
+        const result=await this.engine.request('chat',{providerId:active.service.providerId,model:active.service.model,credential:JSON.parse(active.secret),messages,jobId});
+        if(result.credential)await this.persistManagedCredential(active.service.id,result.credential);
+        if(result.error)throw new Error(result.error);
+        return String(result.answer);
+      }finally{signal.removeEventListener('abort',cancel);}
+    };
+    const result=this.engineQueue.then(task);this.engineQueue=result.then(()=>undefined,()=>undefined);return result;
   }
   async remove(id:string){
     return this.mutate(async()=>{

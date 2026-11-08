@@ -61,7 +61,7 @@ for(const theme of ['light','dark'] as const)test(`${theme}: readable type fits 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme',theme);
   await openNotebook(page);await expect(page.getByLabel('当前章节随手笔记')).toHaveValue('字体调整后，继续观察输入与输出。');
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content',theme==='dark'?'#20231f':'#f7f7f2');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content',theme==='dark'?'#191b1d':'#f7f7f2');
 });
 
 test('a cached dark preference paints a dark canvas before the application JavaScript starts',async({page})=>{
@@ -69,8 +69,8 @@ test('a cached dark preference paints a dark canvas before the application JavaS
   await page.route('**/*',route=>route.request().resourceType()==='script'?route.abort():route.continue());
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-  expect(await page.locator('html').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(32, 35, 31)');
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content','#20231f');
+  expect(await page.locator('html').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(25, 27, 29)');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content','#191b1d');
   await expect(page.locator('.app-shell')).toHaveCount(0);
 });
 

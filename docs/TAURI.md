@@ -51,7 +51,7 @@ APK 位于 `src-tauri/gen/android/app/build/outputs/apk/` 下。最低 Android A
 | Linux | 官方 crate 明确不支持，效果由系统 compositor 决定；保留 CSS fallback |
 | Android / 浏览器 | 不调用桌面窗口接口，使用 CSS fallback |
 
-Tauri 的 `native_material_status` 命令返回真实启用结果。只有成功时才移除 CSS 环境背景并降低网页遮罩；调用失败或平台不支持时继续使用现有 CSS。窗口缩放仍由系统材质和 WebView 自动处理；Windows Acrylic 的官方 crate 已注明部分版本在拖动／缩放时有性能限制，本项目不声称消除了这些系统限制。
+Tauri 的 `native_material_status` 命令返回真实启用结果。成功后可移除 CSS 环境背景，但暗色侧栏、上下文面板和非 macOS 顶栏保持不透明；只有 macOS 桌面大窗口明确启用原生材质且未要求减少透明度时，才降低暗色侧栏遮罩。调用失败或平台不支持时使用不透明 CSS。窗口缩放仍由系统材质和 WebView 自动处理；Windows Acrylic 的官方 crate 已注明部分版本在拖动／缩放时有性能限制，本项目不声称消除了这些系统限制。
 
 `prefers-reduced-transparency` 下，网页导航、根背景和工具面板恢复不透明，因此不会透过它们显示原生材质。正文始终不透明。macOS 透明 WebView 需要 `transparent: true`、`macOSPrivateApi: true` 和对应 Tauri feature；这属于构建能力说明，不代表 Apple 签名、公证或 App Store 审核。
 
@@ -59,7 +59,7 @@ macOS 另使用 `titleBarStyle: Overlay` 与 `hiddenTitle: true`，让原生交�
 
 ## 可选 AI 导师
 
-未配置模型服务时，课程和练习可离线使用。桌面应用的「模型服务」面板支持保存多个 OpenAI 兼容接口并切换当前服务；非秘密配置保存在应用配置目录，API key 使用系统凭据存储，原生 Rust 客户端负责模型请求。Linux 使用 Secret Service，需要桌面环境提供并解锁凭据服务。GitHub Copilot 选项尚未提供完整登录流程，不应视为已完成订阅认证支持。
+未配置模型服务时，课程和练习可离线使用。桌面应用的「模型服务」面板支持从 41 个服务入口中选择 Key 或 OAuth 方式，并保存多个账号/服务。内置 pi 运行时自动配置服务协议、地址、模型目录与刷新凭据；自定义 OpenAI 兼容接口仍通过 Rust 客户端请求。非秘密配置保存在应用配置目录，凭据使用系统凭据存储。Linux 使用 Secret Service，需要桌面环境提供并解锁凭据服务。GitHub Copilot 已接入 pi 的 OAuth 流程。覆盖范围与真实账号验证边界见 [模型服务](MODEL_SERVICES.md)。
 
 浏览器使用同源 `/api/tutor/*` 与 Node 服务端配置。若自行构建并设置 `VITE_TUTOR_API_ORIGIN=https://tutor.example.com`，应用可改用外部 HTTPS 导师代理；该地址不能含秘密。代理需设置 `TUTOR_ALLOW_TAURI_ORIGIN=1`，公网部署同时配置 `TUTOR_ACCESS_TOKEN`。详见 [架构说明](ARCHITECTURE.md)。
 
@@ -73,7 +73,7 @@ macOS 另使用 `titleBarStyle: Overlay` 与 `hiddenTitle: true`，让原生交�
 | Windows x64 | NSIS `.exe` |
 | Linux x86_64（Ubuntu 24.04 构建） | AppImage 与 DEB |
 
-[release.yml](../.github/workflows/release.yml) 在推送 `vX.Y.Z` 标签时校验 npm、Tauri、Cargo 与标签版本一致，验证同一源码提交在 main 上的完整 CI 和桌面构建已成功。只有全部成功，才从该次桌面构建运行中汇集四个安装包，检查文件格式，生成 SHA-256 与源码清单，上传到草稿再公开 Release。构建只有 `contents: read`，仅最终发布 job 有 `contents: write`。已公开的版本不能被工作流覆盖。操作步骤见 [CI / CD](GITHUB_CICD.md)。
+[release.yml](../.github/workflows/release.yml) 在推送 `vX.Y.Z` 标签时校验 npm、Tauri、Cargo 与标签版本一致，验证同一源码提交在 main 上的完整 CI 和桌面构建已成功。只有全部成功，才从该次桌面构建运行中汇集四个安装包，检查文件格式，生成 SHA-256 与源码清单，上传到草稿再公开 Release。构建只有 `contents: read`，仅最终发布 job 有 `contents: write`。已公开的版本不能被工作流覆盖。操作步骤见 [CI / CD](GITHUB_CICD.md)。签名更新包与 `latest.json` 随同发布，首次密钥配置及更新操作见 [自更新说明](UPDATES.md)。
 
 产物未配置 Apple Developer ID 签名、公证或 Windows 代码签名，不能据此声称已通过应用商店审核。Linux 最低兼容环境以 Ubuntu 24.04 和系统 WebKitGTK 依赖为基线；AppImage 仍需满足宿主运行库与 FUSE 条件。
 

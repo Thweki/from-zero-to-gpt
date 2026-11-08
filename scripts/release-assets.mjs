@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync} from 'node:fs';
+import {copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
@@ -21,8 +21,27 @@ export function expectedAssets(version) {
     .map(suffix=>`from-zero-to-gpt-${version}-${suffix}`);
 }
 
+export function expectedUpdateAssets(version) {
+  return [`from-zero-to-gpt-${version}-macos-universal.app.tar.gz`,
+    ...['linux-x86_64.AppImage','macos-universal.app.tar.gz','windows-x64-setup.exe'].map(suffix=>`from-zero-to-gpt-${version}-${suffix}.sig`)];
+}
+
+export function createUpdateManifest(directory,version,notes='',repository='Thweki/from-zero-to-gpt') {
+  for(const name of expectedUpdateAssets(version))assert.ok(existsSync(join(directory,name)),`Missing signed updater artifact: ${name}`);
+  const platforms={};
+  for(const [targets,suffix] of [[['windows-x86_64'],'windows-x64-setup.exe'],[['linux-x86_64'],'linux-x86_64.AppImage'],[['darwin-x86_64','darwin-aarch64'],'macos-universal.app.tar.gz']]) {
+    const name=`from-zero-to-gpt-${version}-${suffix}`;
+    assert.ok(statSync(join(directory,name)).size>1024,'Empty update archive');
+    const signature=readFileSync(join(directory,name+'.sig'),'utf8').trim();
+    assert.ok(signature.length>40&&signature.length<4096,'Invalid updater signature');
+    for(const target of targets)platforms[target]={signature,url:`https://github.com/${repository}/releases/download/v${version}/${name}`};
+  }
+  return {version,notes,pub_date:new Date().toISOString(),platforms};
+}
+
 export function validateAssets(directory,version) {
-  const names=readdirSync(directory).sort();
+  const allNames=readdirSync(directory).sort();
+  const names=allNames.filter(name=>!expectedUpdateAssets(version).includes(name));
   assert.deepEqual(names,expectedAssets(version).sort(),'All three platforms and all four installers are required');
   return names.map(name=>{
     const path=join(directory,name);
@@ -49,7 +68,18 @@ function stage(platform) {
     const source=join('src-tauri/target',directory);
     const files=readdirSync(source).filter(name=>name.endsWith(extension));
     assert.equal(files.length,1,`Expected exactly one ${extension} installer`);
-    copyFileSync(join(source,files[0]),join(output,`from-zero-to-gpt-${version}-${suffix}`));
+    const target=`from-zero-to-gpt-${version}-${suffix}`;
+    copyFileSync(join(source,files[0]),join(output,target));
+    if(existsSync(join(source,files[0]+'.sig')))copyFileSync(join(source,files[0]+'.sig'),join(output,target+'.sig'));
+  }
+  if(platform==='macOS'){
+    const source='src-tauri/target/universal-apple-darwin/release/bundle/macos';
+    const archive=readdirSync(source).find(name=>name.endsWith('.app.tar.gz'));
+    if(archive){
+      const target=`from-zero-to-gpt-${version}-macos-universal.app.tar.gz`;
+      copyFileSync(join(source,archive),join(output,target));
+      if(existsSync(join(source,archive+'.sig')))copyFileSync(join(source,archive+'.sig'),join(output,target+'.sig'));
+    }
   }
 }
 
@@ -61,6 +91,8 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href) {
     const directory=argument||'artifacts/desktop-release';
     const version=checkVersion(process.env.RELEASE_TAG);
     const assets=validateAssets(directory,version);
+    const update=createUpdateManifest(directory,version,readFileSync(`docs/releases/v${version}.md`,'utf8'));
+    writeFileSync(join(directory,'latest.json'),JSON.stringify(update,null,2)+'\n');
     assert.match(process.env.GITHUB_SHA||'',/^[a-f0-9]{40}$/);
     for(const name of ['LICENSE','THIRD_PARTY_NOTICES.md'])copyFileSync(name,join(directory,name));
     writeFileSync(join(directory,'release-manifest.json'),JSON.stringify({version,commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,assets},null,2)+'\n');

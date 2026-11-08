@@ -17,7 +17,7 @@
 - **保存学习现场**：进度、笔记、代码、实验参数和导师对话保存在浏览器；支持导出、导入，以及记录问题与下一步后暂停。
 - **按需使用 AI 导师**：接入 OpenAI 兼容接口，围绕当前章节提问；选中文字或实验图后可将引用带入草稿。
 
-当前版本为 **0.4.3**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
+当前版本为 **0.5.0**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
 
 ## 下载安装
 
@@ -25,15 +25,15 @@
 
 | 平台 | 下载文件 | 安装方式 |
 | --- | --- | --- |
-| Linux x86_64 | `from-zero-to-gpt-0.4.3-linux-amd64.deb` / `linux-x86_64.AppImage` | Ubuntu 24.04 或兼容环境优先使用 DEB；AppImage 添加执行权限后运行 |
-| macOS（Apple Silicon / Intel） | `from-zero-to-gpt-0.4.3-macos-universal.dmg` | 打开 DMG，将应用拖入 Applications |
-| Windows x64 | `from-zero-to-gpt-0.4.3-windows-x64-setup.exe` | 运行安装程序；需要 WebView2，安装器可按需下载 |
+| Linux x86_64 | `from-zero-to-gpt-0.5.0-linux-amd64.deb` / `linux-x86_64.AppImage` | Ubuntu 24.04 或兼容环境优先使用 DEB；AppImage 添加执行权限后运行 |
+| macOS（Apple Silicon / Intel） | `from-zero-to-gpt-0.5.0-macos-universal.dmg` | 打开 DMG，将应用拖入 Applications |
+| Windows x64 | `from-zero-to-gpt-0.5.0-windows-x64-setup.exe` | 运行安装程序；需要 WebView2，安装器可按需下载 |
 
 本版安装包未配置 Apple Developer ID 签名、公证或 Windows 代码签名，系统可能提示未识别的开发者。Linux 需要图形桌面；AppImage 仍受系统库与 FUSE 支持限制，使用 Ubuntu 24.04 构建，不承诺兼容更早发行版。三平台自动构建成功不等同于所有系统版本的实机验收。
 
 Release 同时提供 `SHA256SUMS`、记录源码提交与安装包摘要的 `release-manifest.json`，以及许可证。下载后可在文件所在目录运行 `sha256sum -c SHA256SUMS --ignore-missing`（Linux），或用 `shasum -a 256 <文件>`（macOS）、`Get-FileHash <文件> -Algorithm SHA256`（PowerShell）核对对应摘要。
 
-桌面应用内置课程、公式、字体和 Python 练习运行时，可离线学习。AI 导师需联网，打开应用中的「模型服务」配置 OpenAI 兼容接口；桌面凭据由系统凭据存储保存。学习数据保存在当前应用的 WebView 中，浏览器与桌面应用之间请通过导出／导入迁移。完整说明见 [桌面应用](docs/TAURI.md)。
+桌面应用内置课程、公式、字体和 Python 练习运行时，可离线学习。AI 导师需联网，打开应用中的「模型服务」，选择服务商后粘贴 Key 或使用订阅登录，再选择模型；普通流程无需填写接口地址。桌面凭据由系统凭据存储保存，支持的方式见 [模型服务](docs/MODEL_SERVICES.md)。学习数据保存在当前应用的 WebView 中，浏览器与桌面应用之间请通过导出／导入迁移。完整说明见 [桌面应用](docs/TAURI.md)。桌面版支持从 GitHub 检查、下载并安装签名更新，发布配置见 [自更新说明](docs/UPDATES.md)。
 
 ## 快速开始
 
@@ -41,7 +41,7 @@ Release 同时提供 `SHA256SUMS`、记录源码提交与安装包摘要的 `rel
 
 | 依赖 | 要求 | 用途 |
 | --- | --- | --- |
-| Node.js / npm | Node.js **22.18+**，推荐 24 LTS；安装时包含 npm | 本地网站、依赖安装与构建 |
+| Node.js / npm | Node.js **22.19+**，推荐 24 LTS；安装时包含 npm | 本地网站、依赖安装与构建 |
 | Python | **3.10+**，推荐 3.12 | 启动检查、教学工程打包与本地课程验证 |
 | 浏览器 | 支持 WebAssembly、Web Worker 和 IndexedDB 的现代浏览器 | 图形实验、浏览器 Python 与学习记录 |
 | PyTorch | 仅运行独立 tiny-GPT 工程时另行安装 | 本地 CPU 训练与生成；网站启动不需要 |

@@ -34,3 +34,15 @@ export function removeProviderService(id:string):Promise<ProviderServiceSnapshot
 export function nativeTutorStatus(){return invokeNative<Record<string,unknown>>('native_tutor_status');}
 export function nativeTutorChat(payload:unknown){return invokeNative<{answer:string}>('native_tutor_chat',{payload});}
 export function nativeTutorCancel(sessionId:string){return invokeNative<void>('native_tutor_cancel',{sessionId});}
+
+export async function providerEngineRequest<T>(action:string,data:Record<string,unknown>={}):Promise<T>{
+  if(isTauriRuntime&&!endpoint(''))return invokeNative('provider_engine_request',{action,data});
+  const url=tutorApiUrl('services/engine');if(!url)throw new Error('此部署不支持账号连接。请使用桌面版或本地服务。');
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,data}),cache:'no-store'});
+  const result=await response.json();if(!response.ok)throw new Error(result.error||'模型服务操作失败。');return result;
+}
+export async function openProviderUrl(url:string){
+  if(new URL(url).protocol!=='https:')throw new Error('登录地址无效。');
+  if(isTauriRuntime)return invokeNative('open_provider_url',{url});
+  window.open(url,'_blank','noopener,noreferrer');
+}

@@ -98,7 +98,7 @@ flowchart LR
 
 默认连接信息为 OpenCode Go、`https://opencode.ai/inference/go/openai/v1` 与 `deepseek-v4.1-flash`，提供商或订阅可用性由实际服务决定。配置是否有效以状态接口与真实调用结果为准，示例文件不含有效凭证。
 
-本地开发复制 `.env.example` 为 `.env` 后，`npm run dev` 的 Vite 中间件代理导师请求。构建运行 `npm run build`，输出静态 `dist/`、Node 处理器 `dist-server/tutor.mjs`、Worker `dist-server/worker.js`；构建需要 `python3` 打包项目。`npm start` 用 Node 22.18+ 读取可选 `.env`，默认只监听 `127.0.0.1:8787`，可用 `HOST`、`PORT` 调整。生产入口应使用 HTTPS 反向代理，并保证转发给处理器的 origin 与浏览器同源。
+本地开发复制 `.env.example` 为 `.env` 后，`npm run dev` 的 Vite 中间件代理导师请求。构建运行 `npm run build`，输出静态 `dist/`、Node 处理器 `dist-server/tutor.mjs`、Worker `dist-server/worker.js`；构建需要 `python3` 打包项目。`npm start` 用 Node 22.19+ 读取可选 `.env`，默认只监听 `127.0.0.1:8787`，可用 `HOST`、`PORT` 调整。生产入口应使用 HTTPS 反向代理，并保证转发给处理器的 origin 与浏览器同源。
 
 Worker 部署以 `dist-server/worker.js` 为入口，绑定名为 `ASSETS` 的 `dist/` 静态资源；`/api/tutor/*` 必须先经过 Worker，其他路径由资源绑定处理。平台密钥存储设置 `TUTOR_API_KEY` 和可选访问码，普通变量设置模型及地址。发布时确认 WASM、`/python.worker.js`、字体、下载 ZIP 与 API 都在同一站点可达。只有 `dist/` 的普通静态托管不包含导师后端；`vite preview` 也不是生产 AI 代理。
 

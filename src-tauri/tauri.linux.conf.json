@@ -1,4 +1,9 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "From Zero to GPT"
+  "productName": "From Zero to GPT",
+  "bundle": {
+    "externalBin": [
+      "binaries/provider-engine"
+    ]
+  }
 }

@@ -47,6 +47,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm test
+      - run: npm run test:ci-local
       - run: npm run test:delivery
       - run: npm run test:tauri
       - run: npm run test:release

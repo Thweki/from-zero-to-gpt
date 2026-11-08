@@ -10,8 +10,8 @@ import {findPython,runPython} from './python.mjs';
 import {packageProjects} from './package-projects.mjs';
 
 test('rejects unsupported Node releases before installing dependencies',()=>{
-  for(const v of ['18.20.0','20.19.0','22.17.9'])assert.equal(supportedNode(v),false);
-  for(const v of ['22.18.0','22.20.0','24.0.0','24.19.0'])assert.equal(supportedNode(v),true);
+  for(const v of ['18.20.0','20.19.0','22.17.9','22.18.0'])assert.equal(supportedNode(v),false);
+  for(const v of ['22.19.0','22.20.0','24.0.0','24.19.0'])assert.equal(supportedNode(v),true);
 });
 test('validates user ports and rejects shell-like arguments',()=>{
   assert.deepEqual(parseOptions(['--port','5180','--no-open']),{port:5180,open:false,check:false,help:false});

@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::Manager;
 
 mod services;
+mod provider_engine;
 mod tutor;
 
 static NATIVE_MATERIAL_ACTIVE: AtomicBool = AtomicBool::new(false);
@@ -33,6 +34,8 @@ pub fn run() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       native_material_status,
+      provider_engine::provider_engine_request,
+      provider_engine::open_provider_url,
       services::provider_services_snapshot,
       services::provider_service_save,
       services::provider_service_activate,
@@ -42,7 +45,13 @@ pub fn run() {
       tutor::native_tutor_cancel
     ])
     .setup(|app| {
+      #[cfg(not(target_os = "android"))]
+      {
+        app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+        app.handle().plugin(tauri_plugin_process::init())?;
+      }
       services::register(app)?;
+      provider_engine::register(app);
       tutor::register(app)?;
       if cfg!(debug_assertions) {
         app.handle().plugin(

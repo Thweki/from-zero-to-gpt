@@ -12,7 +12,7 @@ import {isMain} from './cli-main.mjs';
 
 // Expand macOS aliases and Windows 8.3 paths before Vite derives its filesystem allow list.
 export const projectRoot=realpathSync.native(fileURLToPath(new URL('../',import.meta.url)));
-export function supportedNode(version){const [major,minor]=version.split('.').map(Number);return major>22||(major===22&&minor>=18);}
+export function supportedNode(version){const [major,minor]=version.split('.').map(Number);return major>22||(major===22&&minor>=19);}
 export function parseOptions(args,defaultPort='5173'){
   const options={port:defaultPort,open:true,check:false,help:false};
   for(let i=0;i<args.length;i++){
@@ -87,8 +87,8 @@ export async function main(args=process.argv.slice(2)){
   process.on('SIGINT',stop);process.on('SIGTERM',stop);
   try{
     const options=parseOptions(args,process.env.FROM_ZERO_PORT||'5173');
-    if(options.help){console.log('From Zero to GPT 一键启动\n用法：启动脚本 [--no-open] [--port 5173] [--check]\n--check 仅检查依赖，不安装或启动\n关闭：在此窗口按 Ctrl+C。需要 Node 22.18+、Python 3.10+；首次安装需要网络。');return 0;}
-    if(!supportedNode(process.versions.node))throw new Error('需要 Node.js 22.18+，推荐从 https://nodejs.org/ 安装 Node 24 LTS。');
+    if(options.help){console.log('From Zero to GPT 一键启动\n用法：启动脚本 [--no-open] [--port 5173] [--check]\n--check 仅检查依赖，不安装或启动\n关闭：在此窗口按 Ctrl+C。需要 Node 22.19+、Python 3.10+；首次安装需要网络。');return 0;}
+    if(!supportedNode(process.versions.node))throw new Error('需要 Node.js 22.19+，推荐从 https://nodejs.org/ 安装 Node 24 LTS。');
     process.chdir(projectRoot);
     const python=findPython(),npm=npmCommand(['--version']),probe=spawnSync(npm.command,npm.args,{encoding:'utf8',windowsHide:true,timeout:10000});
     if(probe.error||probe.status!==0)throw new Error('无法运行 npm。请安装包含 npm 的 Node.js 24 LTS，并重新打开终端。');

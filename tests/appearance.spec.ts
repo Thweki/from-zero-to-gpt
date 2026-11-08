@@ -130,7 +130,7 @@ test('dark matrix vectors and attention heatmaps use visible colors and preserve
   await page.locator('.tf-lab').scrollIntoViewIfNeeded();await page.screenshot({path:'artifacts/dark-appearance/attention.png'});
 });
 
-test('glass has real blur over an ambient layer, opaque reading, and reduced-transparency fallback',async({page})=>{
+test('light navigation and topbar use blur; dark navigation and reading stay opaque',async({page})=>{
  await page.goto('/#/lesson/functions');
  await expect(page.locator('.sidebar')).toBeAttached();
  for(const theme of ['light','dark'] as const){
@@ -141,13 +141,75 @@ test('glass has real blur over an ambient layer, opaque reading, and reduced-tra
    ambient:getComputedStyle(document.querySelector('.app-shell')!,'::before').backgroundImage,
    mainBackground:getComputedStyle(document.querySelector('main')!).backgroundColor,
   }));
-  expect(metrics.sidebarFilter).toContain('blur(');expect(metrics.topbarFilter).toContain('blur(');
+  if(theme==='light')expect(metrics.sidebarFilter).toContain('blur(');
+  else expect(metrics.sidebarFilter).toBe('none');
+  expect(metrics.topbarFilter).toContain('blur(');
   expect(metrics.ambient).toContain('radial-gradient');
-  expect(metrics.mainBackground).toBe(theme==='dark'?'rgb(32, 35, 31)':'rgb(247, 247, 242)');
+  expect(metrics.mainBackground).toBe(theme==='dark'?'rgb(25, 27, 29)':'rgb(247, 247, 242)');
  }
  await page.setViewportSize({width:390,height:844});
  const client=await page.context().newCDPSession(page);
  await client.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
  await expect.poll(()=>page.evaluate(()=>getComputedStyle(document.querySelector('.sidebar')!).backdropFilter)).toBe('none');
- expect(await page.locator('.sidebar').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(38, 42, 37)');
+ expect(await page.locator('.sidebar').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(30, 34, 36)');
+});
+
+test('dark side panels stay opaque across platform and material states, with a macOS desktop opt-in',async({page})=>{
+ await dark(page);await openNotebook(page);
+ for(const state of [
+  {platform:'other',native:'false'}, // Linux / Android fallback
+  {platform:'other',native:'true'},  // Windows Mica / Acrylic
+  {platform:'macos',native:'false'}, // Failed macOS vibrancy
+  {platform:'macos',native:'true'},
+ ]){
+  await page.evaluate(state=>{
+   document.documentElement.dataset.appPlatform=state.platform;
+   document.documentElement.dataset.nativeMaterial=state.native;
+  },state);
+  const translucent=state.platform==='macos'&&state.native==='true';
+  for(const selector of ['.sidebar','.context-panel']){
+   const surface=await page.locator(selector).evaluate(n=>({background:getComputedStyle(n).backgroundColor,filter:getComputedStyle(n).backdropFilter}));
+   if(translucent){
+    expect(surface.background).toBe('rgba(30, 34, 36, 0.72)');
+    expect(surface.filter).toContain('blur(');
+   }else{
+    expect(surface.background).toBe('rgb(30, 34, 36)');
+    expect(surface.filter).toBe('none');
+    await readable(page,['.sidebar .nav-link.active','.sidebar .lesson-nav-link','.sidebar .local-status','.save-thought p']);
+   }
+  }
+ }
+ // The native desktop exception must also respect reduced transparency.
+ const client=await page.context().newCDPSession(page);
+ await client.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+ await expect(page.locator('.sidebar')).toHaveCSS('background-color','rgb(30, 34, 36)');
+ await expect(page.locator('.sidebar')).toHaveCSS('backdrop-filter','none');
+ await client.send('Emulation.setEmulatedMedia',{features:[]});
+ // Even a native-material flag cannot make a narrow navigation drawer transparent.
+ await closeNotebook(page);await page.setViewportSize({width:390,height:844});
+ await page.getByRole('button',{name:'打开导航',exact:true}).click();
+ await expect(page.locator('.sidebar')).toBeVisible();
+ await expect(page.locator('.sidebar')).toHaveCSS('background-color','rgb(30, 34, 36)');
+ await expect(page.locator('.sidebar')).toHaveCSS('backdrop-filter','none');
+ await readable(page,['.sidebar .nav-link.active','.sidebar .lesson-nav-link']);
+});
+
+test('Windows dark chrome stays readable over a light native backdrop, including material failure',async({page})=>{
+ await page.emulateMedia({colorScheme:'light'});
+ await dark(page);await page.goto('/#/lesson/functions');await openNotebook(page);
+ for(const native of ['true','false']){
+  await page.evaluate(native=>{
+   const root=document.documentElement;
+   root.dataset.appPlatform='other';
+   root.dataset.nativeMaterial=native;
+   // Stand in for a bright system material below the transparent webview.
+   root.style.background='white';
+   document.body.style.background='transparent';
+  },native);
+  for(const selector of ['.sidebar','.context-panel','.topbar','.lesson-sticky-tools']){
+   await expect(page.locator(selector)).toHaveCSS('background-color','rgb(30, 34, 36)');
+   await expect(page.locator(selector)).toHaveCSS('backdrop-filter','none');
+  }
+  await readable(page,['.home-link','.breadcrumb>b','.sidebar .lesson-nav-link.active','.mode-tabs button[aria-selected=true]','.save-thought p']);
+ }
 });
