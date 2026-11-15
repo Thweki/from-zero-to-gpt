@@ -1,10 +1,11 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import {offlineReading} from './scripts/offline-build';
 import {NodeProviderServiceStore} from './server/service-store';
 export default defineConfig(({mode})=>{
   const env={...loadEnv(mode,process.cwd(),''),...process.env};
   const providerServices=new NodeProviderServiceStore(env);
-  return {plugins:[react(),{name:'learning-tutor-api',configureServer(server){
+  return {plugins:[react(),offlineReading(env.VITE_EXPERIMENTAL_OFFLINE==='1'),{name:'learning-tutor-api',configureServer(server){
     server.middlewares.use(async(req,res,next)=>{
       if(!req.url?.startsWith('/api/tutor/'))return next();
       try{

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import {prepareOfflineReading} from './offline-reading';
 import {enableNativeMaterial,isTauriRuntime} from './runtime';
 import 'katex/dist/katex.min.css';
 import '@fontsource-variable/inter/wght.css';
@@ -15,3 +16,4 @@ import './learning-flow.css';
 if(isTauriRuntime)document.documentElement.dataset.appPlatform=navigator.userAgent.includes('Mac')?'macos':'other';
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
 void enableNativeMaterial();
+void prepareOfflineReading();
