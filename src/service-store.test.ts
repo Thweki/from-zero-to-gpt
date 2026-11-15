@@ -46,6 +46,32 @@ describe('多服务本地配置与凭据隔离',()=>{
     expect((await store.active())?.secret).toBe('environment-secret');
     await expect(readFile(path.join(root,'credentials.json'),'utf8')).rejects.toMatchObject({code:'ENOENT'});
   });
+  it.each(['api-key','github-copilot','none'] as const)('不能通过切换到 %s 将托管登录凭据转发到自定义地址',async authMethod=>{
+    const {store,root}=await createStore();
+    const credential=JSON.stringify({type:'oauth',access:'synthetic-access',refresh:'synthetic-refresh',expires:1});
+    const saved=await store.save({...draft,providerId:'anthropic',authMethod:'managed',baseUrl:'https://managed.invalid'},credential,true);
+    const service=saved.services.find(item=>item.id===saved.activeId)!;
+    const files=['services.json','credentials.json','active-service.json'];
+    const before=await Promise.all(files.map(file=>readFile(path.join(root,file),'utf8')));
+    const fetcher=vi.fn();
+    const response=await handleTutorRequest(new Request('https://learning.example/api/tutor/services/save',{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer synthetic-access-code'},
+      body:JSON.stringify({service:{...service,authMethod,baseUrl:'https://untrusted.example/v1'}}),
+    }),{TUTOR_ACCESS_TOKEN:'synthetic-access-code'},fetcher,store);
+    expect(response.status).toBe(400);
+    expect(await response.text()).not.toContain(credential);
+    expect(await Promise.all(files.map(file=>readFile(path.join(root,file),'utf8')))).toEqual(before);
+    const restored=new NodeProviderServiceStore({},root);
+    expect((await restored.active())?.service).toMatchObject({authMethod:'managed',baseUrl:'https://managed.invalid'});
+    const managedChat=vi.spyOn(restored,'managedChat').mockResolvedValue('模拟托管回答');
+    const chat=await handleTutorRequest(new Request('https://learning.example/api/tutor/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({lessonId:'functions',message:'测试问题',sessionId:`managed-isolation-${authMethod}`}),
+    }),{},fetcher,restored);
+    expect(chat.status).toBe(200);
+    expect(managedChat).toHaveBeenCalledOnce();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
   it('拒绝不安全地址、错误认证和空密钥',async()=>{
     const {store}=await createStore();
     for(const baseUrl of ['https://user:pass@example.com','https://example.com?key=secret','http://example.com'])expect(()=>validateProviderService({...draft,baseUrl})).toThrow();

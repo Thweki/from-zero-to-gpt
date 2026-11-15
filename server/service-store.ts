@@ -91,9 +91,10 @@ export class NodeProviderServiceStore implements ProviderServiceStore{
   async save(draft:ProviderServiceDraft,secret?:string,internal=false){
     return this.mutate(async()=>{
       await this.load();
-      if(draft.authMethod==='managed'&&!internal){
-        const existing=this.services!.find(s=>s.id===draft.id);
-        if(!existing||existing.authMethod!=='managed'||existing.providerId!==draft.providerId||secret!==undefined)throw new Error('请使用服务商登录流程。');
+      const existing=this.services!.find(s=>s.id===draft.id);
+      // Managed credentials must never be reused as a custom endpoint's bearer token.
+      if(!internal&&(draft.authMethod==='managed'||existing?.authMethod==='managed')){
+        if(!existing||existing.authMethod!=='managed'||draft.authMethod!=='managed'||existing.providerId!==draft.providerId||secret!==undefined)throw new Error('请使用服务商登录流程。');
       }
       const service=validateProviderService(draft),services=[...this.services!],credentials={...this.credentials!};
       const index=services.findIndex(item=>item.id===service.id);
