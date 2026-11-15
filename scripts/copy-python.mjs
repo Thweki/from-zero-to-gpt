@@ -1,6 +1,11 @@
 import { mkdir, copyFile, cp, readFile, readdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+// Only launcher-owned npm ci sets this flag; it runs this script explicitly in
+// the next measured phase. Normal npm ci/build behavior remains unchanged.
+if(process.env.FROM_ZERO_LAUNCH_INSTALL==='1'){
+  console.log('Browser runtime resource preparation deferred to the launcher.');
+}else{
 const require = createRequire(import.meta.url);
 const root = dirname(require.resolve('pyodide/package.json'));
 await mkdir('public/python', { recursive: true });
@@ -32,3 +37,4 @@ for(const [directory,metadata] of Object.entries(lock.packages)) {
   for(const file of notices)await cp(join(directory,file),join(destination,file),{recursive:true});
 }
 await cp('third_party/provider-engine','public/licenses/provider-engine',{recursive:true});
+}

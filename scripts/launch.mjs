@@ -9,6 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
 import {findPython} from './python.mjs';
 import {isMain} from './cli-main.mjs';
+import {measureLaunchPhase} from './launcher-phases.mjs';
 
 // Expand macOS aliases and Windows 8.3 paths before Vite derives its filesystem allow list.
 export const projectRoot=realpathSync.native(fileURLToPath(new URL('../',import.meta.url)));
@@ -78,9 +79,9 @@ function openBrowser(url){
 export async function main(args=process.argv.slice(2)){
   let release,active,interrupted=false;const controller=new AbortController();
   const stop=()=>{interrupted=true;controller.abort();active?.kill('SIGTERM');};
-  const run=(command,argv,label)=>new Promise((yes,no)=>{
+  const run=(command,argv,label,env=process.env)=>new Promise((yes,no)=>{
     if(interrupted){no(new Error('已停止'));return;}
-    const child=spawn(command,argv,{cwd:projectRoot,stdio:'inherit'});active=child;
+    const child=spawn(command,argv,{cwd:projectRoot,stdio:'inherit',env});active=child;
     child.once('error',error=>{if(active===child)active=null;no(new Error(`${label}无法启动：${error.code||error.message}`));});
     child.once('exit',(code,signal)=>{if(active===child)active=null;if(code===0&&!interrupted)yes();else no(new Error(`${label}已退出（${signal||code}）。请查看上面的具体输出。`));});
   });
@@ -100,15 +101,19 @@ export async function main(args=process.argv.slice(2)){
     installed=installed&&existsSync(join(projectRoot,'node_modules','vite','bin','vite.js'))&&existsSync(join(projectRoot,'node_modules','pyodide','pyodide.asm.wasm'));
     if(!installed){
       console.log('首次准备或依赖已变更：按锁文件安装项目依赖（npm ci）…');
-      const install=npmCommand(['ci','--no-audit','--no-fund']);await run(install.command,install.args,'依赖安装');
+      const install=npmCommand(['ci','--no-audit','--no-fund']);
+      // Defer only our own postinstall resource copy. Third-party lifecycle hooks
+      // (including esbuild) still run; resources are prepared exactly once below.
+      await measureLaunchPhase('install',()=>run(install.command,install.args,'依赖安装',{...process.env,FROM_ZERO_LAUNCH_INSTALL:'1'}));
       await writeFile(marker,JSON.stringify({fingerprint})+'\n');
     }else console.log('依赖已就绪，复用本地安装。');
     console.log('正在准备浏览器 Python 与可下载工程…');
-    await run(process.execPath,['scripts/copy-python.mjs'],'Python 资源准备');
-    await run(process.execPath,['scripts/package-projects.mjs'],'学习工程打包');
+    const resourceEnv={...process.env};delete resourceEnv.FROM_ZERO_LAUNCH_INSTALL;
+    await measureLaunchPhase('runtime',()=>run(process.execPath,['scripts/copy-python.mjs'],'Python 资源准备',resourceEnv));
+    await measureLaunchPhase('projects',()=>run(process.execPath,['scripts/package-projects.mjs'],'学习工程打包'));
     const url=`http://localhost:${options.port}`;
     const server=run(process.execPath,[join(projectRoot,'node_modules','vite','bin','vite.js'),'--host','127.0.0.1','--port',String(options.port),'--strictPort'],'本地服务');
-    const ready=await Promise.race([waitForServer(options.port,controller.signal),server.then(()=>false)]);
+    const ready=await measureLaunchPhase('ready',()=>Promise.race([waitForServer(options.port,controller.signal),server.then(()=>false)]));
     if(ready){console.log(`\n学习平台已启动：${url}\n保留此窗口；按 Ctrl+C 关闭。AI 导师可选，不配置密钥也能学习。\n`);if(options.open)openBrowser(url);}
     await server;return 0;
   }catch(error){if(interrupted){console.log('\n本地服务已停止。');return 0;}console.error(`\n启动失败：${error.message}`);return 1;}

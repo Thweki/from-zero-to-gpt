@@ -140,12 +140,26 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: learning lab/package-lock.json
+      - name: Locate the restored npm download cache
+        id: npm-cache
+        shell: bash
+        run: echo "path=$(npm config get cache)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
-      - run: node --test scripts/launcher.test.mjs scripts/launcher-smoke.test.mjs
+      - run: node --test scripts/launcher.test.mjs scripts/launcher-phases.test.mjs scripts/launcher-smoke.test.mjs
         env:
+          FROM_ZERO_NPM_CACHE: ${{ steps.npm-cache.outputs.path }}
           FROM_ZERO_PYTHON: ${{ runner.os == 'Windows' && format('{0}\python.exe', env.pythonLocation) || format('{0}/bin/python', env.pythonLocation) }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ always() }}
+        with:
+          name: launcher-diagnostics-${{ matrix.os }}-${{ github.sha }}
+          path: learning lab/artifacts/launcher-smoke/
+          if-no-files-found: warn
+          retention-days: 7
 
   delivery:
     name: Verified deployment artifact (no production deployment)
