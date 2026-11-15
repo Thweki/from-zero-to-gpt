@@ -43,5 +43,10 @@ export function validateImport(value: unknown): LearningState {
     if (!isObject(c) || !lessonIds.includes(c.lessonId as LessonId) || typeof c.savedAt !== 'string' || !Number.isFinite(Date.parse(c.savedAt))) throw new Error('学习断点格式无效');
     result.checkpoint={lessonId:c.lessonId as LessonId,question:checkedString(c.question),next:checkedString(c.next),savedAt:c.savedAt,code:checkedString(c.code),runResult:checkedString(c.runResult)};
   }
+  if (value.flashcardLessons !== undefined) {
+    const ids = value.flashcardLessons;
+    if (!Array.isArray(ids) || ids.length > lessonIds.length || Array.from(ids).some(id => !lessonIds.includes(id)) || new Set(ids).size !== ids.length) throw new Error('闪卡章节格式无效');
+    result.flashcardLessons = [...ids];
+  }
   return result;
 }
