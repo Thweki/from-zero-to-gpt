@@ -1,4 +1,4 @@
-import {useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {lazy,Suspense,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
 import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
 import {lessons,lessonById} from '../data/lessons';
@@ -8,13 +8,15 @@ import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
 
+const ExerciseHints=lazy(()=>import('./ExerciseHints').then(module=>({default:module.ExerciseHints})));
+
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
   {id:'math',label:'数学推导',icon:GitBranch},
   {id:'code',label:'代码实现',icon:Code2},
   {id:'deep',label:'深入研究',icon:BookOpen},
 ] as const;
-type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
+type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void;experimentalExerciseHints?:boolean};
 
 function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
@@ -30,7 +32,7 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
   })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
-export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
+export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve,experimentalExerciseHints}:Props){
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
@@ -122,7 +124,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
       </>}
       {progress.mode==='math'&&<ReadingSections sections={lesson.math} mainFormula={lesson.formula} formulaCaption={lesson.formulaCaption}/>}
       {progress.mode==='code'&&<>
-        <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p></section>
+        <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p>{experimentalExerciseHints === true && <Suspense fallback={<p role="status">正在加载编程提示…</p>}><ExerciseHints lessonId={lesson.id}/></Suspense>}</section>
         {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前编辑器中的代码。</p>}
         <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
       </>}

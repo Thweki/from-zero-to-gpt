@@ -59,6 +59,7 @@ export interface Checkpoint {
 }
 export interface LearningState {
   version: 1;
+  experimentalExerciseHints?: boolean;
   theme: 'light' | 'dark';
   lastLesson: LessonId;
   progress: Partial<Record<LessonId, LessonProgress>>;

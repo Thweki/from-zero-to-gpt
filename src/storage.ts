@@ -22,6 +22,10 @@ export function validateImport(value: unknown): LearningState {
   if (!isObject(value) || value.version !== 1 || !lessonIds.includes(value.lastLesson as LessonId) || !['light','dark'].includes(value.theme as string) || !isObject(value.progress)) throw new Error('不支持的学习数据格式，请选择本平台导出的 JSON 文件');
   if (typeof value.updatedAt !== 'string' || !Number.isFinite(Date.parse(value.updatedAt))) throw new Error('学习数据时间无效');
   const result = initialState(); result.theme = value.theme as LearningState['theme']; result.lastLesson = value.lastLesson as LessonId; result.updatedAt = value.updatedAt;
+  if (value.experimentalExerciseHints !== undefined) {
+    if (typeof value.experimentalExerciseHints !== 'boolean') throw new Error('实验性编程提示设置无效');
+    result.experimentalExerciseHints = value.experimentalExerciseHints;
+  }
   for (const [key, p] of Object.entries(value.progress)) {
     if (!lessonIds.includes(key as LessonId) || !isObject(p) || !['new','learning','mastered'].includes(p.status as string) || !['intuition','math','code','deep'].includes(p.mode as string) || typeof p.review !== 'boolean') throw new Error('章节进度格式无效');
     const progress: LessonProgress = { status:p.status as LessonProgress['status'],mode:p.mode as LessonProgress['mode'],note:checkedString(p.note),code:checkedString(p.code),review:p.review };
