@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:built-runtime": "node --test scripts/built-runtime-smoke.test.mjs",
     "test:e2e": "playwright test",
+    "test:offline": "node --test scripts/offline-browser.test.mjs",
     "check": "tsc -b",
     "postinstall": "node scripts/copy-python.mjs",
     "validate:course": "node scripts/validate-course.mjs",
