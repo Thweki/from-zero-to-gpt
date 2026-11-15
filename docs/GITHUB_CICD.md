@@ -14,12 +14,15 @@
 | --- | --- |
 | repository-safety | 检查追踪文件、最大5MiB文件限制和完整可达Git历史的常见凭证格式；排除环境文件、依赖、缓存、权重、个人学习备份等 |
 | web | `npm ci`、严格类型、Vitest、交付校验测试、全部83章CPython参考/TODO验收、真实生产构建、Sites格式打包 |
-| browser | 安装Chromium及系统依赖，分成两个分片执行全部 Playwright 用例（当前 299 项）；包括83章页面、83个独立浏览器Python参考验收、导师模拟、学习恢复、深色外观、全屏、窄屏和触控模拟；job预算30分钟，各章结果断言30秒 |
+| browser | 安装Chromium及系统依赖，分成两个分片执行 desktop、mobile、touch-chromium 项目；包括83章页面、83个独立浏览器Python参考验收、导师模拟、学习恢复、深色外观、全屏、窄屏和触控模拟；job预算30分钟，各章结果断言30秒 |
+| webkit-smoke | 安装WebKit及系统依赖，只执行 `tests/webkit-smoke.spec.ts` 的四项检查：本地Pyodide Worker/WASM、IndexedDB刷新恢复、真实鼠标文字选择、键盘焦点循环与恢复；不重复全部视觉用例；job预算10分钟 |
 | python | 分别运行标准库regression、micrograd及独立tiny-gpt全部unittest；只有tiny-gpt安装CPU PyTorch |
 | launcher | Ubuntu24.04、Windows2025、macOS15实际调用平台入口，从无依赖源码安装／启动，核对HTTP资源、重复保护、停止与再次启动 |
 | delivery | 仅main上的非PR事件、上述所有job（含三个启动平台）成功后，下载同一次运行的候选产物，复核源码提交、SHA-256、Site身份与必需运行时，再上传 `verified-site-<commit>` |
 
 失败会阻止最终交付。PR可以生成候选包以检查构建，但不会生成main的verified产物，更不会部署生产。导师浏览器测试使用模拟HTTP；CI无需付费模型API，也不访问学习者的真实数据。
+
+两个浏览器job都在失败时仍上传诊断产物（保留7天）：`artifacts/browser-version.log`、`browser-install.log`、启用 `DEBUG=pw:browser` 的 `browser-run.log`、JSON结果、HTML报告和 `test-results/` 中的失败截图与trace。显式bash步骤保留pipefail，日志经过tee不会掩盖安装或测试失败。Chromium产物名含分片编号，WebKit使用独立的 `webkit-smoke-results-<commit>`。下载后可用 `npx playwright show-report playwright-report` 或 `npx playwright show-trace <trace.zip>` 查看；安装失败时可能只有安装日志，没有测试报告。诊断只针对隔离的测试页面，不输出环境变量或提供商凭据。
 
 工作流配置和本地命令验证不等于真实GitHub Actions验收。首次接入推送会触发main上的真实运行，必须检查各job、产物及日志；实际推送SHA、Actions运行URL和结果以工作区GitHub交接回执为准，不能因只读权限信息就声称运行通过。
 
@@ -40,7 +43,7 @@ PATH="/opt/homebrew/opt/node@24/bin:/opt/homebrew/opt/rustup/bin:$PATH" \
 FROM_ZERO_PYTHON=/opt/homebrew/bin/python3.12 npm run ci:local
 ```
 
-预检将已追踪的改动和未忽略的新文件复制到临时 Git 快照，包含删除，不复制 `.env`、个人凭据或原有依赖。不会提交原工作区或推送临时提交。随后执行干净 `npm ci`、历史安全检查、工作流/脚本检查、类型与单元测试、全部课程验收、生产与交付打包、三个 Python 工程、干净安装/热启动、两个完整浏览器分片、Rust 测试、当前系统桌面打包与独立模型运行时检查。浏览器使用独立端口，不复用正在开发的页面。
+预检将已追踪的改动和未忽略的新文件复制到临时 Git 快照，包含删除，不复制 `.env`、个人凭据或原有依赖。不会提交原工作区或推送临时提交。随后执行干净 `npm ci`、历史安全检查、工作流/脚本检查、类型与单元测试、全部课程验收、生产与交付打包、三个 Python 工程、干净安装/热启动、安装Chromium与WebKit并运行两个完整浏览器分片（含四项WebKit smoke）、Rust 测试、当前系统桌面打包与独立模型运行时检查。浏览器使用独立端口，不复用正在开发的页面；Linux需预先安装两种浏览器的系统依赖。
 
 日志与结果保存在 `artifacts/local-ci/`。失败即停止并保留快照以便排查；成功记录源码 Git tree。通过 `git config core.hooksPath .githooks` 启用本仓库的 `pre-push` 检查后，只有待推送提交的源码树与通过预检的版本一致才允许推送；修改源码后需重新预检。检查不会自动提交、推送、发布或关闭 GitHub CI。
 
@@ -92,6 +95,8 @@ Actions上传的候选产物保留7天，verified产物14天；浏览器结果�
 `check-repository.mjs` 是仓库文件策略及常见提供商凭证格式检查，不是对所有秘密或个人信息的完备识别。不得靠忽略整个tests目录或把匹配行打印到日志来处理发现；需要逐项核对，真实泄漏必须先处理再推送。本轮仅记录命中规则／路径和扫描统计，不输出凭证。
 
 浏览器手机参数和触控仍是Chromium模拟，不能声称完成iOS／Android实机或软键盘验收。完整CI的真实GitHub托管环境结果以实际运行及回执为准，本地测试不代替该结果。
+
+WebKit smoke是Playwright的桌面WebKit检查，不代表Safari发行版、真实iPhone或Tauri原生WebView端到端验收。Firefox没有配置，视觉矩阵仍只在Chromium执行。受限环境无法安装WebKit时，应明确记录未运行的项目与原因；不能将Chromium通过记作WebKit通过。
 
 ## 桌面 Release
 
