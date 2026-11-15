@@ -1,0 +1,12 @@
+.recent-lessons { margin: 28px 0; }
+.recent-lessons h2 { font-size: 18px; }
+.recent-lessons p { margin: 8px 0 14px; font-size: 13px; color: var(--secondary); }
+.recent-lessons ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0; list-style: none; }
+.recent-lessons a { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--text); text-decoration: none; }
+.recent-lessons a:hover { background: var(--accent-soft); }
+.recent-lessons a:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 3px; }
+.recent-lessons a > span { min-width: 0; overflow-wrap: anywhere; }
+.recent-lessons svg { flex-shrink: 0; }
+.recent-lessons strong { font-size: 14px; }
+.recent-lessons small, .recent-lessons time { display: block; margin-top: 5px; font-size: 12px; color: var(--secondary); }
+@media (max-width: 600px) { .recent-lessons ol { grid-template-columns: minmax(0, 1fr); } }
