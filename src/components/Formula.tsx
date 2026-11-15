@@ -1,9 +1,10 @@
 import katex from 'katex';
-import { Children, cloneElement, isValidElement, type ReactNode } from 'react';
+import { Children, cloneElement, isValidElement, useMemo, type ReactNode } from 'react';
 import { mathPartToLatex, splitMathText } from '../math-format';
 
 export function Formula({ children, block = true, label }: { children: string; block?: boolean; label?: string }) {
-  return <span role="math" aria-label={label ?? children} className={block ? 'formula block' : 'formula'} dangerouslySetInnerHTML={{__html:katex.renderToString(children,{throwOnError:false,displayMode:block,output:'htmlAndMathml'})}} />;
+  const html = useMemo(() => katex.renderToString(children,{throwOnError:false,displayMode:block,output:'htmlAndMathml'}), [children, block]);
+  return <span role="math" aria-label={label ?? children} className={block ? 'formula block' : 'formula'} dangerouslySetInnerHTML={{__html:html}} />;
 }
 
 export function MathText({ children }: { children: string }) {
