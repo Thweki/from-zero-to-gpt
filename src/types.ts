@@ -1,4 +1,5 @@
 import { lessonIds } from './data/lesson-ids';
+import type {LessonHighlight} from './lesson-highlights';
 import type {TutorSelection} from './tutor-selection';
 export type LessonId = typeof lessonIds[number];
 export type ViewMode = 'intuition' | 'math' | 'code' | 'deep';
@@ -42,6 +43,7 @@ export interface LessonProgress {
   tutorMessages?: TutorMessage[];
   tutorDraft?: string;
   tutorSelection?: TutorSelection;
+  highlights?: LessonHighlight[];
   readCompleted?: boolean;
   experimented?: boolean;
   codePassed?: boolean;

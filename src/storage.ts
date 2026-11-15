@@ -2,6 +2,7 @@ import { openDB } from 'idb';
 import type { LearningState, LessonId, LessonProgress } from './types';
 export { lessonIds } from './data/lesson-ids';
 import { lessonIds } from './data/lesson-ids';
+import {validateHighlights} from './lesson-highlights';
 import {validateTutorSelection} from './tutor-selection';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
 export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
@@ -32,6 +33,7 @@ export function validateImport(value: unknown): LearningState {
     if(p.lastVisited!==undefined){if(typeof p.lastVisited!=='string'||!Number.isFinite(Date.parse(p.lastVisited)))throw new Error('章节访问时间无效');progress.lastVisited=p.lastVisited;}
     if(p.observationDraft!==undefined)progress.observationDraft=checkedString(p.observationDraft,4000);
     if(p.observationSnapshot!==undefined)progress.observationSnapshot=checkedString(p.observationSnapshot,3000);
+    if(p.highlights!==undefined)progress.highlights=validateHighlights(p.highlights);
     if(p.tutorDraft!==undefined)progress.tutorDraft=checkedString(p.tutorDraft,4000);
     if(p.tutorSelection!==undefined)progress.tutorSelection=validateTutorSelection(p.tutorSelection);
     if(p.tutorMessages!==undefined){if(!Array.isArray(p.tutorMessages)||p.tutorMessages.length>80)throw new Error('导师记录格式无效');progress.tutorMessages=p.tutorMessages.map(m=>{if(!isObject(m)||!['user','assistant'].includes(m.role as string)||typeof m.createdAt!=='string'||!Number.isFinite(Date.parse(m.createdAt)))throw new Error('导师记录格式无效');return {role:m.role as 'user'|'assistant',content:checkedString(m.content,24000),createdAt:m.createdAt,...(m.role==='user'&&m.selection!==undefined?{selection:validateTutorSelection(m.selection)}:{})};});}
