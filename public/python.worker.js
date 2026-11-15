@@ -15,7 +15,9 @@ self.onmessage = async ({data}) => {
     try {
       await python.runPythonAsync(data.code,{globals,filename:'experiment.py'});
       if (data.tests) await python.runPythonAsync(data.tests,{globals,filename:'acceptance_tests.py'});
-      self.postMessage({type:'done',output:output||'代码已执行，没有标准输出。',passed:!!data.tests});
+      const customTests=!!data.customTests?.trim();
+      if (customTests) await python.runPythonAsync(data.customTests,{globals,filename:'custom_tests.py'});
+      self.postMessage({type:'done',output:output||'代码已执行，没有标准输出。',passed:!!data.tests,customTestsPassed:customTests});
     } finally {globals.destroy();}
   } catch (e) {self.postMessage({type:'error',output:output+(e.message||String(e))});}
 };

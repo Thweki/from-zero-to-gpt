@@ -3,8 +3,8 @@ import { Play, RotateCcw, Square, Check, Copy, Code2 } from 'lucide-react';
 import type { Lesson } from '../types';
 import {analyzePythonFailure} from '../python-errors';
 import {MathContent} from './Formula';
-type Props={lesson:Lesson; code:string; lastRun?:string; onCode:(code:string)=>void; onResult:(result:string,source?:string)=>void};
-export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
+type Props={lesson:Lesson; code:string; customTests:string; lastRun?:string; onCode:(code:string)=>void; onCustomTests:(tests:string)=>void; onResult:(result:string,source?:string,sourceTests?:string)=>void};
+export function CodeLab({lesson,code,customTests,lastRun,onCode,onCustomTests,onResult}:Props){
   const worker=useRef<Worker|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const editor=useRef<HTMLTextAreaElement>(null);
   const pendingSelection=useRef<{start:number;end:number;direction:'forward'|'backward'|'none'}|null>(null);
@@ -26,11 +26,11 @@ export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
     current.onmessage=({data})=>{
       if(data.type==='running'){setStatus('正在执行你的 Python 代码…');return;}
       if(data.type==='loading'){setStatus('首次加载本地 Pyodide 资源，可能需要片刻…');return;}
-      const result=(data.type==='error'?'运行错误\n':data.passed?'✓ 本章单元测试通过\n':'')+data.output;
-      onResult(result,code);setStatus(data.type==='error'?'请根据错误继续调试':'执行完成');stop();
+      const result=(data.type==='error'?'运行错误\n':data.passed?'✓ 本章单元测试通过\n'+(data.customTestsPassed?'个人测试也已通过\n':''):'')+data.output;
+      onResult(result,code,customTests);setStatus(data.type==='error'?'请根据错误继续调试':'执行完成');stop();
     };
     current.onerror=()=>{onResult('Python 环境加载失败。请检查静态资源 /python/ 是否部署完整，再重试。');setStatus('加载失败');stop();};
-    current.postMessage({code,tests:lesson.pythonTests});
+    current.postMessage({code,tests:lesson.pythonTests,customTests});
   };
   const indent=()=>{
     const target=editor.current;if(!target)return;
@@ -51,5 +51,6 @@ export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
     onCode(updated);
   };
   return <MathContent><section className="code-lab" aria-label="Python 代码实验室"><div className="code-toolbar"><span><Code2 size={16}/> experiment.py <small>Python 3 · Pyodide</small></span><div><button className="text-button" onClick={()=>setReference(!reference)}>{reference?'隐藏参考':'对照参考'}</button><button className="icon-button" aria-label="重置代码" onClick={()=>{stop();onCode(lesson.starter);onResult('');}}><RotateCcw size={15}/></button></div></div><p className="code-description">{lesson.codeExplanation}</p><div className="editor-wrap"><div className="line-numbers" aria-hidden="true">{code.split('\n').map((_,i)=><div key={i}>{i+1}</div>)}</div><textarea ref={editor} className="code-editor" aria-label="Python 代码编辑器" spellCheck={false} value={code} onChange={e=>onCode(e.target.value)} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&e.key===']'){e.preventDefault();indent();}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();if(!running)run();}}}/></div><div className="code-actions"><span>{running?status:<><span className="code-keyboard-hint">Tab 切换焦点 · Ctrl/⌘ + ] 插入缩进</span><span className="code-touch-hint">将光标移到代码中，点“缩进”插入四个空格</span></>}</span><button type="button" className="button secondary code-indent" onPointerDown={e=>e.preventDefault()} onClick={indent}>缩进</button>{running?<button className="button secondary" onClick={()=>{stop();onResult('已手动停止运行。代码已保留。');}}><Square size={14}/>停止</button>:<button className="button primary compact" onClick={run}><Play size={14}/>运行并测试 <kbd>⌘/Ctrl ↵</kbd></button>}</div>{lastRun&&<div className={`code-output ${lastRun.startsWith('✓')?'success':''}`} role="status"><small>运行结果</small>{failure?<><div className="python-error-summary"><h4>{failure.location} · {failure.type}</h4><p>{failure.explanation}</p>{failure.message&&<p className="python-error-message">{failure.type}: {failure.message}</p>}{failure.source&&<pre className="python-error-source">{failure.source}</pre>}</div>{failure.stdout&&<div className="python-stdout"><small>出错前的输出</small><pre>{failure.stdout}</pre></div>}<details className="python-error-details"><summary>展开完整错误堆栈（含运行环境）</summary><pre>{failure.raw}</pre></details></>:<pre>{lastRun}</pre>}</div>}
+    <details className="test-source custom-tests"><summary>个人测试（可选）{customTests.trim()?' · 已添加':''}</summary><p id="custom-tests-help">补充边界输入和自己的断言。点击“运行并测试”时，先运行本章验收测试，通过后再运行个人测试；全部通过才记录验收通过。留空可跳过，重置代码会保留个人测试。</p><label htmlFor="custom-tests-editor">个人 Python 测试</label><textarea id="custom-tests-editor" className="code-editor" aria-describedby="custom-tests-help" spellCheck={false} maxLength={10000} value={customTests} onChange={event=>onCustomTests(event.target.value)} placeholder="# 调用上方定义的函数，用 assert 检查期望值" onKeyDown={event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();if(!running)run();}}}/><small>{customTests.length.toLocaleString()} / 10,000 字符 · 自动随本章保存</small></details>
     {reference&&<div className="reference-code"><div><strong>参考实现</strong><button className="text-button" onClick={()=>{void navigator.clipboard?.writeText(lesson.reference).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});}}>{copied?<Check size={14}/>:<Copy size={14}/>}复制</button></div><p>建议先保存自己的尝试，逐行比较哪里不同。</p><pre>{lesson.reference}</pre></div>}<details className="test-source"><summary>查看实际运行的验收测试</summary><pre>{lesson.pythonTests}</pre></details></section></MathContent>;
 }

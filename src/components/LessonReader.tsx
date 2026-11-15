@@ -33,6 +33,7 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
 export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
+  const currentTests=useRef(progress.customTests??'');currentTests.current=progress.customTests??'';
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
   const [pendingSection,setPendingSection]=useState<LessonSection|null>(null);
   const toolsRef=useRef<HTMLDivElement>(null);
@@ -123,8 +124,8 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
       {progress.mode==='math'&&<ReadingSections sections={lesson.math} mainFormula={lesson.formula} formulaCaption={lesson.formulaCaption}/>}
       {progress.mode==='code'&&<>
         <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p></section>
-        {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前编辑器中的代码。</p>}
-        <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
+        {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前代码与个人测试。</p>}
+        <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} customTests={progress.customTests??''} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onCustomTests={customTests=>patch({customTests,codePassed:false})} onResult={(lastRun,source,sourceTests)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current&&sourceTests===currentTests.current})}/></div>
       </>}
       {progress.mode==='deep'&&<>
         <ReadingSections sections={lesson.deep}/>

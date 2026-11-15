@@ -22,16 +22,16 @@ export function analyzePythonFailure(result:string):PythonFailure|null{
   const exception=[...lines].reverse().find(line=>/^[A-Za-z_][\w.]*(?:Error|Exception|Interrupt|Exit)(?::|$)/.test(line));
   const match=exception?.match(/^([\w.]+)(?::\s*(.*))?$/);
   const type=match?.[1]||'Python 错误',message=match?.[2]||'';
-  const frames=[...raw.matchAll(/File "(experiment\.py|acceptance_tests\.py)", line (\d+)[^\n]*/g)];
+  const frames=[...raw.matchAll(/File "(experiment\.py|acceptance_tests\.py|custom_tests\.py)", line (\d+)[^\n]*/g)];
   // Prefer the innermost actual user frame, even if a test called that function.
   const frame=frames.filter(f=>f[1]==='experiment.py').at(-1)||frames.at(-1);
   const filename=frame?.[1],line=frame?Number(frame[2]):undefined;
   const following=frame?raw.slice(frame.index!+frame[0].length).split('\n')[1]:undefined;
   const source=following&&/^\s+\S/.test(following)&&!/^\s*(?:File |Traceback|\^)/.test(following)?following.trim():undefined;
-  const firstTrace=raw.search(/(?:PythonError:\s*)?Traceback \(most recent call last\):|(?:PythonError:\s*)?\s*File "(?:experiment|acceptance_tests)\.py"/);
+  const firstTrace=raw.search(/(?:PythonError:\s*)?Traceback \(most recent call last\):|(?:PythonError:\s*)?\s*File "(?:experiment|acceptance_tests|custom_tests)\.py"/);
   const stdout=firstTrace>0?raw.slice(0,firstTrace).trimEnd():'';
-  const tests=filename==='acceptance_tests.py';
+  const tests=filename==='acceptance_tests.py',customTests=filename==='custom_tests.py';
   return {type,message,line,filename,source,raw,stdout,
-    location:line?`${tests?'验收测试（不是用户代码）':'用户代码 experiment.py'} · 第 ${line} 行`:'没有可确认的用户代码行号',
-    explanation:tests&&type==='AssertionError'?'Python 已执行到验收断言，但结果尚未符合本章要求。请比较输入、返回值与测试条件；这里的行号属于验收测试。':hints[type]||'执行在此处停止。结合错误名称与原始提示，先检查自己的相关代码。'};
+    location:line?`${tests?'验收测试（不是用户代码）':customTests?'个人测试 custom_tests.py':'用户代码 experiment.py'} · 第 ${line} 行`:'没有可确认的用户代码行号',
+    explanation:customTests&&type==='AssertionError'?'个人测试的断言没有成立。检查你写的期望值与函数返回值；这里的行号属于个人测试。':tests&&type==='AssertionError'?'Python 已执行到验收断言，但结果尚未符合本章要求。请比较输入、返回值与测试条件；这里的行号属于验收测试。':hints[type]||'执行在此处停止。结合错误名称与原始提示，先检查自己的相关代码。'};
 }
