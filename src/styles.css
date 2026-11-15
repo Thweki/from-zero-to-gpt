@@ -15,3 +15,5 @@ html:root[data-native-material='true'],html:root[data-native-material='true'] bo
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @media(prefers-reduced-transparency:reduce){:root{--glass-bg:var(--panel);--glass-highlight:var(--border)}html:root,html:root[data-native-material],body{background:var(--bg)}.app-shell::before{display:none}:is(.sidebar,.topbar,.context-panel,.lesson-sticky-tools,.modal-backdrop,.search-overlay,.mobile-scrim){backdrop-filter:none;-webkit-backdrop-filter:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--glass-bg:var(--panel);--glass-highlight:var(--border)}.app-shell::before{display:none}:is(.sidebar,.topbar,.context-panel,.lesson-sticky-tools,.modal-backdrop,.search-overlay,.mobile-scrim){backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+.storage-warning{flex-wrap:wrap}.recovery-editor{flex-basis:100%;min-width:0}.recovery-editor textarea{display:block;width:100%;font-family:var(--font-mono);margin:8px 0}

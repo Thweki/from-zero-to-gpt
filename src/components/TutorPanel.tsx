@@ -1,3 +1,5 @@
+import {LimitedTextarea} from './LimitedTextarea';
+import {learningLimits} from '../learning-limits';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,Check,ChevronDown,LoaderCircle,Send,Square,Trash2,WifiOff,X} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -98,7 +100,7 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
       {selection&&<SelectionCard selection={selection} imagesSupported={status?.imagesSupported} onRemove={()=>onSelection?.(undefined)}/>}
       {mode==='solution'&&<p className="solution-note"><Check size={12}/>你已主动选择完整解答；导师会解释每一步。</p>}
       {(shareCode||shareNote)&&<div className="tutor-attachments">{shareCode&&<button onClick={()=>setShareCode(false)} aria-label="不再附上代码和错误">已附上代码和错误<X size={13}/></button>}{shareNote&&<button onClick={()=>setShareNote(false)} aria-label="不再附上笔记">已附上笔记<X size={13}/></button>}</div>}
-      <textarea ref={composer} aria-label="向 AI 导师提问" placeholder="哪一句、哪个公式，或哪一步代码没想通？" maxLength={4000} value={input} onChange={event=>editDraft(event.target.value)} onKeyDown={event=>{
+      <LimitedTextarea ref={composer} aria-label="向 AI 导师提问" placeholder="哪一句、哪个公式，或哪一步代码没想通？" limit={learningLimits.tutorDraft} value={input} onValue={editDraft} onKeyDown={event=>{
         if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing&&event.keyCode!==229){event.preventDefault();if(input.trim())void send();}
       }}/>
       {readingMode==='code'&&!shareCode&&<button className="text-button tutor-attach-code" onClick={()=>setShareCode(true)}>附上当前代码{lastRun?'和最近运行结果':''}</button>}
