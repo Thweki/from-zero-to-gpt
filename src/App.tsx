@@ -38,6 +38,13 @@ export default function App(){
   useEffect(()=>{const media=matchMedia('(max-width: 900px)');const update=()=>{setNavOverlay(media.matches);if(!media.matches)setMobile(false);};media.addEventListener('change',update);return()=>media.removeEventListener('change',update);},[]);
   useEffect(()=>{if(mobile)document.querySelector<HTMLButtonElement>('.navigation-close')?.focus();},[mobile]);
   const observationOrigin=useRef<{element:HTMLElement|null;x:number;y:number}|null>(null);
+  const lessonFocus=useRef<LessonId|null>(null);
+  useEffect(()=>{
+    if(ready&&route.page==='lesson'&&route.id===lessonFocus.current){
+      document.querySelector<HTMLElement>('.lesson-title-row h1')?.focus({preventScroll:true});
+      lessonFocus.current=null;
+    }
+  },[ready,route.page,route.id]);
   useReadablePlots(ready);
   useEffect(()=>{if(rightOpen)document.querySelector<HTMLElement>(contextTab==='tutor'?'.context-panel .tutor-composer textarea':'.context-panel .observation-input,.context-panel .scratchpad')?.focus({preventScroll:true});},[rightOpen,contextTab]);
   const saveSequence=useRef(0),lastSavedState=useRef<LearningState>(state);
@@ -83,7 +90,7 @@ export default function App(){
     setContextTab('notes');setRightOpen(true);setMobile(false);
     requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>('.context-panel .observation-input')?.focus({preventScroll:true}));
   };
-  const navigate=(id:LessonId)=>{location.hash=`/lesson/${id}`;setSearching(false);setQuery('');};
+  const navigate=(id:LessonId,focusHeading=false)=>{lessonFocus.current=focusHeading?id:null;location.hash=`/lesson/${id}`;setSearching(false);setQuery('');};
   const exportData=()=>{const blob=new Blob([JSON.stringify(stateRef.current,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`from-zero-to-gpt-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);notify('全部学习数据已导出');};
   const importData=async(file?:File)=>{if(!file)return;try{if(file.size>67108864)throw new Error('请选择小于 64 MB 的学习数据文件');const data=validateImport(JSON.parse(await file.text()));await writeState(data);setState(data);setCanSave(true);setStorageError('');notify('学习数据已恢复');}catch(e){notify(e instanceof Error?e.message:'无法读取学习数据');}if(importRef.current)importRef.current.value='';};
   const total=Object.values(state.progress).filter(p=>p?.status==='mastered').length;
