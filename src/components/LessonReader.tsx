@@ -7,6 +7,7 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {useReadingPosition} from '../use-reading-position';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -22,7 +23,7 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
     const formula=section.formula?.trim();
     const showFormula=Boolean(formula&&!shown.has(formula));
     if(formula)shown.add(formula);
-    return <section className="prose-section" key={section.title}>
+    return <section className="prose-section" data-reading-anchor={`section-${i}`} key={section.title}>
       <h2><span>{String(i+1).padStart(2,'0')}</span>{section.title}</h2>
       {section.paragraphs.map((paragraph,j)=><p key={j}>{paragraph}</p>)}
       {showFormula&&<div className="formula-card"><Formula>{formula!}</Formula>{formula===mainFormula?.trim()&&<p>{formulaCaption}</p>}</div>}
@@ -36,6 +37,8 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
   const [pendingSection,setPendingSection]=useState<LessonSection|null>(null);
   const toolsRef=useRef<HTMLDivElement>(null);
+  const articleRef=useRef<HTMLElement>(null);
+  const restartReading=useReadingPosition(articleRef,lesson.id,progress.mode,pendingSection!==null);
   useLayoutEffect(()=>{
     const tools=toolsRef.current;
     if(!tools)return;
@@ -80,9 +83,9 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const hintVisible=hint||(feedback&&answer!==lesson.quiz.correct);
   const pathDone=progress.readCompleted&&progress.experimented&&progress.quizPassed;
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
-  return <MathContent><article className="page-content lesson-page">
+  return <MathContent><article ref={articleRef} className="page-content lesson-page">
     <div className="lesson-kicker"><span>阶段 0{stage}</span><span>{lesson.number}</span><span>{lesson.english}</span></div>
-    <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
+    <div className="lesson-title-row"><h1 tabIndex={-1}>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
     <section className="recommended-path" aria-label="新手推荐路径">
       <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
@@ -99,20 +102,20 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         event.preventDefault();changeMode(modes[n].id);
         const tab=document.getElementById(`tab-${modes[n].id}`);tab?.focus({preventScroll:true});tab?.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'});
       }}>{modes.map(mode=><button role="tab" tabIndex={progress.mode===mode.id?0:-1} aria-selected={progress.mode===mode.id} aria-controls="lesson-mode-panel" id={`tab-${mode.id}`} key={mode.id} onClick={()=>changeMode(mode.id)}><mode.icon size={15}/>{mode.label}</button>)}</div>
-      <LessonNavigation onGo={goToSection}/>
+      <LessonNavigation onGo={goToSection} onStart={()=>{setPendingSection(null);restartReading();}}/>
     </div>
     <p className="mode-estimate">{progress.mode==='intuition'?'推荐路径 · ':''}{estimate}</p>
-    <div id="lesson-mode-panel" tabIndex={-1} role="tabpanel" aria-labelledby={`tab-${progress.mode}`} data-mode={progress.mode}>
+    <div data-reading-anchor="panel" id="lesson-mode-panel" tabIndex={-1} role="tabpanel" aria-labelledby={`tab-${progress.mode}`} data-mode={progress.mode}>
       {progress.mode==='intuition'&&<>
         <div className="problem-callout"><span className="mini-label">这个概念解决什么问题？</span><p>{lesson.problem}</p></div>
         <ReadingSections sections={lesson.intuition}/>
         <div className="reading-next"><button className="text-button" onClick={()=>{patch({readCompleted:true});goToSection('experiment');}}>{progress.readCompleted?'已记录阅读，继续实验':'我已读完，去做实验'}<ArrowRight size={14}/></button></div>
-        <div id="lesson-experiment" tabIndex={-1}><LessonLab lesson={lesson} values={progress.labValues||{}} onChange={labValues=>patch({labValues,experimented:true})} onObserve={onObserve}/></div>
+        <div data-reading-anchor="experiment" id="lesson-experiment" tabIndex={-1}><LessonLab lesson={lesson} values={progress.labValues||{}} onChange={labValues=>patch({labValues,experimented:true})} onObserve={onObserve}/></div>
         <details className="reading-disclosure"><summary>学习目标与容易混淆的地方</summary>
           <section className="goals-section"><h2><CheckCheck size={19}/>你应该能够解释</h2><ul>{lesson.goals.map(goal=><li key={goal}>{goal}</li>)}</ul></section>
           <section className="misconceptions"><h3><HelpCircle size={17}/>容易混淆的地方</h3>{lesson.misconceptions.map(misconception=><p key={misconception}>{misconception}</p>)}</section>
         </details>
-        <section className="quiz-card" id="lesson-quiz" tabIndex={-1}>
+        <section data-reading-anchor="quiz" className="quiz-card" id="lesson-quiz" tabIndex={-1}>
           <div className="section-title"><span className="mini-label">理解检查 · 不是考试</span>{progress.quizPassed&&<span className="badge"><Check size={12}/>已验证</span>}</div>
           <h3>{lesson.quiz.question}</h3>
           <div className="quiz-options">{lesson.quiz.options.map((option,i)=><label key={option} className={answer===i?'chosen':''}><input type="radio" name={`quiz-${lesson.id}`} value={i} checked={answer===i} onChange={()=>{setAnswer(i);setFeedback(false);}}/><span className="option-letter">{String.fromCharCode(65+i)}</span>{option}</label>)}</div>
@@ -124,7 +127,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
       {progress.mode==='code'&&<>
         <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p></section>
         {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前编辑器中的代码。</p>}
-        <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
+        <div data-reading-anchor="code" id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
       </>}
       {progress.mode==='deep'&&<>
         <ReadingSections sections={lesson.deep}/>
@@ -135,7 +138,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         <ProjectDownload stage={stage} lessonId={lesson.id}/>
       </>}
     </div>
-    <section className="learning-evidence" aria-label="本章学习记录"><p>这些记录相互独立，不是必须做完的清单。</p><dl><div><dt>阅读（自记）</dt><dd>{progress.readCompleted?'已阅读':'未记录'}</dd></div><div><dt>自测</dt><dd>{progress.quizPassed?'已验证':'待验证'}</dd></div><div><dt>当前代码</dt><dd>{progress.codePassed?'验收通过':'未验证'}</dd></div><div><dt>掌握（自评）</dt><dd>{progress.status==='mastered'?'自评已掌握':'尚未自评'}</dd></div></dl></section>
+    <section data-reading-anchor="end" className="learning-evidence" aria-label="本章学习记录"><p>这些记录相互独立，不是必须做完的清单。</p><dl><div><dt>阅读（自记）</dt><dd>{progress.readCompleted?'已阅读':'未记录'}</dd></div><div><dt>自测</dt><dd>{progress.quizPassed?'已验证':'待验证'}</dd></div><div><dt>当前代码</dt><dd>{progress.codePassed?'验收通过':'未验证'}</dd></div><div><dt>掌握（自评）</dt><dd>{progress.status==='mastered'?'自评已掌握':'尚未自评'}</dd></div></dl></section>
     <div className="lesson-completion"><div><strong>{progress.status==='mastered'?'你已将本章自评为掌握。':'能用自己的话解释了吗？'}</strong><p>这是你的判断，不代表系统认证；无需完成所有扩展。</p></div><button className="button secondary" onClick={()=>patch({status:progress.status==='mastered'?'learning':'mastered'})}><Check size={16}/>{progress.status==='mastered'?'取消掌握自评':'自评为已掌握'}</button></div>
     <div className="lesson-pagination"><button className="text-button" onClick={onCheckpoint}><Pause size={14}/>保存思路，今天到这里</button>{next?<button className="button primary next-lesson" onClick={()=>navigate(next.id)}>下一步 · {next.title}<ArrowRight size={16}/></button>:<a className="button primary" href="#/map">回到学习路线<ArrowRight size={16}/></a>}</div>
   </article></MathContent>;
