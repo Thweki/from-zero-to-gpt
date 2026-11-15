@@ -94,15 +94,19 @@ class Value:
 
     def _topological(self):
         order, seen = [], set()
-
-        def visit(node):
+        # Explicit DFS keeps long loss sums off Python's bounded call stack.
+        stack = [(self, False)]
+        while stack:
+            node, expanded = stack.pop()
+            if expanded:
+                order.append(node)
+                continue
             if node in seen:
-                return
+                continue
             seen.add(node)
-            for parent in node._prev:
-                visit(parent)
-            order.append(node)
-        visit(self)
+            stack.append((node, True))
+            # Append only after parents; reverse pushes preserve operand order.
+            stack.extend((parent, False) for parent in reversed(node._prev))
         return order
 
     def backward(self):
