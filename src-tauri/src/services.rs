@@ -121,6 +121,33 @@ mod tests {
   use super::*;
 
   #[test]
+  fn managed_credentials_cannot_be_reused_by_custom_services() {
+    let existing = ProviderService {
+      provider_id: Some("anthropic".into()), id: "managed-test".into(), name: "Managed".into(),
+      base_url: "https://managed.invalid".into(), model: "test".into(),
+      auth_method: "managed".into(), allow_local_http: false,
+    };
+    let mut draft = ServiceDraft {
+      provider_id: existing.provider_id.clone(), id: Some(existing.id.clone()), name: "Renamed".into(),
+      base_url: "https://untrusted.example/v1".into(), model: "other-model".into(),
+      auth_method: "managed".into(), allow_local_http: false,
+    };
+    assert!(validate_service_edit(Some(&existing), &draft, false).is_ok());
+    assert!(validate_service_edit(None, &draft, false).is_err());
+    assert!(validate_service_edit(Some(&existing), &draft, true).is_err());
+    draft.provider_id = Some("openai".into());
+    assert!(validate_service_edit(Some(&existing), &draft, false).is_err());
+    draft.provider_id = existing.provider_id.clone();
+    for method in ["api-key", "github-copilot", "none"] {
+      draft.auth_method = method.into();
+      for has_secret in [false, true] {
+        assert!(validate_service_edit(Some(&existing), &draft, has_secret).is_err());
+      }
+      assert!(validate_service_edit(None, &draft, false).is_ok());
+    }
+  }
+
+  #[test]
   fn restart_restores_selected_service_instead_of_first_service() {
     let directory = std::env::temp_dir().join(format!("from-zero-services-{}", uuid::Uuid::new_v4()));
     let services = ["first", "second"].into_iter().map(|id| ProviderService {
@@ -188,16 +215,24 @@ pub fn provider_services_snapshot(state: State<'_, Mutex<ServicesState>>) -> Res
   state.lock().map_err(|_| "服务状态不可用。")?.snapshot()
 }
 
+fn validate_service_edit(old: Option<&ProviderService>, draft: &ServiceDraft, has_secret: bool) -> Result<(), String> {
+  // Managed credentials must never be reused as a custom endpoint's bearer token.
+  if draft.auth_method == "managed" || old.is_some_and(|service| service.auth_method == "managed") {
+    if draft.auth_method != "managed"
+      || !old.is_some_and(|service| service.auth_method == "managed" && service.provider_id == draft.provider_id)
+      || has_secret {
+      return Err("请使用服务商登录流程。".into());
+    }
+  }
+  Ok(())
+}
+
 #[tauri::command]
 pub fn provider_service_save(state: State<'_, Mutex<ServicesState>>, service: ServiceDraft, secret: Option<String>) -> Result<ServiceSnapshot, String> {
   let mut state = state.lock().map_err(|_| "服务状态不可用。")?;
   state.writable()?;
-  if service.auth_method == "managed" {
-    let old = state.services.iter().find(|s| Some(&s.id) == service.id.as_ref());
-    if !old.is_some_and(|s| s.auth_method == "managed" && s.provider_id == service.provider_id) || secret.is_some() {
-      return Err("请使用服务商登录流程。".into());
-    }
-  }
+  let old = state.services.iter().find(|s| Some(&s.id) == service.id.as_ref());
+  validate_service_edit(old, &service, secret.is_some())?;
   let service = validate(service)?;
   if secret.is_some() && service.auth_method != "api-key" { return Err("此认证方式不接受 API key。".into()); }
   if secret.is_some() { save_credential(&service.id, secret)?; }
