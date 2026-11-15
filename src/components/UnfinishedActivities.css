@@ -1,0 +1,10 @@
+.unfinished-page > p { color: var(--secondary); line-height: 1.8; }
+.unfinished-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; }
+.unfinished-filter select { max-width: 100%; padding: 10px; color: var(--text); background: var(--panel-soft); border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+.unfinished-list { display: grid; gap: 16px; }
+.unfinished-card, .unfinished-empty { padding: 20px; border: 1px solid var(--border); border-radius: 12px; }
+.unfinished-card h2 { margin: 0 0 12px; font-size: 18px; overflow-wrap: anywhere; }
+.unfinished-card h2 .mono { color: var(--secondary); font-size: 13px; }
+.unfinished-card ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 8px; list-style: none; margin: 0; padding: 0; }
+.unfinished-card a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border-radius: 6px; color: var(--accent); background: var(--panel-soft); }
+.unfinished-card a:hover { text-decoration: underline; }
