@@ -1,0 +1,7 @@
+.chapter-restore fieldset{border:1px solid var(--border);border-radius:10px;margin:16px 0;padding:12px;max-height:360px;overflow-y:auto}
+.restore-chapter{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;cursor:pointer}
+.restore-chapter+.restore-chapter{border-top:1px solid var(--border)}
+.restore-chapter input{flex-shrink:0;margin-top:5px}
+.restore-chapter span{min-width:0;overflow-wrap:anywhere}
+.restore-chapter small{display:block;line-height:1.8;margin-top:4px;color:var(--muted)}
+.chapter-restore [role=status]:empty{display:none}
