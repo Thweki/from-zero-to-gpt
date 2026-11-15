@@ -121,6 +121,21 @@ mod tests {
   use super::*;
 
   #[test]
+  fn service_text_boundaries_match_web_utf16_units_after_trimming() {
+    for (field, limit) in [("name", 60), ("model", 160)] {
+      for character in ["a", "中", "😀"] {
+        let text = character.repeat(limit / character.encode_utf16().count());
+        let mut value = serde_json::json!({"id": "unicode-test", "name": "服务", "model": "模型",
+          "baseUrl": "https://example.com/v1", "authMethod": "none"});
+        value[field] = serde_json::json!(format!(" {text} "));
+        assert!(validate(serde_json::from_value(value.clone()).unwrap()).is_ok());
+        value[field] = serde_json::json!(format!("{text}a"));
+        assert!(validate(serde_json::from_value(value).unwrap()).is_err());
+      }
+    }
+  }
+
+  #[test]
   fn restart_restores_selected_service_instead_of_first_service() {
     let directory = std::env::temp_dir().join(format!("from-zero-services-{}", uuid::Uuid::new_v4()));
     let services = ["first", "second"].into_iter().map(|id| ProviderService {
@@ -143,7 +158,8 @@ fn validate(draft: ServiceDraft) -> Result<ProviderService, String> {
   }
   let name = draft.name.trim().to_string();
   let model = draft.model.trim().to_string();
-  if name.is_empty() || name.len() > 60 || model.is_empty() || model.len() > 160 {
+  // Match JavaScript .length and the frontend maxLength: UTF-16 code units.
+  if name.is_empty() || name.encode_utf16().count() > 60 || model.is_empty() || model.encode_utf16().count() > 160 {
     return Err("服务名称或模型格式无效。".into());
   }
   if !["api-key", "github-copilot", "none", "managed"].contains(&draft.auth_method.as_str()) {
@@ -173,7 +189,7 @@ fn credential(id: &str) -> Result<Option<String>, String> {
 fn save_credential(id: &str, secret: Option<String>) -> Result<(), String> {
   let entry = keyring::Entry::new("org.fromzerotogpt.learning", id).map_err(|_| "无法访问系统凭据存储。")?;
   if let Some(secret) = secret {
-    if secret.trim().is_empty() || secret.len() > 16_000 { return Err("API key 为空或过长。".into()); }
+    if secret.trim().is_empty() || secret.encode_utf16().count() > 16_000 { return Err("API key 为空或过长。".into()); }
     entry.set_password(secret.trim()).map_err(|_| "无法保存到系统凭据存储。".to_string())
   } else {
     match entry.delete_credential() {
