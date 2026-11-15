@@ -2,6 +2,7 @@ import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
 import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
 import {lessons,lessonById} from '../data/lessons';
+import {LessonMinimap,readingHeadingId} from './LessonMinimap';
 import {LessonLab} from './LessonLab';
 import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
@@ -16,14 +17,14 @@ const modes=[
 ] as const;
 type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
 
-function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
+function ReadingSections({sections,formulaCaption,mainFormula,lessonId,mode}:{lessonId:string;mode:string;sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
   return <MathContent>{sections.map((section,i)=>{
     const formula=section.formula?.trim();
     const showFormula=Boolean(formula&&!shown.has(formula));
     if(formula)shown.add(formula);
     return <section className="prose-section" key={section.title}>
-      <h2><span>{String(i+1).padStart(2,'0')}</span>{section.title}</h2>
+      <h2 id={readingHeadingId(lessonId,mode,i)} tabIndex={-1}><span>{String(i+1).padStart(2,'0')}</span>{section.title}</h2>
       {section.paragraphs.map((paragraph,j)=><p key={j}>{paragraph}</p>)}
       {showFormula&&<div className="formula-card"><Formula>{formula!}</Formula>{formula===mainFormula?.trim()&&<p>{formulaCaption}</p>}</div>}
     </section>;
@@ -100,12 +101,13 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         const tab=document.getElementById(`tab-${modes[n].id}`);tab?.focus({preventScroll:true});tab?.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'});
       }}>{modes.map(mode=><button role="tab" tabIndex={progress.mode===mode.id?0:-1} aria-selected={progress.mode===mode.id} aria-controls="lesson-mode-panel" id={`tab-${mode.id}`} key={mode.id} onClick={()=>changeMode(mode.id)}><mode.icon size={15}/>{mode.label}</button>)}</div>
       <LessonNavigation onGo={goToSection}/>
+      {progress.mode!=='code'&&<LessonMinimap key={`${lesson.id}-${progress.mode}`} lessonId={lesson.id} mode={progress.mode} sections={lesson[progress.mode]} toolsRef={toolsRef}/>}
     </div>
     <p className="mode-estimate">{progress.mode==='intuition'?'推荐路径 · ':''}{estimate}</p>
     <div id="lesson-mode-panel" tabIndex={-1} role="tabpanel" aria-labelledby={`tab-${progress.mode}`} data-mode={progress.mode}>
       {progress.mode==='intuition'&&<>
         <div className="problem-callout"><span className="mini-label">这个概念解决什么问题？</span><p>{lesson.problem}</p></div>
-        <ReadingSections sections={lesson.intuition}/>
+        <ReadingSections lessonId={lesson.id} mode={progress.mode} sections={lesson.intuition}/>
         <div className="reading-next"><button className="text-button" onClick={()=>{patch({readCompleted:true});goToSection('experiment');}}>{progress.readCompleted?'已记录阅读，继续实验':'我已读完，去做实验'}<ArrowRight size={14}/></button></div>
         <div id="lesson-experiment" tabIndex={-1}><LessonLab lesson={lesson} values={progress.labValues||{}} onChange={labValues=>patch({labValues,experimented:true})} onObserve={onObserve}/></div>
         <details className="reading-disclosure"><summary>学习目标与容易混淆的地方</summary>
@@ -120,14 +122,14 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
           {(feedback||hintVisible)&&<div className={`quiz-feedback ${feedback&&answer===lesson.quiz.correct?'correct':''}`} role="status">{feedback&&<strong>{answer===lesson.quiz.correct?'理解正确。':'再想一想，试着用上面的实验验证。'}</strong>}{feedback&&answer===lesson.quiz.correct&&<p>{lesson.quiz.explanation}</p>}{hintVisible&&<p className="quiz-hint">{lesson.quiz.hint}</p>}</div>}
         </section>
       </>}
-      {progress.mode==='math'&&<ReadingSections sections={lesson.math} mainFormula={lesson.formula} formulaCaption={lesson.formulaCaption}/>}
+      {progress.mode==='math'&&<ReadingSections lessonId={lesson.id} mode={progress.mode} sections={lesson.math} mainFormula={lesson.formula} formulaCaption={lesson.formulaCaption}/>}
       {progress.mode==='code'&&<>
         <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p></section>
         {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前编辑器中的代码。</p>}
         <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
       </>}
       {progress.mode==='deep'&&<>
-        <ReadingSections sections={lesson.deep}/>
+        <ReadingSections lessonId={lesson.id} mode={progress.mode} sections={lesson.deep}/>
         <section className="related-section"><h2>先修知识与延伸阅读</h2>
           {lesson.prerequisites.length>0&&<div className="prerequisite-list">{lesson.prerequisites.map(id=><button className="button secondary compact" key={id} onClick={()=>navigate(id)}><RotateCcw size={13}/>{lessonById[id].title}</button>)}</div>}
           <div className="references">{lesson.references.map(reference=><a key={reference.url} href={reference.url} target="_blank" rel="noreferrer"><span>{reference.title}<small>{reference.note}</small></span><ExternalLink size={14}/></a>)}</div>

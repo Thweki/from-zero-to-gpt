@@ -1,0 +1,10 @@
+.lesson-page .lesson-sticky-tools{flex-wrap:wrap}
+.lesson-minimap{display:flex;align-items:center;gap:10px;flex:0 0 100%;min-width:0;border-top:1px solid var(--border);padding-top:3px}
+.lesson-minimap-label{font-size:11px;color:var(--secondary);white-space:nowrap;padding-left:7px}
+.lesson-minimap-track{position:relative;flex:1;height:28px;min-width:0}
+.lesson-minimap-track button{position:absolute;top:0;height:28px;border:1px solid var(--border);border-radius:4px;background:var(--panel-soft);color:var(--secondary);font:11px var(--font-mono)}
+.lesson-minimap-track button:hover,.lesson-minimap-track button[aria-current]{background:var(--accent-soft);color:var(--accent-dark)}
+.lesson-minimap-track button[aria-current]{font-weight:700;text-decoration:underline}
+.lesson-minimap-track button:focus-visible{outline:2px solid var(--accent-dark);outline-offset:2px;z-index:2}
+.lesson-minimap-viewport{position:absolute;top:0;height:100%;border:2px solid var(--accent-dark);border-radius:4px;pointer-events:none}
+@media print{.lesson-minimap{display:none}}
