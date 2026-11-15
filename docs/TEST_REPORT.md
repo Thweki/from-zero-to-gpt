@@ -1,3 +1,18 @@
+# WebKit smoke 本地验证
+
+2026-11-15，`burn/webkit-smoke`。仅新增四项WebKit检查：真实Pyodide Worker/WASM执行、IndexedDB恢复笔记／代码／外观、原生鼠标文字选择、键盘焦点循环与恢复。原有视觉与全课程矩阵继续使用Chromium；没有生产代码改动。
+
+- 通过：`npm run check`；单独严格检查 `playwright.config.ts`、`tests/webkit-smoke.spec.ts`；`git diff --check`；本地CI脚本语法检查。
+- 通过：Playwright发现4项WebKit测试、304项Chromium测试，Chromium列表不含新smoke文件；以哨兵路径检查Chromium executable override不传入WebKit。CI YAML解析通过，安装、始终上传诊断和WebKit交付依赖均已检查；未运行actionlint（本机未安装）。
+- Vitest实际执行：611通过、38失败（共649）；38项均因沙箱中 `spawnSync python3 EPERM` 失败，涉及 `modern-llm`、`neural`、`transformer`，不是通过记录。JSON结果保存在忽略的 `artifacts/webkit-smoke-unit-results.json`。
+- `npm run test:ci-local` 受子进程限制失败；用 `node --test --test-isolation=none scripts/local-ci.test.mjs` 定位后，1项通过，快照测试因 `spawnSync git EPERM` 失败。
+- WebKit未执行：本地未安装，尝试下载时全部镜像DNS解析报 `EAI_AGAIN`。WebKit和单项Chromium执行尝试还在启动开发服务器时被Python子进程限制阻止，未进入浏览器测试。mobile、touch-chromium未执行；Firefox未配置。没有宣称Safari、实机或Tauri验收。
+- 依赖安装：在线 `npm ci` 因registry DNS失败；离线安装因esbuild安装脚本的 `spawnSync ... EPERM` 失败；最终用本地npm缓存及 `--offline --ignore-scripts` 安装依赖，并单独运行 `scripts/copy-python.mjs`。此环境不等同于CI的干净安装。
+
+GitHub Actions尚未运行。完整浏览器验收需在可安装浏览器与系统依赖、允许启动开发服务器的环境中运行；CI配置保留安装／启动日志、HTML／JSON报告、失败trace和截图。未推送、合并或部署。
+
+---
+
 # 0.3.8 试用报告七项修复验收
 
 2026-10-24。实际实现与逐项边界见 [REVIEW_FIXES_0_3_8](REVIEW_FIXES_0_3_8.md)。保留原站点／GitHub私有仓库、配色、数据版本和模型配置。新手路径不锁课，自评不冒充认证；观察草稿按章保存，三处选择器统一，连接状态区分检测、配置与错误。

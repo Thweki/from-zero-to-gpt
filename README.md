@@ -154,14 +154,18 @@ npm run validate:course
 npm run build
 ```
 
-浏览器回归需要 Playwright Chromium：
+浏览器回归使用 Playwright Chromium，以及仅四项核心交互的 WebKit smoke：
 
 ```bash
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:e2e
+# 只运行 WebKit 的 Worker/WASM、IndexedDB、文字选择和键盘焦点检查
+npm run test:e2e -- --project=webkit-smoke
+# 只运行原有 Chromium 回归
+npm run test:e2e -- --project=desktop --project=mobile --project=touch-chromium
 ```
 
-已有系统 Chromium 时，可将 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 设置为本机浏览器可执行文件的路径。
+Linux 缺少浏览器系统库时使用 `npx playwright install --with-deps chromium webkit`。已有系统 Chromium 时，可将 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 设置为本机浏览器可执行文件的路径；该覆盖不会应用到 WebKit。未安装的浏览器会报错，不会自动跳过。诊断产物与覆盖边界见 [CI 说明](docs/GITHUB_CICD.md)。
 
 独立 Python 工程按各自 README 运行测试；tiny-GPT 需先安装 CPU PyTorch。GitHub Actions 分为 [完整 CI](.github/workflows/ci.yml)、[三平台桌面构建](.github/workflows/tauri.yml) 和 [Release 发布](.github/workflows/release.yml)。版本标签核对同一源码提交在主分支上的完整 CI 与三平台构建结果，全部成功后才发布对应安装包与校验文件；实际结果查看 [Actions](https://github.com/Thweki/from-zero-to-gpt/actions)。验证范围与历史记录见 [测试报告](docs/TEST_REPORT.md)。
 

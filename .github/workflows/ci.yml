@@ -83,17 +83,69 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e -- --fully-parallel --shard=${{ matrix.shard }}/2
+      - name: Install Chromium and record browser diagnostics
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          npx playwright --version | tee artifacts/browser-version.log
+          npx playwright install --with-deps chromium 2>&1 | tee artifacts/browser-install.log
+      - name: Run Chromium regressions
+        shell: bash
+        env:
+          DEBUG: pw:browser
+        run: npm run test:e2e -- --project=desktop --project=mobile --project=touch-chromium --fully-parallel --shard=${{ matrix.shard }}/2 2>&1 | tee artifacts/browser-run.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: ${{ always() }}
         with:
           name: browser-results-${{ github.sha }}-${{ matrix.shard }}
           path: |
             test-results/
+            playwright-report/
             artifacts/playwright-results.json
+            artifacts/browser-*.log
             artifacts/usability-review/*.png
             artifacts/dark-appearance/*.png
+          if-no-files-found: warn
+          retention-days: 7
+
+  webkit-smoke:
+    name: WebKit Worker, storage, selection and focus smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Install WebKit and record browser diagnostics
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          npx playwright --version | tee artifacts/browser-version.log
+          npx playwright install --with-deps webkit 2>&1 | tee artifacts/browser-install.log
+      - name: Run narrow WebKit smoke
+        shell: bash
+        env:
+          DEBUG: pw:browser
+        run: npm run test:e2e -- --project=webkit-smoke 2>&1 | tee artifacts/browser-run.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ always() }}
+        with:
+          name: webkit-smoke-results-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+            artifacts/playwright-results.json
+            artifacts/browser-*.log
           if-no-files-found: warn
           retention-days: 7
 
@@ -148,7 +200,7 @@ jobs:
 
   delivery:
     name: Verified deployment artifact (no production deployment)
-    needs: [repository-safety, web, browser, python, launcher]
+    needs: [repository-safety, web, browser, webkit-smoke, python, launcher]
     if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
