@@ -8,6 +8,7 @@ import {useTutorConnection} from '../tutor-connection';
 import {isTauriRuntime,tutorApiUrl} from '../runtime';
 import {nativeTutorCancel,nativeTutorChat} from '../provider-manager';
 import {selectionSummary,type TutorSelection} from '../tutor-selection';
+import {downloadTutorConversation} from '../tutor-export';
 import './SelectionTutor.css';
 import './TutorPanel.css';
 const modeOptions=[{id:'guide',label:'跟着问题讲解'},{id:'hint',label:'只给一个提示'},{id:'explain',label:'换个方式解释'},{id:'review',label:'复习先修知识'},{id:'solution',label:'完整解答（我已尝试）'}] as const;
@@ -112,6 +113,6 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
         <p>选中的内容会发送至所示模型提供商。访问码仅保留在当前页面内存，不是模型 API 密钥。</p>
       </div>}
     </div>
-    <div className="tutor-footnote"><span>Enter 发送 · Shift+Enter 换行<br/>回答可能出错，请用实验验证。</span><button className="icon-button" aria-label="清空本章导师对话" disabled={pending||!messages.length} onClick={()=>{if(window.confirm('清空本章导师对话？笔记和代码会保留。'))onMessages([]);}}><Trash2 size={13}/></button></div>
+    <div className="tutor-footnote"><span>Enter 发送 · Shift+Enter 换行<br/>回答可能出错，请用实验验证。</span><button className="text-button" aria-label="导出本章导师对话（Markdown）" disabled={pending||!messages.length} onClick={()=>downloadTutorConversation(lesson,messages)}>导出对话</button><button className="icon-button" aria-label="清空本章导师对话" disabled={pending||!messages.length} onClick={()=>{if(window.confirm('清空本章导师对话？笔记和代码会保留。'))onMessages([]);}}><Trash2 size={13}/></button></div>
   </section>;
 }
