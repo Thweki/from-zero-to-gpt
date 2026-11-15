@@ -61,10 +61,14 @@ test('native mouse selection reaches the tutor composer and focuses its input',a
   await page.mouse.up();
   const selected=await page.evaluate(()=>window.getSelection()?.toString().trim());
   expect(selected).toBeTruthy();
+  // Native KaTeX selection exposes rendered math; the card preserves $x$ source.
+  const sharedText=['给盒子一个数字','，盒子'];
+  for(const text of sharedText)expect(selected).toContain(text);
   const ask=page.getByRole('button',{name:'将选中内容带到 AI 导师',exact:true});
   await expect(ask).toBeVisible();
   await ask.click();
-  await expect(page.locator('.tutor-composer .tutor-selection-card blockquote')).toContainText(selected!);
+  const quote=page.locator('.tutor-composer .tutor-selection-card blockquote');
+  for(const text of sharedText)await expect(quote).toContainText(text);
   await expect(page.locator('.context-panel').getByLabel('向 AI 导师提问')).toBeFocused();
 });
 
