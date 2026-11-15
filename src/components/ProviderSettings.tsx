@@ -14,13 +14,16 @@ export function ProviderSettings(){
   const [snapshot,setSnapshot]=useState<ProviderServiceSnapshot|null>(null);
   const [draft,setDraft]=useState<ProviderServiceDraft>(blank);
   const [secret,setSecret]=useState('');
+  // Deployment authorization lives only in this mounted settings page.
+  const [accessCode,setAccessCode]=useState(''),[managementCode,setManagementCode]=useState('');
   const [editor,setEditor]=useState<'connect'|'custom'|'managed'>('connect');
   const [messageKind,setMessageKind]=useState<'success'|'error'>('success');
   const [message,setMessage]=useState(''),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
   const selected=snapshot?.services.find(service=>service.id===draft.id);
-  const load=async()=>{
-    try{const next=await providerServicesSnapshot();setSnapshot(next);const current=next.services.find(service=>service.id===next.activeId)??next.services[0];if(current){setDraft({...current});if(current.authMethod==='managed')setEditor('managed');}setMessage('');}
-    catch(error){setMessageKind('error');setMessage(error instanceof Error?error.message:'无法读取服务配置。');}
+  const load=async(code='')=>{
+    setLoading(true);setMessage('');
+    try{const next=await providerServicesSnapshot(code);setManagementCode(code);setSnapshot(next);const current=next.services.find(service=>service.id===next.activeId)??next.services[0];setDraft(current?{...current}:blank());setEditor(current?.authMethod==='managed'?'managed':'connect');setSecret('');setMessage('');}
+    catch(error){setSnapshot(null);setManagementCode('');setMessageKind('error');setMessage(error instanceof Error?error.message:'无法读取服务配置。');}
     finally{setLoading(false);}
   };
   useEffect(()=>{void load();},[]);
@@ -30,20 +33,20 @@ export function ProviderSettings(){
   };
   const save=async()=>{
     setBusy(true);setMessage('');
-    try{publish(await saveProviderService(draft,secret?secret:undefined),'服务配置已保存。');}
+    try{publish(await saveProviderService(draft,secret?secret:undefined,managementCode),'服务配置已保存。');}
     catch(error){setMessageKind('error');setMessage(error instanceof Error?error.message:'保存失败。');}
     finally{setBusy(false);}
   };
   const activate=async(id:string)=>{
     setBusy(true);setMessage('');
-    try{publish(await activateProviderService(id),'已切换当前模型服务。');}
+    try{publish(await activateProviderService(id,managementCode),'已切换当前模型服务。');}
     catch(error){setMessageKind('error');setMessage(error instanceof Error?error.message:'切换失败。');}
     finally{setBusy(false);}
   };
   const remove=async(id:string)=>{
     if(!window.confirm('删除此模型服务及其凭据？课程、笔记和学习记录不会受影响。'))return;
     setBusy(true);setMessage('');
-    try{publish(await removeProviderService(id),'服务已删除；学习数据未改变。');}
+    try{publish(await removeProviderService(id,managementCode),'服务已删除；学习数据未改变。');}
     catch(error){setMessageKind('error');setMessage(error instanceof Error?error.message:'删除失败。');}
     finally{setBusy(false);}
   };
@@ -51,8 +54,12 @@ export function ProviderSettings(){
     <div className="section-title provider-heading"><div><h2>模型服务</h2><p>为 AI 导师选择模型，课程与实验可独立使用。</p></div><button className="button secondary compact" disabled={busy||loading||!snapshot} onClick={()=>{setDraft(blank());setEditor('connect');setSecret('');setMessage('');}}><Plus size={16}/>新增服务</button></div>
     <div className={`provider-connection ${checking?'checking':status?.configured?'ready':'unavailable'}`} role="status">
       <div><strong>{checking?'正在检测连接':status?.configured?'当前服务已配置':'模型服务未就绪'}</strong><p>{checking?'正在读取当前服务状态…':status?.configured?`${status.provider} · ${status.model}`:connectionError}</p></div>
-      <button className="text-button" disabled={checking||busy} onClick={()=>refresh()}><RefreshCw size={14}/>重新检查</button>
+      <button className="text-button" disabled={checking||busy||loading} onClick={()=>{void refresh();void load(accessCode);}}><RefreshCw size={14}/>重新检查</button>
     </div>
+    {(status?.accessCodeRequired||(!loading&&!snapshot))&&<form className="provider-login-prompt" aria-label="服务管理授权" onSubmit={event=>{event.preventDefault();if(!busy&&!loading)void load(accessCode);}}>
+      <label>服务管理访问码<input type="password" aria-label="服务管理访问码" autoComplete="off" spellCheck={false} value={accessCode} disabled={busy||loading} onChange={event=>setAccessCode(event.target.value)}/><small>仅在当前设置页面内存中使用，不写入学习数据或导出备份。</small></label>
+      <button type="submit" className="button secondary" disabled={busy||loading}>授权并重试</button>
+    </form>}
     {loading?<p role="status">正在读取本地服务配置…</p>:snapshot&&<>
       <section className="provider-saved" aria-label="已保存的模型服务">
         <div className="provider-section-heading"><h3>已保存服务</h3><span>{snapshot.services.length} 个服务</span></div>
@@ -64,8 +71,8 @@ export function ProviderSettings(){
           </div>)}
         </div>}
       </section>
-      {editor==='connect'&&<ProviderConnect onConnected={next=>publish(next,'凭据已保存，请选择模型。')} onCustom={()=>{setDraft(blank());setEditor('custom');setSecret('');}}/>}
-      {editor==='managed'&&<ManagedServiceEditor key={draft.id} draft={draft} onChange={update} onSave={()=>void save()} busy={busy}/>}
+      {editor==='connect'&&<ProviderConnect accessCode={managementCode} onConnected={next=>publish(next,'凭据已保存，请选择模型。')} onCustom={()=>{setDraft(blank());setEditor('custom');setSecret('');}}/>}
+      {editor==='managed'&&<ManagedServiceEditor key={draft.id} accessCode={managementCode} draft={draft} onChange={update} onSave={()=>void save()} busy={busy}/>}
       {editor==='custom'&&<form className="provider-editor" aria-label="服务编辑器" onSubmit={event=>{event.preventDefault();if(!busy&&draft.authMethod!=='github-copilot')void save();}}>
         <div className="provider-section-heading"><h3>{draft.id?'编辑服务':'新增服务'}</h3><span>{draft.id?draft.name:'支持 OpenAI 兼容接口'}</span></div>
         <fieldset disabled={busy}>
