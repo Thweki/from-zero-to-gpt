@@ -1,13 +1,13 @@
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import {LoaderCircle, Sparkles, X} from 'lucide-react';
+import {LoaderCircle, NotebookPen, Sparkles, X} from 'lucide-react';
 import type {Lesson} from '../types';
 import {selectionImageLimit, type TutorSelection} from '../tutor-selection';
 import {experimentContext} from '../experiment-context';
 import './SelectionTutor.css';
 
 type Graphic = HTMLImageElement | SVGSVGElement | HTMLCanvasElement;
-type Pick = {selection?: TutorSelection; graphic?: Graphic; x:number; y:number};
+type Pick = {selection?: TutorSelection; graphic?: Graphic; annotatable?:boolean; x:number; y:number};
 const excluded = 'input,textarea,select,button,a,[contenteditable="true"],.tutor-panel,.tutor-selection-popup,.katex-mathml';
 const graphicSelector = 'img,svg[role="img"],canvas';
 const compact = (text:string) => text.replace(/\s+/g, ' ').trim();
@@ -68,7 +68,7 @@ async function rasterPreview(graphic:Graphic):Promise<string|undefined> {
   finally {if (objectURL) URL.revokeObjectURL(objectURL);}
 }
 
-export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson;resetKey:string;values:Record<string,number>;onPick:(selection:TutorSelection)=>void}) {
+export function SelectionTutor({lesson, resetKey, values, onPick, onAnnotate}:{lesson:Lesson;resetKey:string;values:Record<string,number>;onPick:(selection:TutorSelection)=>void;onAnnotate?:(quote:string)=>void}) {
   const [pick,setPick] = useState<Pick|null>(null), [busy,setBusy] = useState(false);
   const popup = useRef<HTMLDivElement>(null), generation = useRef(0), transferring=useRef(false), dismissedSelection=useRef<string|null>(null), graphicSelection=useRef<Graphic|null>(null);
   useEffect(() => {
@@ -92,8 +92,10 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
       const text = selectedText(range);
       if (!text) {setPick(null);return false;}
       const rect = range.getBoundingClientRect();
+      const inReading = (node:Node) => (node instanceof Element?node:node.parentElement)?.closest('.lesson-page .prose-section');
+      const annotatable = Boolean(inReading(range.startContainer) && inReading(range.endContainer));
       rememberScroll();
-      setPick({selection:{kind:'text',title:lesson.title,text:text.length>3000?`${text.slice(0,2960)}\n（选区较长，以上为前 2960 字。）`:text},x:point?.x??rect.right,y:point?.y??rect.bottom});
+      setPick({selection:{kind:'text',title:lesson.title,text:text.length>3000?`${text.slice(0,2960)}\n（选区较长，以上为前 2960 字。）`:text},annotatable,x:point?.x??rect.right,y:point?.y??rect.bottom});
       return true;
     };
     const chooseGraphic=(graphic:Graphic,x:number,y:number)=>{
@@ -143,7 +145,8 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
   },[lesson.id,lesson.title,resetKey]);
 
   if (!pick) return null;
-  const width=190,height=46;
+  const canAnnotate=Boolean(onAnnotate&&pick.annotatable&&pick.selection?.kind==='text');
+  const width=canAnnotate?280:190,height=46;
   const left=Math.max(8,Math.min(pick.x+10,window.innerWidth-width-8));
   const top=Math.max(8,Math.min(pick.y+12,window.innerHeight-height-8));
   const transfer = async () => {
@@ -169,6 +172,9 @@ export function SelectionTutor({lesson, resetKey, values, onPick}:{lesson:Lesson
   };
   return createPortal(<div ref={popup} data-kind={pick.graphic?'image':'text'} className="tutor-selection-popup" role="toolbar" aria-label="选中内容操作" aria-keyshortcuts="Alt+Enter" style={{left,top}} onPointerDown={event=>event.preventDefault()}>
     <button type="button" disabled={busy} aria-label="将选中内容带到 AI 导师" onClick={()=>void transfer()}>{busy?<LoaderCircle size={15}/>:<Sparkles size={15}/>}<span>{busy?'正在带入…':'问导师'}</span></button>
+    {canAnnotate&&<button type="button" aria-label="为选中文字记批注" onClick={()=>{
+      onAnnotate!(pick.selection!.text);window.getSelection()?.removeAllRanges();setPick(null);
+    }}><NotebookPen size={15}/><span>记批注</span></button>}
     <button type="button" className="selection-dismiss" aria-label="取消选中内容操作" onClick={()=>{dismissedSelection.current=window.getSelection()?.toString()||'';generation.current++;transferring.current=false;setPick(null);setBusy(false);}}><X size={15}/></button>
   </div>,document.fullscreenElement || document.body);
 }

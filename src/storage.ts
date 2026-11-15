@@ -3,6 +3,7 @@ import type { LearningState, LessonId, LessonProgress } from './types';
 export { lessonIds } from './data/lesson-ids';
 import { lessonIds } from './data/lesson-ids';
 import {validateTutorSelection} from './tutor-selection';
+import {validateAnnotations} from './annotations';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
 export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
 const database = () => openDB('from-zero-to-gpt', 1, {upgrade(db) {db.createObjectStore('learning');}});
@@ -31,6 +32,7 @@ export function validateImport(value: unknown): LearningState {
     for(const field of ['readCompleted','experimented','codePassed'] as const){if(p[field]!==undefined){if(typeof p[field]!=='boolean')throw new Error('学习活动状态无效');progress[field]=p[field];}}
     if(p.lastVisited!==undefined){if(typeof p.lastVisited!=='string'||!Number.isFinite(Date.parse(p.lastVisited)))throw new Error('章节访问时间无效');progress.lastVisited=p.lastVisited;}
     if(p.observationDraft!==undefined)progress.observationDraft=checkedString(p.observationDraft,4000);
+    if(p.annotations!==undefined)progress.annotations=validateAnnotations(p.annotations);
     if(p.observationSnapshot!==undefined)progress.observationSnapshot=checkedString(p.observationSnapshot,3000);
     if(p.tutorDraft!==undefined)progress.tutorDraft=checkedString(p.tutorDraft,4000);
     if(p.tutorSelection!==undefined)progress.tutorSelection=validateTutorSelection(p.tutorSelection);

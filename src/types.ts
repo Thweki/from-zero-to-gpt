@@ -33,6 +33,7 @@ export interface LessonProgress {
   status: LessonStatus;
   mode: ViewMode;
   note: string;
+  annotations?: LessonAnnotation[];
   code: string;
   review: boolean;
   quizAnswer?: number;
@@ -48,6 +49,13 @@ export interface LessonProgress {
   lastVisited?: string;
   observationDraft?: string;
   observationSnapshot?: string;
+}
+export interface LessonAnnotation {
+  id: string;
+  mode: Exclude<ViewMode, 'code'>;
+  quote: string;
+  text: string;
+  createdAt: string;
 }
 export interface Checkpoint {
   lessonId: LessonId;
