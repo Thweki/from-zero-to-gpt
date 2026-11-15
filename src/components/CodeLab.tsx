@@ -7,6 +7,26 @@ type Props={lesson:Lesson; code:string; lastRun?:string; onCode:(code:string)=>v
 export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
   const worker=useRef<Worker|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const editor=useRef<HTMLTextAreaElement>(null);
+  const copyAttempt=useRef(0);
+  const [copyState,setCopyState]=useState<'idle'|'pending'|'copied'|'manual'>('idle');
+  useEffect(()=>{
+    setCopyState('idle');
+    return()=>{copyAttempt.current++;};
+  },[code,lesson.id]);
+  const copyCode=async()=>{
+    const attempt=++copyAttempt.current;
+    setCopyState('pending');
+    try{
+      // Copy the source verbatim, without line numbers or run output.
+      await navigator.clipboard.writeText(code);
+      if(attempt===copyAttempt.current)setCopyState('copied');
+    }catch{
+      if(attempt!==copyAttempt.current)return;
+      editor.current?.focus({preventScroll:true});
+      editor.current?.select();
+      setCopyState('manual');
+    }
+  };
   const pendingSelection=useRef<{start:number;end:number;direction:'forward'|'backward'|'none'}|null>(null);
   useLayoutEffect(()=>{
     const pending=pendingSelection.current;
@@ -50,6 +70,6 @@ export function CodeLab({lesson,code,lastRun,onCode,onResult}:Props){
     target.focus({preventScroll:true});
     onCode(updated);
   };
-  return <MathContent><section className="code-lab" aria-label="Python 代码实验室"><div className="code-toolbar"><span><Code2 size={16}/> experiment.py <small>Python 3 · Pyodide</small></span><div><button className="text-button" onClick={()=>setReference(!reference)}>{reference?'隐藏参考':'对照参考'}</button><button className="icon-button" aria-label="重置代码" onClick={()=>{stop();onCode(lesson.starter);onResult('');}}><RotateCcw size={15}/></button></div></div><p className="code-description">{lesson.codeExplanation}</p><div className="editor-wrap"><div className="line-numbers" aria-hidden="true">{code.split('\n').map((_,i)=><div key={i}>{i+1}</div>)}</div><textarea ref={editor} className="code-editor" aria-label="Python 代码编辑器" spellCheck={false} value={code} onChange={e=>onCode(e.target.value)} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&e.key===']'){e.preventDefault();indent();}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();if(!running)run();}}}/></div><div className="code-actions"><span>{running?status:<><span className="code-keyboard-hint">Tab 切换焦点 · Ctrl/⌘ + ] 插入缩进</span><span className="code-touch-hint">将光标移到代码中，点“缩进”插入四个空格</span></>}</span><button type="button" className="button secondary code-indent" onPointerDown={e=>e.preventDefault()} onClick={indent}>缩进</button>{running?<button className="button secondary" onClick={()=>{stop();onResult('已手动停止运行。代码已保留。');}}><Square size={14}/>停止</button>:<button className="button primary compact" onClick={run}><Play size={14}/>运行并测试 <kbd>⌘/Ctrl ↵</kbd></button>}</div>{lastRun&&<div className={`code-output ${lastRun.startsWith('✓')?'success':''}`} role="status"><small>运行结果</small>{failure?<><div className="python-error-summary"><h4>{failure.location} · {failure.type}</h4><p>{failure.explanation}</p>{failure.message&&<p className="python-error-message">{failure.type}: {failure.message}</p>}{failure.source&&<pre className="python-error-source">{failure.source}</pre>}</div>{failure.stdout&&<div className="python-stdout"><small>出错前的输出</small><pre>{failure.stdout}</pre></div>}<details className="python-error-details"><summary>展开完整错误堆栈（含运行环境）</summary><pre>{failure.raw}</pre></details></>:<pre>{lastRun}</pre>}</div>}
+  return <MathContent><section className="code-lab" aria-label="Python 代码实验室"><div className="code-toolbar"><span><Code2 size={16}/> experiment.py <small>Python 3 · Pyodide</small></span><div><button type="button" className="text-button" disabled={copyState==='pending'||code.length===0} onClick={()=>void copyCode()}><Copy size={14} aria-hidden="true"/>复制代码</button><button className="text-button" onClick={()=>setReference(!reference)}>{reference?'隐藏参考':'对照参考'}</button><button className="icon-button" aria-label="重置代码" onClick={()=>{stop();onCode(lesson.starter);onResult('');}}><RotateCcw size={15}/></button></div></div><p className="code-description" role="status" hidden={copyState==='idle'}>{copyState==='pending'?'正在复制…':copyState==='copied'?'已复制当前代码':copyState==='manual'?'无法自动复制，已选中代码，请使用系统复制命令（Ctrl/Cmd+C 或长按复制）。':''}</p><p className="code-description">{lesson.codeExplanation}</p><div className="editor-wrap"><div className="line-numbers" aria-hidden="true">{code.split('\n').map((_,i)=><div key={i}>{i+1}</div>)}</div><textarea ref={editor} className="code-editor" aria-label="Python 代码编辑器" spellCheck={false} value={code} onChange={e=>onCode(e.target.value)} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&e.key===']'){e.preventDefault();indent();}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();if(!running)run();}}}/></div><div className="code-actions"><span>{running?status:<><span className="code-keyboard-hint">Tab 切换焦点 · Ctrl/⌘ + ] 插入缩进</span><span className="code-touch-hint">将光标移到代码中，点“缩进”插入四个空格</span></>}</span><button type="button" className="button secondary code-indent" onPointerDown={e=>e.preventDefault()} onClick={indent}>缩进</button>{running?<button className="button secondary" onClick={()=>{stop();onResult('已手动停止运行。代码已保留。');}}><Square size={14}/>停止</button>:<button className="button primary compact" onClick={run}><Play size={14}/>运行并测试 <kbd>⌘/Ctrl ↵</kbd></button>}</div>{lastRun&&<div className={`code-output ${lastRun.startsWith('✓')?'success':''}`} role="status"><small>运行结果</small>{failure?<><div className="python-error-summary"><h4>{failure.location} · {failure.type}</h4><p>{failure.explanation}</p>{failure.message&&<p className="python-error-message">{failure.type}: {failure.message}</p>}{failure.source&&<pre className="python-error-source">{failure.source}</pre>}</div>{failure.stdout&&<div className="python-stdout"><small>出错前的输出</small><pre>{failure.stdout}</pre></div>}<details className="python-error-details"><summary>展开完整错误堆栈（含运行环境）</summary><pre>{failure.raw}</pre></details></>:<pre>{lastRun}</pre>}</div>}
     {reference&&<div className="reference-code"><div><strong>参考实现</strong><button className="text-button" onClick={()=>{void navigator.clipboard?.writeText(lesson.reference).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});}}>{copied?<Check size={14}/>:<Copy size={14}/>}复制</button></div><p>建议先保存自己的尝试，逐行比较哪里不同。</p><pre>{lesson.reference}</pre></div>}<details className="test-source"><summary>查看实际运行的验收测试</summary><pre>{lesson.pythonTests}</pre></details></section></MathContent>;
 }
