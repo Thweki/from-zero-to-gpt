@@ -3,6 +3,7 @@ import type { LearningState, LessonId, LessonProgress } from './types';
 export { lessonIds } from './data/lesson-ids';
 import { lessonIds } from './data/lesson-ids';
 import {validateTutorSelection} from './tutor-selection';
+import {validateReviewSchedule} from './review-queue';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
 export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
 const database = () => openDB('from-zero-to-gpt', 1, {upgrade(db) {db.createObjectStore('learning');}});
@@ -22,9 +23,14 @@ export function validateImport(value: unknown): LearningState {
   if (!isObject(value) || value.version !== 1 || !lessonIds.includes(value.lastLesson as LessonId) || !['light','dark'].includes(value.theme as string) || !isObject(value.progress)) throw new Error('不支持的学习数据格式，请选择本平台导出的 JSON 文件');
   if (typeof value.updatedAt !== 'string' || !Number.isFinite(Date.parse(value.updatedAt))) throw new Error('学习数据时间无效');
   const result = initialState(); result.theme = value.theme as LearningState['theme']; result.lastLesson = value.lastLesson as LessonId; result.updatedAt = value.updatedAt;
+  if (value.reviewQueueEnabled !== undefined) {
+    if (typeof value.reviewQueueEnabled !== 'boolean') throw new Error('间隔复习设置无效');
+    result.reviewQueueEnabled = value.reviewQueueEnabled;
+  }
   for (const [key, p] of Object.entries(value.progress)) {
     if (!lessonIds.includes(key as LessonId) || !isObject(p) || !['new','learning','mastered'].includes(p.status as string) || !['intuition','math','code','deep'].includes(p.mode as string) || typeof p.review !== 'boolean') throw new Error('章节进度格式无效');
     const progress: LessonProgress = { status:p.status as LessonProgress['status'],mode:p.mode as LessonProgress['mode'],note:checkedString(p.note),code:checkedString(p.code),review:p.review };
+    if (p.reviewSchedule !== undefined) progress.reviewSchedule = validateReviewSchedule(p.reviewSchedule);
     if (p.quizAnswer !== undefined) {if (!Number.isInteger(p.quizAnswer) || Number(p.quizAnswer)<0 || Number(p.quizAnswer)>3) throw new Error('自测数据无效');progress.quizAnswer = p.quizAnswer as number;}
     if (p.quizPassed !== undefined) {if (typeof p.quizPassed !== 'boolean') throw new Error('自测状态无效');progress.quizPassed=p.quizPassed;}
     if (p.lastRun !== undefined) progress.lastRun=checkedString(p.lastRun);
