@@ -1,3 +1,16 @@
+# 阅读位置进度条验收
+
+2026-11-15，分支 `burn/feat-scroll-progress`。当前阅读模式的正文位置显示为模式栏下方的细进度条；不保存位置、不自动记录阅读或掌握，代码模式不显示。已检查当前开放 PR 的实际标题与说明，此功能不提供恢复位置、章节缩略图或导航。
+
+- `npm test -- --run src/reading-progress.test.ts`：15/15 通过，覆盖滚动边界、短正文、模式／章节切换、正文范围、窗口与内容尺寸变化、事件合并和卸载清理。
+- `npm test`：636 通过、38 失败；失败均为现有 Python 执行测试遇到 `spawnSync python3 EPERM`，涉及 `modern-llm`、`neural`、`transformer` 三个测试文件。
+- `npm run check`、`vite build`、`git diff --check`：通过。
+- `npm run build`：TypeScript 通过，工程打包阶段无法启动 Python，后续完整打包未执行。
+- 新增 `tests/reading-progress.spec.ts` 的 1440px／390px 浏览器用例；Playwright 启动在工程打包的 Python 检测阶段受阻。直接启动 Vite 也因 `listen EPERM` 无法监听端口，故未完成浏览器／视觉验收。
+- 未运行 Tauri／Cargo、交付打包或远程 CI；本次仅修改阅读界面，无部署。
+
+---
+
 # 0.3.8 试用报告七项修复验收
 
 2026-10-24。实际实现与逐项边界见 [REVIEW_FIXES_0_3_8](REVIEW_FIXES_0_3_8.md)。保留原站点／GitHub私有仓库、配色、数据版本和模型配置。新手路径不锁课，自评不冒充认证；观察草稿按章保存，三处选择器统一，连接状态区分检测、配置与错误。
