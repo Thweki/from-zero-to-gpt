@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { RotateCcw, FlaskConical } from 'lucide-react';
 import type { Lesson } from '../types';
 import { dot, norm, format } from '../math';
@@ -12,13 +12,16 @@ export function MathLab({lesson,values,onChange,onObserve}:Props) {
   const v={...labDefaults,...values};
   const set=(key:string,value:number)=>onChange({...v,[key]:value});
   const vectors=lesson.lab==='vector'||lesson.lab==='dot';
-  const functionY=(x:number)=>lesson.lab==='linear'?v.k*x+v.b:v.kind===1?2*x+1:v.kind===2?Math.abs(x):x*x;
+  const functionY=useCallback((x:number)=>lesson.lab==='linear'?v.k*x+v.b:v.kind===1?2*x+1:v.kind===2?Math.abs(x):x*x,[lesson.lab,v.k,v.b,v.kind]);
   const result=functionY(v.x);
   const viewport=functionPlotViewport(functionY,v.x);
   const unit=vectors?Math.min(26,130/Math.max(5,Math.abs(v.ax),Math.abs(v.ay),Math.abs(v.bx),Math.abs(v.by),Math.abs(v.ax+v.bx),Math.abs(v.ay+v.by))):viewport.unit;
   const originY=vectors?155:viewport.originY;
   const px=(x:number)=>320+x*unit, py=(y:number)=>originY-y*unit;
-  const points=Array.from({length:241},(_,i)=>{const x=-12+i/10;return `${px(x)},${py(functionY(x))}`}).join(' ');
+  // Moving the input marker does not change the curve unless the viewport changes.
+  const points=useMemo(()=>vectors?'':Array.from({length:241},(_,i)=>{
+    const x=-12+i/10;return `${320+x*unit},${originY-functionY(x)*unit}`;
+  }).join(' '),[vectors,functionY,unit,originY]);
   const a=[v.ax,v.ay],b=[v.bx,v.by];
   const product=dot(a,b);
   const equation=vectors
