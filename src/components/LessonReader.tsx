@@ -7,6 +7,7 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {LessonReadAloud} from './LessonReadAloud';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -18,7 +19,7 @@ type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<
 
 function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
-  return <MathContent>{sections.map((section,i)=>{
+  return <MathContent>{import.meta.env.VITE_EXPERIMENTAL_TTS==='true'&&<LessonReadAloud sections={sections}/>}{sections.map((section,i)=>{
     const formula=section.formula?.trim();
     const showFormula=Boolean(formula&&!shown.has(formula));
     if(formula)shown.add(formula);

@@ -1,0 +1,6 @@
+.lesson-read-aloud{margin:20px 0;padding:16px;border:1px solid var(--border);border-radius:10px;background:var(--panel);font-size:13px;color:var(--secondary)}
+.lesson-read-aloud strong{color:var(--text)}
+.lesson-read-aloud p{font-size:12px;line-height:1.8;margin:8px 0}
+.lesson-read-aloud label{display:block;margin:12px 0}
+.lesson-read-aloud select{display:block;width:100%;max-width:100%;min-height:44px;margin-top:6px;padding:8px;border:1px solid var(--control-border);border-radius:7px;background:var(--panel);color:var(--text);font:inherit}
+.lesson-read-aloud .button{min-height:44px;white-space:normal}
