@@ -20,7 +20,7 @@
     "test:delivery": "node --test scripts/delivery.test.mjs",
     "package:delivery": "node scripts/package-site.mjs && node scripts/package-delivery.mjs && node scripts/verify-delivery.mjs",
     "launch": "node scripts/launch.mjs",
-    "test:launcher": "node --test scripts/launcher.test.mjs",
+    "test:launcher": "node --test scripts/launcher.test.mjs scripts/launcher-phases.test.mjs",
     "test:launcher:smoke": "node --test scripts/launcher-smoke.test.mjs",
     "desktop:dev": "tauri dev",
     "desktop:build": "node scripts/desktop-build.mjs",

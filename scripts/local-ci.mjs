@@ -83,7 +83,7 @@ async function main(){
     const pythonExe=path.join(pythonEnv,process.platform==='win32'?'Scripts/python.exe':'bin/python');
     await run('python-dependencies',pythonExe,['-m','pip','install','-r','projects/tiny-gpt/requirements.txt',...(process.platform==='darwin'?[]:['--index-url','https://download.pytorch.org/whl/cpu'])]);
     for(const project of ['regression','micrograd','tiny-gpt'])await run(`python-${project}`,pythonExe,['-m','unittest','discover','-v'],{cwd:path.join(workspace,'projects',project)});
-    await run('launcher-clean-and-warm',process.execPath,['--test','scripts/launcher.test.mjs','scripts/launcher-smoke.test.mjs']);
+    await run('launcher-clean-and-warm',process.execPath,['--test','scripts/launcher.test.mjs','scripts/launcher-phases.test.mjs','scripts/launcher-smoke.test.mjs']);
     await run('chromium-install',process.execPath,[npm,'exec','--','playwright','install','chromium']);
     const port=await new Promise(resolve=>{const server=createServer();server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port));});});
     for(const shard of [1,2]){
