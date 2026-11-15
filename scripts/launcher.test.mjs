@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,writeFile,mkdir,rm,symlink,unlink} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,mkdir,rm,symlink,unlink,stat,utimes,rename} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -63,5 +63,60 @@ test('project ZIP works in a spaced path and excludes local credentials, caches 
     await packageProjects(root);
     const python=findPython();const result=runPython(python,['-I','-c','import json,sys,zipfile; print(json.dumps(zipfile.ZipFile(sys.argv[1]).namelist()))',join(root,'public','downloads','regression.zip')],{encoding:'utf8'});
     assert.equal(result.status,0);assert.deepEqual(new Set(JSON.parse(result.stdout)),new Set(['regression/README.md','regression/main.py']));
+  }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('unchanged project ZIPs are reused, including after excluded files change',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'from zero cached projects '));try{
+    const project=join(root,'projects','regression'),archive=join(root,'public','downloads','regression.zip');
+    await mkdir(project,{recursive:true});await writeFile(join(project,'main.py'),'print(5)');
+    await packageProjects(root);
+    const bytes=await readFile(archive),old=new Date('2001-01-01T00:00:00Z');
+    await utimes(archive,old,old);
+    await utimes(join(project,'main.py'),old,old);
+    await writeFile(join(project,'.env'),'local fixture');await writeFile(join(project,'model.pt'),'local weights');
+    await packageProjects(root);
+    assert.equal((await stat(archive)).mtimeMs,old.getTime(),'cache hit must not rewrite or recompress the ZIP');
+    assert.deepEqual(await readFile(archive),bytes);
+  }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('project ZIP cache tracks content, additions, renames and removals independently',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'from zero changed projects '));try{
+    for(const name of ['regression','micrograd']){
+      await mkdir(join(root,'projects',name),{recursive:true});
+      await writeFile(join(root,'projects',name,'main.py'),'print(5)');
+    }
+    await packageProjects(root);
+    const project=join(root,'projects','regression'),archive=join(root,'public','downloads','regression.zip');
+    const untouched=join(root,'public','downloads','micrograd.zip'),old=new Date('2001-01-01T00:00:00Z');
+    await utimes(untouched,old,old);
+    const python=findPython();
+    const contents=()=>{
+      const result=runPython(python,['-I','-c','import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); print(json.dumps({n:z.read(n).decode() for n in z.namelist()}))',archive],{encoding:'utf8'});
+      assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);
+    };
+    const original=await stat(join(project,'main.py'));
+    await writeFile(join(project,'main.py'),'print(6)');
+    await utimes(join(project,'main.py'),original.atime,original.mtime);
+    await packageProjects(root);assert.deepEqual(contents(),{'regression/main.py':'print(6)'});
+    await writeFile(join(project,'README.md'),'Study');
+    await packageProjects(root);assert.deepEqual(contents(),{'regression/main.py':'print(6)','regression/README.md':'Study'});
+    await rename(join(project,'main.py'),join(project,'example.py'));
+    await packageProjects(root);assert.deepEqual(contents(),{'regression/example.py':'print(6)','regression/README.md':'Study'});
+    await unlink(join(project,'README.md'));
+    await packageProjects(root);assert.deepEqual(contents(),{'regression/example.py':'print(6)'});
+    assert.equal((await stat(untouched)).mtimeMs,old.getTime(),'changing one project must not repack another');
+  }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('project ZIP cache rebuilds missing and malformed archives',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'from zero restored projects '));try{
+    await mkdir(join(root,'projects','regression'),{recursive:true});
+    await writeFile(join(root,'projects','regression','main.py'),'print(5)');
+    const archive=join(root,'public','downloads','regression.zip');
+    await packageProjects(root);const expected=await readFile(archive);
+    await unlink(archive);await packageProjects(root);assert.deepEqual(await readFile(archive),expected);
+    await writeFile(archive,'interrupted archive');await packageProjects(root);assert.deepEqual(await readFile(archive),expected);
   }finally{await rm(root,{recursive:true,force:true});}
 });
