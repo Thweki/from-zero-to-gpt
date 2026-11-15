@@ -4,7 +4,8 @@ import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
 import {lessons,lessonById} from '../data/lessons';
 import {LessonLab} from './LessonLab';
 import {CodeLab} from './CodeLab';
-import {Formula,MathContent} from './Formula';
+import {MathContent} from './Formula';
+import {LessonFormula} from './LessonFormula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
 
@@ -25,9 +26,9 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
     return <section className="prose-section" key={section.title}>
       <h2><span>{String(i+1).padStart(2,'0')}</span>{section.title}</h2>
       {section.paragraphs.map((paragraph,j)=><p key={j}>{paragraph}</p>)}
-      {showFormula&&<div className="formula-card"><Formula>{formula!}</Formula>{formula===mainFormula?.trim()&&<p>{formulaCaption}</p>}</div>}
+      {showFormula&&<div className="formula-card"><LessonFormula source={formula!}/>{formula===mainFormula?.trim()&&<p>{formulaCaption}</p>}</div>}
     </section>;
-  })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
+  })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><LessonFormula source={mainFormula}/><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
 export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
