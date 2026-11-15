@@ -1,0 +1,8 @@
+.lesson-checklist{margin:24px 0;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.lesson-checklist summary{min-height:44px;cursor:pointer;line-height:1.8;font-weight:600}
+.lesson-checklist summary span{display:inline-block;margin-left:12px;font-size:13px;font-weight:400;color:var(--secondary)}
+.lesson-checklist p,.lesson-checklist small{font-size:13px;line-height:1.8;color:var(--secondary)}
+.lesson-checklist fieldset{min-width:0;margin:16px 0;padding:0;border:0}
+.lesson-checklist legend{font-weight:600;font-size:14px;margin-bottom:8px}
+.lesson-checklist label{display:flex;align-items:flex-start;gap:10px;min-height:44px;padding:10px 0;font-size:14px;line-height:1.7;cursor:pointer;overflow-wrap:anywhere}
+.lesson-checklist input{flex-shrink:0;width:18px;height:18px;margin-top:3px;accent-color:var(--accent-dark)}

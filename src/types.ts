@@ -43,6 +43,7 @@ export interface LessonProgress {
   tutorDraft?: string;
   tutorSelection?: TutorSelection;
   readCompleted?: boolean;
+  completedGoals?: string[];
   experimented?: boolean;
   codePassed?: boolean;
   lastVisited?: string;

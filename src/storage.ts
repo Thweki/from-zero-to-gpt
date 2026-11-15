@@ -28,6 +28,11 @@ export function validateImport(value: unknown): LearningState {
     if (p.quizAnswer !== undefined) {if (!Number.isInteger(p.quizAnswer) || Number(p.quizAnswer)<0 || Number(p.quizAnswer)>3) throw new Error('自测数据无效');progress.quizAnswer = p.quizAnswer as number;}
     if (p.quizPassed !== undefined) {if (typeof p.quizPassed !== 'boolean') throw new Error('自测状态无效');progress.quizPassed=p.quizPassed;}
     if (p.lastRun !== undefined) progress.lastRun=checkedString(p.lastRun);
+    if(p.completedGoals!==undefined){
+      if(!Array.isArray(p.completedGoals)||p.completedGoals.length>100)throw new Error('学习目标清单无效');
+      progress.completedGoals=p.completedGoals.map(goal=>checkedString(goal,1000));
+      if(progress.completedGoals.some(goal=>!goal.trim())||new Set(progress.completedGoals).size!==progress.completedGoals.length)throw new Error('学习目标清单无效');
+    }
     for(const field of ['readCompleted','experimented','codePassed'] as const){if(p[field]!==undefined){if(typeof p[field]!=='boolean')throw new Error('学习活动状态无效');progress[field]=p[field];}}
     if(p.lastVisited!==undefined){if(typeof p.lastVisited!=='string'||!Number.isFinite(Date.parse(p.lastVisited)))throw new Error('章节访问时间无效');progress.lastVisited=p.lastVisited;}
     if(p.observationDraft!==undefined)progress.observationDraft=checkedString(p.observationDraft,4000);
