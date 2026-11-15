@@ -7,38 +7,41 @@ async function invokeNative<T>(command:string,args?:Record<string,unknown>):Prom
   const {invoke}=await import('@tauri-apps/api/core');
   return invoke<T>(command,args);
 }
-async function request<T>(operation:''|ServiceOperation,body?:unknown):Promise<T>{
+function managementHeaders(accessCode:string):Record<string,string>{
+  return accessCode?{Authorization:`Bearer ${accessCode}`} : {};
+}
+async function request<T>(operation:''|ServiceOperation,body?:unknown,accessCode=''):Promise<T>{
   const url=endpoint(operation);
   if(!url)throw new Error('此部署不允许从浏览器管理模型服务。');
-  const response=await fetch(url,{method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
+  const response=await fetch(url,{method:body===undefined?'GET':'POST',headers:{...managementHeaders(accessCode),...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'服务管理暂时不可用。');
   return data as T;
 }
-export function providerServicesSnapshot():Promise<ProviderServiceSnapshot>{
+export function providerServicesSnapshot(accessCode=''):Promise<ProviderServiceSnapshot>{
   if(isTauriRuntime&&!endpoint(''))return invokeNative('provider_services_snapshot');
-  return request('');
+  return request('',undefined,accessCode);
 }
-export function saveProviderService(service:ProviderServiceDraft,secret?:string):Promise<ProviderServiceSnapshot>{
+export function saveProviderService(service:ProviderServiceDraft,secret?:string,accessCode=''):Promise<ProviderServiceSnapshot>{
   if(isTauriRuntime&&!endpoint('save'))return invokeNative('provider_service_save',{service,secret});
-  return request('save',{service,secret});
+  return request('save',{service,secret},accessCode);
 }
-export function activateProviderService(id:string):Promise<ProviderServiceSnapshot>{
+export function activateProviderService(id:string,accessCode=''):Promise<ProviderServiceSnapshot>{
   if(isTauriRuntime&&!endpoint('activate'))return invokeNative('provider_service_activate',{id});
-  return request('activate',{id});
+  return request('activate',{id},accessCode);
 }
-export function removeProviderService(id:string):Promise<ProviderServiceSnapshot>{
+export function removeProviderService(id:string,accessCode=''):Promise<ProviderServiceSnapshot>{
   if(isTauriRuntime&&!endpoint('remove'))return invokeNative('provider_service_remove',{id});
-  return request('remove',{id});
+  return request('remove',{id},accessCode);
 }
 export function nativeTutorStatus(){return invokeNative<Record<string,unknown>>('native_tutor_status');}
 export function nativeTutorChat(payload:unknown){return invokeNative<{answer:string}>('native_tutor_chat',{payload});}
 export function nativeTutorCancel(sessionId:string){return invokeNative<void>('native_tutor_cancel',{sessionId});}
 
-export async function providerEngineRequest<T>(action:string,data:Record<string,unknown>={}):Promise<T>{
+export async function providerEngineRequest<T>(action:string,data:Record<string,unknown>={},accessCode=''):Promise<T>{
   if(isTauriRuntime&&!endpoint(''))return invokeNative('provider_engine_request',{action,data});
   const url=tutorApiUrl('services/engine');if(!url)throw new Error('此部署不支持账号连接。请使用桌面版或本地服务。');
-  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,data}),cache:'no-store'});
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...managementHeaders(accessCode)},body:JSON.stringify({action,data}),cache:'no-store'});
   const result=await response.json();if(!response.ok)throw new Error(result.error||'模型服务操作失败。');return result;
 }
 export async function openProviderUrl(url:string){
