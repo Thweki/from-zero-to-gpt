@@ -21,6 +21,10 @@
 
 失败会阻止最终交付。PR可以生成候选包以检查构建，但不会生成main的verified产物，更不会部署生产。导师浏览器测试使用模拟HTTP；CI无需付费模型API，也不访问学习者的真实数据。
 
+`npm run check` 和 `npm run build` 共用 `tsconfig.json`，严格类型检查覆盖 `src/`、`server/`、`scripts/*.ts` 及根目录的 `*.config.ts`，包括 Worker／provider-worker 入口、原生教材生成器与 Vite／Vitest／Playwright 配置。打包器的转译成功不能替代类型检查；`src/tooling-types.test.ts` 在内存中向这些入口注入类型错误，验证它们确实会被编译器检查。Playwright 用例本身仍由浏览器测试执行，不在这次扩展范围内。
+
+2026-11-15 本地验证：新增类型检查回归在旧配置下失败、扩展后通过，`npm run check` 通过；完整 Vitest 为 612 通过、38 失败，失败均为现有课程测试的 `spawnSync python3 EPERM`。delivery／release／updater／tauri 脚本测试共 17 项通过，local-ci 为 1 通过、1 因 `spawnSync git EPERM` 失败；直接执行 Python regression／micrograd 共 16 项通过。完整构建在项目 ZIP 打包时因子进程无法检测 Python 而停止。使用现有依赖，未重新安装；未运行浏览器、Cargo、完整本地 CI 或 tiny-gpt（缺少 PyTorch），`actionlint`／`shellcheck` 不可用。本地结果不代表 GitHub Actions 已通过。
+
 工作流配置和本地命令验证不等于真实GitHub Actions验收。首次接入推送会触发main上的真实运行，必须检查各job、产物及日志；实际推送SHA、Actions运行URL和结果以工作区GitHub交接回执为准，不能因只读权限信息就声称运行通过。
 
 本轮本地已通过严格类型、509项Vitest、7项交付校验测试、83章CPython验收、完整127项浏览器测试（0失败／跳过／flaky，约8.2分钟）、三个Python工程6/10/23项测试及生产构建。完整浏览器输出为 `artifacts/playwright-results.json`，详细说明见 [TEST_REPORT](TEST_REPORT.md)。归档与最终源码提交以工作区GitHub准备回执为准；这些本地结果不冒充真实Actions。
