@@ -1,0 +1,11 @@
+.reading-section-heading{display:flex;align-items:flex-start;gap:12px}
+.reading-section-heading h2{flex:1;min-width:0;scroll-margin-top:calc(64px + var(--lesson-tools-height,58px) + 12px)}
+.section-bookmark-button{flex-shrink:0;min-width:44px;min-height:44px}
+.section-bookmarks{margin:24px 0 32px;padding:20px;border:1px solid var(--border);border-radius:12px}
+.section-bookmarks h2{display:flex;align-items:center;gap:8px;font-size:18px}
+.section-bookmarks ul{list-style:none;padding:0;margin:0}
+.section-bookmarks li{display:flex;align-items:center;gap:12px;padding:12px 0}
+.section-bookmarks li+li{border-top:1px solid var(--border)}
+.section-bookmarks a{flex:1;min-width:0;overflow-wrap:anywhere}
+.section-bookmarks small{display:block;color:var(--secondary);margin-top:4px}
+.section-bookmarks .icon-button{flex-shrink:0;min-width:44px;min-height:44px}

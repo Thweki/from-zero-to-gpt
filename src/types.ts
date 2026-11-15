@@ -29,12 +29,17 @@ export interface Lesson {
   quiz: { question: string; options: string[]; correct: number; explanation: string; hint: string };
   references: { title: string; url: string; note: string }[];
 }
+export interface SectionBookmark {
+  mode: 'intuition' | 'math' | 'deep';
+  title: string;
+}
 export interface LessonProgress {
   status: LessonStatus;
   mode: ViewMode;
   note: string;
   code: string;
   review: boolean;
+  bookmarks?: SectionBookmark[];
   quizAnswer?: number;
   quizPassed?: boolean;
   labValues?: Record<string, number>;

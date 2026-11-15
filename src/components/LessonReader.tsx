@@ -1,12 +1,14 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
-import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
+import type {Lesson,LessonId,LessonProgress,ViewMode,SectionBookmark} from '../types';
 import {lessons,lessonById} from '../data/lessons';
 import {LessonLab} from './LessonLab';
 import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {SectionBookmarkButton} from './SectionBookmarks';
+import {bookmarkSectionId} from '../bookmarks';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -14,27 +16,27 @@ const modes=[
   {id:'code',label:'代码实现',icon:Code2},
   {id:'deep',label:'深入研究',icon:BookOpen},
 ] as const;
-type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
+type Props={bookmark?:SectionBookmark;lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
 
-function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
+function ReadingSections({sections,mode,bookmarks,onBookmarks,formulaCaption,mainFormula}:{sections:Lesson['math'];mode:SectionBookmark['mode'];bookmarks:SectionBookmark[];onBookmarks:(bookmarks:SectionBookmark[])=>void;formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
   return <MathContent>{sections.map((section,i)=>{
     const formula=section.formula?.trim();
     const showFormula=Boolean(formula&&!shown.has(formula));
     if(formula)shown.add(formula);
     return <section className="prose-section" key={section.title}>
-      <h2><span>{String(i+1).padStart(2,'0')}</span>{section.title}</h2>
+      <div className="reading-section-heading"><h2 id={`reading-${mode}-${i}`} tabIndex={-1}><span>{String(i+1).padStart(2,'0')}</span>{section.title}</h2><SectionBookmarkButton bookmark={{mode,title:section.title}} bookmarks={bookmarks} onChange={onBookmarks}/></div>
       {section.paragraphs.map((paragraph,j)=><p key={j}>{paragraph}</p>)}
       {showFormula&&<div className="formula-card"><Formula>{formula!}</Formula>{formula===mainFormula?.trim()&&<p>{formulaCaption}</p>}</div>}
     </section>;
   })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
-export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
+export function LessonReader({bookmark,lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
-  const [pendingSection,setPendingSection]=useState<LessonSection|null>(null);
+  const [pendingSection,setPendingSection]=useState<string|null>(null);
   const toolsRef=useRef<HTMLDivElement>(null);
   useLayoutEffect(()=>{
     const tools=toolsRef.current;
@@ -47,12 +49,19 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const goToSection=(section:LessonSection)=>{
     if(section==='code')patch({mode:'code'});
     else if(section==='experiment'||section==='quiz')patch({mode:'intuition'});
-    setPendingSection(section);
+    setPendingSection({reading:'lesson-mode-panel',experiment:'lesson-experiment',code:'lesson-code',quiz:'lesson-quiz'}[section]);
   };
   useEffect(()=>{
+    setPendingSection(null);
+    if(!bookmark)return;
+    const id=bookmarkSectionId(lesson,bookmark);
+    if(!id)return;
+    patch({mode:bookmark.mode});
+    setPendingSection(id);
+  },[lesson.id,bookmark?.mode,bookmark?.title]);
+  useEffect(()=>{
     if(!pendingSection)return;
-    const id={reading:'lesson-mode-panel',experiment:'lesson-experiment',code:'lesson-code',quiz:'lesson-quiz'}[pendingSection];
-    const target=document.getElementById(id);
+    const target=document.getElementById(pendingSection);
     if(!target)return;
     const article=target.closest('article')!;
     let frame=0,cancelled=false;
@@ -85,7 +94,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
     <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
     <section className="recommended-path" aria-label="新手推荐路径">
-      <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
+      <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('lesson-mode-panel');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
       <details className="recommended-path-details"><summary>如何使用这条路径</summary><p>{pathDone?'现在可以停下，也可以选一项扩展继续探索。':'数学推导、代码实现和深入研究是可选扩展，随时可以跳转。'}用时仅作参考，不计时、不设期限。</p></details>
     </section>
     <div className="lesson-sticky-tools" ref={toolsRef}>
@@ -105,7 +114,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
     <div id="lesson-mode-panel" tabIndex={-1} role="tabpanel" aria-labelledby={`tab-${progress.mode}`} data-mode={progress.mode}>
       {progress.mode==='intuition'&&<>
         <div className="problem-callout"><span className="mini-label">这个概念解决什么问题？</span><p>{lesson.problem}</p></div>
-        <ReadingSections sections={lesson.intuition}/>
+        <ReadingSections sections={lesson.intuition} mode="intuition" bookmarks={progress.bookmarks||[]} onBookmarks={bookmarks=>patch({bookmarks})}/>
         <div className="reading-next"><button className="text-button" onClick={()=>{patch({readCompleted:true});goToSection('experiment');}}>{progress.readCompleted?'已记录阅读，继续实验':'我已读完，去做实验'}<ArrowRight size={14}/></button></div>
         <div id="lesson-experiment" tabIndex={-1}><LessonLab lesson={lesson} values={progress.labValues||{}} onChange={labValues=>patch({labValues,experimented:true})} onObserve={onObserve}/></div>
         <details className="reading-disclosure"><summary>学习目标与容易混淆的地方</summary>
@@ -120,14 +129,14 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
           {(feedback||hintVisible)&&<div className={`quiz-feedback ${feedback&&answer===lesson.quiz.correct?'correct':''}`} role="status">{feedback&&<strong>{answer===lesson.quiz.correct?'理解正确。':'再想一想，试着用上面的实验验证。'}</strong>}{feedback&&answer===lesson.quiz.correct&&<p>{lesson.quiz.explanation}</p>}{hintVisible&&<p className="quiz-hint">{lesson.quiz.hint}</p>}</div>}
         </section>
       </>}
-      {progress.mode==='math'&&<ReadingSections sections={lesson.math} mainFormula={lesson.formula} formulaCaption={lesson.formulaCaption}/>}
+      {progress.mode==='math'&&<ReadingSections sections={lesson.math} mode="math" bookmarks={progress.bookmarks||[]} onBookmarks={bookmarks=>patch({bookmarks})} mainFormula={lesson.formula} formulaCaption={lesson.formulaCaption}/>}
       {progress.mode==='code'&&<>
         <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p></section>
         {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前编辑器中的代码。</p>}
         <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
       </>}
       {progress.mode==='deep'&&<>
-        <ReadingSections sections={lesson.deep}/>
+        <ReadingSections sections={lesson.deep} mode="deep" bookmarks={progress.bookmarks||[]} onBookmarks={bookmarks=>patch({bookmarks})}/>
         <section className="related-section"><h2>先修知识与延伸阅读</h2>
           {lesson.prerequisites.length>0&&<div className="prerequisite-list">{lesson.prerequisites.map(id=><button className="button secondary compact" key={id} onClick={()=>navigate(id)}><RotateCcw size={13}/>{lessonById[id].title}</button>)}</div>}
           <div className="references">{lesson.references.map(reference=><a key={reference.url} href={reference.url} target="_blank" rel="noreferrer"><span>{reference.title}<small>{reference.note}</small></span><ExternalLink size={14}/></a>)}</div>

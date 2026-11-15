@@ -3,6 +3,7 @@ import type { LearningState, LessonId, LessonProgress } from './types';
 export { lessonIds } from './data/lesson-ids';
 import { lessonIds } from './data/lesson-ids';
 import {validateTutorSelection} from './tutor-selection';
+import {validateBookmarks} from './bookmarks';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
 export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
 const database = () => openDB('from-zero-to-gpt', 1, {upgrade(db) {db.createObjectStore('learning');}});
@@ -25,6 +26,7 @@ export function validateImport(value: unknown): LearningState {
   for (const [key, p] of Object.entries(value.progress)) {
     if (!lessonIds.includes(key as LessonId) || !isObject(p) || !['new','learning','mastered'].includes(p.status as string) || !['intuition','math','code','deep'].includes(p.mode as string) || typeof p.review !== 'boolean') throw new Error('章节进度格式无效');
     const progress: LessonProgress = { status:p.status as LessonProgress['status'],mode:p.mode as LessonProgress['mode'],note:checkedString(p.note),code:checkedString(p.code),review:p.review };
+    if (p.bookmarks !== undefined) progress.bookmarks = validateBookmarks(p.bookmarks);
     if (p.quizAnswer !== undefined) {if (!Number.isInteger(p.quizAnswer) || Number(p.quizAnswer)<0 || Number(p.quizAnswer)>3) throw new Error('自测数据无效');progress.quizAnswer = p.quizAnswer as number;}
     if (p.quizPassed !== undefined) {if (typeof p.quizPassed !== 'boolean') throw new Error('自测状态无效');progress.quizPassed=p.quizPassed;}
     if (p.lastRun !== undefined) progress.lastRun=checkedString(p.lastRun);
