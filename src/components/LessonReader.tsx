@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
 import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
@@ -14,7 +15,7 @@ const modes=[
   {id:'code',label:'代码实现',icon:Code2},
   {id:'deep',label:'深入研究',icon:BookOpen},
 ] as const;
-type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
+type Props={focusAction?:ReactNode;lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
 
 function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
@@ -30,7 +31,7 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
   })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
-export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
+export function LessonReader({focusAction,lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
@@ -82,7 +83,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
   return <MathContent><article className="page-content lesson-page">
     <div className="lesson-kicker"><span>阶段 0{stage}</span><span>{lesson.number}</span><span>{lesson.english}</span></div>
-    <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
+    <div className="lesson-title-row"><h1>{lesson.title}</h1>{focusAction}<button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
     <section className="recommended-path" aria-label="新手推荐路径">
       <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
