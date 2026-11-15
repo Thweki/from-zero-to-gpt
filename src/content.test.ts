@@ -176,7 +176,7 @@ describe('导出、导入与本地学习数据', () => {
 
   it('第一次打开得到无压力、未开始的初始状态', async () => {
     const state = await readState();
-    expect(state).toMatchObject({ version: 1, theme: 'light', lastLesson: 'functions', progress: {} });
+    expect(state).toMatchObject({ version: 1, theme: 'system', lastLesson: 'functions', progress: {} });
     expect(state.checkpoint).toBeUndefined();
     expect(emptyProgress()).toMatchObject({ status: 'new', review: false, note: '', code: '' });
   });
@@ -188,6 +188,14 @@ describe('导出、导入与本地学习数据', () => {
     source.progress.linear!.note = '已验证负数；下一步学习向量。';
     source.lastLesson = 'vectors';
     await writeState(source);
+    expect(await readState()).toEqual(source);
+  });
+
+  it.each(['system', 'light', 'dark'] as const)('外观偏好 %s 通过备份和 IndexedDB 保留，兼容旧的固定外观', async theme => {
+    const source = { ...populatedState(), theme };
+    const imported = validateImport(JSON.parse(JSON.stringify(source)));
+    expect(imported).toEqual(source);
+    await writeState(imported);
     expect(await readState()).toEqual(source);
   });
 

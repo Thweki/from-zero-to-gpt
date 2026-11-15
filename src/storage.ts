@@ -4,7 +4,7 @@ export { lessonIds } from './data/lesson-ids';
 import { lessonIds } from './data/lesson-ids';
 import {validateTutorSelection} from './tutor-selection';
 export const emptyProgress = (): LessonProgress => ({ status: 'new', mode: 'intuition', note: '', code: '', review: false });
-export const initialState = (): LearningState => ({version:1,theme:'light',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
+export const initialState = (): LearningState => ({version:1,theme:'system',lastLesson:'functions',progress:{},updatedAt:new Date().toISOString()});
 const database = () => openDB('from-zero-to-gpt', 1, {upgrade(db) {db.createObjectStore('learning');}});
 export async function readState(): Promise<LearningState> {
   const db = await database();
@@ -19,7 +19,7 @@ const isParameter=(key:string)=>parameterKeys.has(key)||/^(ml|tf|gpt)[A-Za-z0-9_
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 function checkedString(v: unknown, max = 100000): string {if(typeof v !== 'string' || v.length > max) throw new Error('学习数据中的文字格式无效或过长'); return v;}
 export function validateImport(value: unknown): LearningState {
-  if (!isObject(value) || value.version !== 1 || !lessonIds.includes(value.lastLesson as LessonId) || !['light','dark'].includes(value.theme as string) || !isObject(value.progress)) throw new Error('不支持的学习数据格式，请选择本平台导出的 JSON 文件');
+  if (!isObject(value) || value.version !== 1 || !lessonIds.includes(value.lastLesson as LessonId) || !['system','light','dark'].includes(value.theme as string) || !isObject(value.progress)) throw new Error('不支持的学习数据格式，请选择本平台导出的 JSON 文件');
   if (typeof value.updatedAt !== 'string' || !Number.isFinite(Date.parse(value.updatedAt))) throw new Error('学习数据时间无效');
   const result = initialState(); result.theme = value.theme as LearningState['theme']; result.lastLesson = value.lastLesson as LessonId; result.updatedAt = value.updatedAt;
   for (const [key, p] of Object.entries(value.progress)) {
