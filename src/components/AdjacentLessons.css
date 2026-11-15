@@ -1,0 +1,11 @@
+.adjacent-lessons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0}
+.adjacent-lessons>button,.adjacent-lessons>a{display:flex;align-items:center;gap:10px;min-width:0;min-height:44px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--accent-dark);text-align:left;line-height:1.6}
+.adjacent-lessons>button:hover,.adjacent-lessons>a:hover{background:var(--accent-soft)}
+.adjacent-lessons>:last-child{justify-content:flex-end;text-align:right}
+.adjacent-lessons span{min-width:0;overflow-wrap:anywhere}
+.adjacent-lessons small{display:block;font-size:12px;color:var(--secondary)}
+.adjacent-lessons strong{display:block;font-size:14px;font-weight:600}
+.adjacent-lessons .sequence-boundary{align-self:center;font-size:13px;color:var(--secondary)}
+.lesson-footer{margin-top:20px;padding-top:1px;border-top:1px solid var(--border)}
+.lesson-footer>.text-button{min-height:44px}
+@media(max-width:600px){.adjacent-lessons{gap:8px}.adjacent-lessons>button,.adjacent-lessons>a{padding:10px;gap:6px;font-size:13px}.adjacent-lessons strong{font-size:13px}}

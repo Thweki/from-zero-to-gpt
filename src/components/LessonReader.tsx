@@ -1,12 +1,13 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
 import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
-import {lessons,lessonById} from '../data/lessons';
+import {lessonById} from '../data/lessons';
 import {LessonLab} from './LessonLab';
 import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {AdjacentLessons} from './AdjacentLessons';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -14,7 +15,7 @@ const modes=[
   {id:'code',label:'代码实现',icon:Code2},
   {id:'deep',label:'深入研究',icon:BookOpen},
 ] as const;
-type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
+type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId,focusHeading?:boolean)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
 
 function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
@@ -75,15 +76,15 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
     align();
     return()=>{cancelled=true;cancelAnimationFrame(frame);observer.disconnect();};
   },[pendingSection,progress.mode]);
-  const next=lessons[lessons.indexOf(lesson)+1];
   const changeMode=(mode:ViewMode)=>{setPendingSection(null);patch({mode});};
   const hintVisible=hint||(feedback&&answer!==lesson.quiz.correct);
   const pathDone=progress.readCompleted&&progress.experimented&&progress.quizPassed;
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
   return <MathContent><article className="page-content lesson-page">
     <div className="lesson-kicker"><span>阶段 0{stage}</span><span>{lesson.number}</span><span>{lesson.english}</span></div>
-    <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
+    <div className="lesson-title-row"><h1 tabIndex={-1}>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
+    <AdjacentLessons lessonId={lesson.id} position="顶部" onNavigate={id=>navigate(id,true)}/>
     <section className="recommended-path" aria-label="新手推荐路径">
       <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
       <details className="recommended-path-details"><summary>如何使用这条路径</summary><p>{pathDone?'现在可以停下，也可以选一项扩展继续探索。':'数学推导、代码实现和深入研究是可选扩展，随时可以跳转。'}用时仅作参考，不计时、不设期限。</p></details>
@@ -137,6 +138,6 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
     </div>
     <section className="learning-evidence" aria-label="本章学习记录"><p>这些记录相互独立，不是必须做完的清单。</p><dl><div><dt>阅读（自记）</dt><dd>{progress.readCompleted?'已阅读':'未记录'}</dd></div><div><dt>自测</dt><dd>{progress.quizPassed?'已验证':'待验证'}</dd></div><div><dt>当前代码</dt><dd>{progress.codePassed?'验收通过':'未验证'}</dd></div><div><dt>掌握（自评）</dt><dd>{progress.status==='mastered'?'自评已掌握':'尚未自评'}</dd></div></dl></section>
     <div className="lesson-completion"><div><strong>{progress.status==='mastered'?'你已将本章自评为掌握。':'能用自己的话解释了吗？'}</strong><p>这是你的判断，不代表系统认证；无需完成所有扩展。</p></div><button className="button secondary" onClick={()=>patch({status:progress.status==='mastered'?'learning':'mastered'})}><Check size={16}/>{progress.status==='mastered'?'取消掌握自评':'自评为已掌握'}</button></div>
-    <div className="lesson-pagination"><button className="text-button" onClick={onCheckpoint}><Pause size={14}/>保存思路，今天到这里</button>{next?<button className="button primary next-lesson" onClick={()=>navigate(next.id)}>下一步 · {next.title}<ArrowRight size={16}/></button>:<a className="button primary" href="#/map">回到学习路线<ArrowRight size={16}/></a>}</div>
+    <div className="lesson-footer"><AdjacentLessons lessonId={lesson.id} position="底部" onNavigate={id=>navigate(id,true)}/><button className="text-button" onClick={onCheckpoint}><Pause size={14}/>保存思路，今天到这里</button></div>
   </article></MathContent>;
 }
