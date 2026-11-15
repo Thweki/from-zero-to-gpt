@@ -14,7 +14,7 @@ const modes=[
   {id:'code',label:'代码实现',icon:Code2},
   {id:'deep',label:'深入研究',icon:BookOpen},
 ] as const;
-type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
+type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void;entrySection?:LessonSection};
 
 function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
@@ -30,11 +30,12 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
   })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
-export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
+export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve,entrySection}:Props){
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
   const [pendingSection,setPendingSection]=useState<LessonSection|null>(null);
+  useEffect(()=>{setPendingSection(entrySection??null);},[entrySection]);
   const toolsRef=useRef<HTMLDivElement>(null);
   useLayoutEffect(()=>{
     const tools=toolsRef.current;
