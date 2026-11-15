@@ -7,6 +7,7 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {PracticeQuiz} from './PracticeQuiz';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -135,6 +136,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         <ProjectDownload stage={stage} lessonId={lesson.id}/>
       </>}
     </div>
+    <PracticeQuiz lesson={lesson} navigate={navigate}/>
     <section className="learning-evidence" aria-label="本章学习记录"><p>这些记录相互独立，不是必须做完的清单。</p><dl><div><dt>阅读（自记）</dt><dd>{progress.readCompleted?'已阅读':'未记录'}</dd></div><div><dt>自测</dt><dd>{progress.quizPassed?'已验证':'待验证'}</dd></div><div><dt>当前代码</dt><dd>{progress.codePassed?'验收通过':'未验证'}</dd></div><div><dt>掌握（自评）</dt><dd>{progress.status==='mastered'?'自评已掌握':'尚未自评'}</dd></div></dl></section>
     <div className="lesson-completion"><div><strong>{progress.status==='mastered'?'你已将本章自评为掌握。':'能用自己的话解释了吗？'}</strong><p>这是你的判断，不代表系统认证；无需完成所有扩展。</p></div><button className="button secondary" onClick={()=>patch({status:progress.status==='mastered'?'learning':'mastered'})}><Check size={16}/>{progress.status==='mastered'?'取消掌握自评':'自评为已掌握'}</button></div>
     <div className="lesson-pagination"><button className="text-button" onClick={onCheckpoint}><Pause size={14}/>保存思路，今天到这里</button>{next?<button className="button primary next-lesson" onClick={()=>navigate(next.id)}>下一步 · {next.title}<ArrowRight size={16}/></button>:<a className="button primary" href="#/map">回到学习路线<ArrowRight size={16}/></a>}</div>

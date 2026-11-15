@@ -198,3 +198,11 @@ tiny GPT：CPU PyTorch `2.14.1+cpu`，62,592参数，默认250步实测训练 `3
 ## 限制
 
 移动验收是Chromium模拟，不是真实iOS/Safari；未完成全面WCAG、屏幕阅读器、Firefox或多标签并发数据验收。真实小模型不代表通用语言能力。0.3.0已补齐本地模型整合；尚无分页缓存、整数GEMM、QLoRA或GPU吞吐验收。站点托管结果和版本以发布回执为准；仅静态部署不含导师API。
+
+## 随堂小测分支验证（2026-11-15）
+
+- `src/practice-quiz.test.ts` 与 `src/practice-quiz-ui.test.ts`：18 项通过，覆盖全课程选题边界、完整作答后评分、错题重做、离开清除、解释模式切换、显式下载及失败反馈、原有自测与掌握记录隔离。在临时目录换回原版 `LessonReader` 后，新增集成测试按预期失败。
+- `npm test`：677 项中 639 项通过；38 项失败均为已有 `modern-llm`、`neural`、`transformer` 测试调用 Python 时的 `spawnSync python3 EPERM`，不是小测断言失败。
+- `npm run check`、`npm exec -- vite build`、`git diff --check` 通过。
+- `npm run build` 在 Python 工程打包阶段受限，未完成完整产物打包。Playwright 已识别 `tests/practice-quiz.spec.ts` 的 2 项测试，但常规启动被同一 Python 限制阻断；独立 Vite 服务也因 `listen EPERM` 无法绑定本地端口。因此未执行真实浏览器、下载行为和窄屏视觉验收，不能将 DOM 测试当作这些验收的替代。
+- 本次未运行原生桌面/Cargo、发布、部署或外部 AI 服务；功能只复用本地题库，不需要这些服务。
