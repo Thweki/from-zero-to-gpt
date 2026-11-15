@@ -48,6 +48,7 @@ export interface LessonProgress {
   lastVisited?: string;
   observationDraft?: string;
   observationSnapshot?: string;
+  glossary?: {open: boolean; termId: string};
 }
 export interface Checkpoint {
   lessonId: LessonId;

@@ -1,0 +1,14 @@
+.lesson-glossary{flex-shrink:0}
+.glossary-toggle{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:8px;border-radius:8px;font-size:12px;color:var(--secondary)}
+.glossary-toggle:hover,.glossary-toggle[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-dark)}
+.glossary-panel{position:absolute;right:0;top:calc(100% + 8px);width:min(440px,100%);max-height:min(480px,60dvh);overflow-y:auto;overscroll-behavior:contain;padding:16px;border:1px solid var(--control-border);border-radius:12px;background:var(--panel);box-shadow:var(--shadow);color:var(--text)}
+.glossary-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.glossary-panel label{display:block;font-size:12px;color:var(--secondary);margin-bottom:6px}
+.glossary-panel select{width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid var(--control-border);border-radius:8px;background:var(--panel);color:var(--text);font-size:16px}
+.glossary-panel h2{font-size:18px;margin:18px 0 10px;overflow-wrap:anywhere}
+.glossary-panel h2 small{display:block;font-size:13px;font-weight:400;color:var(--secondary);margin-top:4px}
+.glossary-panel p{font-size:14px;line-height:1.9;overflow-wrap:anywhere}
+.glossary-example{margin-top:12px;padding:10px;background:var(--panel-soft);border-radius:8px}
+.glossary-example b{display:block;color:var(--accent-dark);font-size:12px}
+.glossary-panel .glossary-footnote{margin-top:14px;font-size:12px;color:var(--secondary)}
+@media(max-width:600px){.glossary-toggle{width:44px;padding:4px;font-size:11px}.glossary-toggle svg{display:none}.glossary-panel{padding:12px}}

@@ -7,6 +7,7 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {LessonGlossary} from './LessonGlossary';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -100,6 +101,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         const tab=document.getElementById(`tab-${modes[n].id}`);tab?.focus({preventScroll:true});tab?.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'});
       }}>{modes.map(mode=><button role="tab" tabIndex={progress.mode===mode.id?0:-1} aria-selected={progress.mode===mode.id} aria-controls="lesson-mode-panel" id={`tab-${mode.id}`} key={mode.id} onClick={()=>changeMode(mode.id)}><mode.icon size={15}/>{mode.label}</button>)}</div>
       <LessonNavigation onGo={goToSection}/>
+      <LessonGlossary lessonId={lesson.id} value={progress.glossary} onChange={glossary=>patch({glossary})}/>
     </div>
     <p className="mode-estimate">{progress.mode==='intuition'?'推荐路径 · ':''}{estimate}</p>
     <div id="lesson-mode-panel" tabIndex={-1} role="tabpanel" aria-labelledby={`tab-${progress.mode}`} data-mode={progress.mode}>
