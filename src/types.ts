@@ -63,6 +63,7 @@ export interface LearningState {
   lastLesson: LessonId;
   progress: Partial<Record<LessonId, LessonProgress>>;
   checkpoint?: Checkpoint;
+  flashcardLessons?: LessonId[];
   updatedAt: string;
 }
 

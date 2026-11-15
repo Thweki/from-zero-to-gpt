@@ -1,0 +1,10 @@
+.flashcard-panel { margin: 24px 0; padding: 24px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow-wrap: anywhere; }
+.flashcard-panel h2 { margin: 16px 0 24px; }
+.flashcard-panel p { color: var(--secondary); line-height: 1.8; }
+.flashcard-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.flashcard-filter select { max-width: 100%; min-height: 44px; padding: 8px; color: var(--text); background: var(--panel); border: 1px solid var(--control-border); border-radius: 6px; }
+.flashcard-answer { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.flashcard-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; }
+.flashcard-chapters { list-style: none; padding: 0; }
+.flashcard-chapters li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); }
+.flashcard-chapters a { color: var(--accent); }
