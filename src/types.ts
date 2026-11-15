@@ -1,5 +1,6 @@
 import { lessonIds } from './data/lesson-ids';
 import type {TutorSelection} from './tutor-selection';
+import type {CodeVersion} from './code-versions';
 export type LessonId = typeof lessonIds[number];
 export type ViewMode = 'intuition' | 'math' | 'code' | 'deep';
 export type LessonStatus = 'new' | 'learning' | 'mastered';
@@ -35,6 +36,7 @@ export interface LessonProgress {
   note: string;
   code: string;
   review: boolean;
+  codeVersions?: CodeVersion[];
   quizAnswer?: number;
   quizPassed?: boolean;
   labValues?: Record<string, number>;
