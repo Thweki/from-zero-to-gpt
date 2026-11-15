@@ -54,9 +54,14 @@ npm test
 npm run test:delivery
 npm run validate:course
 npm run build
+npm run test:built-runtime
 # 源码须已提交，不能把未提交改动冒充一个Git提交的产物
 npm run package:delivery
 ```
+
+`test:built-runtime` 在 Actions 的 web job 与 `ci:local` 中紧接生产构建运行，也可用上面的命令单独复现。它启动真实 Node 生产服务器，并在独立 Node 进程中调用已构建 Worker 的 `fetch` 入口，验证状态、聊天转发、错误路由及静态资源分派。提供商是随机端口的本地 HTTP stub；服务数据使用临时目录，环境只包含系统必需字段与合成配置。请求限时 3 秒，子进程限时 12 秒，测试结束强制回收进程、连接和临时目录。Worker 的 `ASSETS` binding 使用 stub；这不是 Cloudflare 平台验收，不部署、不调用付费服务，也不读取个人凭据。
+
+2026-11-15 受限工作区验证：`npm ci` 的 esbuild 子进程检查报 `EPERM`，改用锁文件相同的现有依赖副本。类型检查、脚本语法检查、独立 Vite 构建与 `scripts/build-server.mjs` 均通过；完整 `npm run build` 被 Python 子进程探测的 `EPERM` 阻断。新增 smoke 已尝试运行；用 `node --test --test-isolation=none scripts/built-runtime-smoke.test.mjs` 定位到两个测试均被 `listen EPERM 127.0.0.1` 阻断，不能宣称通过。补充的内存 fetch stub 检查通过了已构建 Worker 的分派断言，但不能替代 HTTP smoke。既有 Vitest 为 611 通过／38 失败（包含 Python 子进程 `EPERM`）；`test:ci-local` 也未通过。完整本地 CI、浏览器、桌面与部署未运行，需在允许本地监听及子进程的环境复验。
 
 `artifacts/ci-release/` 只包含明确列出的三个文件：
 
