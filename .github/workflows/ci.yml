@@ -53,6 +53,7 @@ jobs:
       - run: npm run test:release
       - run: npm run validate:course
       - run: npm run build
+      - run: npm run test:built-runtime
       - run: npm run package:delivery
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
