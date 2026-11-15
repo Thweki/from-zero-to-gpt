@@ -5,6 +5,7 @@ import { dot, norm, format } from '../math';
 import {functionPlotViewport,axisTicks} from '../math-viewport';
 import {FullscreenButton} from './FullscreenButton';
 import {Formula,MathContent} from './Formula';
+import {ExperimentComparison,type ComparisonRow} from './ExperimentComparison';
 type Props={lesson:Lesson; values:Record<string,number>; onChange:(values:Record<string,number>)=>void;onObserve?:(origin:HTMLElement)=>void};
 export const labDefaults = {x:2,k:1,b:0,ax:3,ay:2,bx:1,by:3,kind:0};
 export function MathLab({lesson,values,onChange,onObserve}:Props) {
@@ -28,6 +29,16 @@ export function MathLab({lesson,values,onChange,onObserve}:Props) {
     ? lesson.lab==='dot'?`\\mathbf a\\cdot\\mathbf b=${format(product)}`:`\\mathbf a+\\mathbf b=(${format(v.ax+v.bx)},${format(v.ay+v.by)})`
     : `f(${format(v.x)})=${format(result)}`;
   const norms=`\\lVert\\mathbf a\\rVert=${format(norm(a))},\\quad \\lVert\\mathbf b\\rVert=${format(norm(b))}`;
+  const comparisonParameters:Record<string,number>=vectors?{ax:v.ax,ay:v.ay,bx:v.bx,by:v.by}:lesson.lab==='linear'?{x:v.x,k:v.k,b:v.b}:{x:v.x,kind:v.kind};
+  const comparisonRows:ComparisonRow[]=vectors?[
+    {label:'a 的 x 分量',value:v.ax},{label:'a 的 y 分量',value:v.ay},
+    {label:'b 的 x 分量',value:v.bx},{label:'b 的 y 分量',value:v.by},
+    ...(lesson.lab==='dot'?[{label:'点积',value:product}]:[{label:'向量和 x',value:v.ax+v.bx},{label:'向量和 y',value:v.ay+v.by}]),
+    {label:'a 的长度',value:norm(a)},{label:'b 的长度',value:norm(b)},
+  ]:[
+    ...(lesson.lab==='linear'?[{label:'斜率 k',value:v.k},{label:'截距 b',value:v.b}]:[{label:'函数',value:v.kind===1?'一次函数':v.kind===2?'绝对值函数':'平方函数'}]),
+    {label:'输入 x',value:v.x},{label:'函数的输出',value:result},
+  ];
   const range=(key:string,label:string,min=-5,max=5,step=.5)=><label className="slider-label"><span>{label}<output>{format(v[key as keyof typeof v])}</output></span><input aria-label={label} type="range" min={min} max={max} step={step} value={v[key as keyof typeof v]} onChange={e=>set(key,Number(e.target.value))}/><span className="range-extents"><span>{min}</span><span>{max}</span></span></label>;
   return <MathContent><section className="math-lab" ref={ref} aria-label="交互式数学实验">
     <div className="lab-header"><span><FlaskConical size={16}/> 交互实验 <small>LIVE</small></span><div><button className="icon-button" aria-label="重置实验参数" onClick={()=>onChange({...labDefaults})}><RotateCcw size={15}/></button><FullscreenButton target={ref} label="全屏实验"/></div></div>
@@ -40,5 +51,6 @@ export function MathLab({lesson,values,onChange,onObserve}:Props) {
     <div className="lab-controls">{vectors?<>{range('ax','a 的 x 分量')}{range('ay','a 的 y 分量')}{range('bx','b 的 x 分量')}{range('by','b 的 y 分量')}</>:<>{lesson.lab==='linear'?<>{range('k','斜率 k',-3,3,.1)}{range('b','截距 b',-4,4,.1)}</>:<label className="select-label">选择一个函数<select aria-label="选择函数" value={v.kind} onChange={e=>set('kind',Number(e.target.value))}><option value={0}>平方函数</option><option value={1}>一次函数</option><option value={2}>绝对值函数</option></select></label>}{range('x','输入 x',-3,3,.1)}</>}
     <div className="live-result"><small>{vectors?lesson.lab==='dot'?'点积':'向量和':'函数的输出'}</small><strong data-testid="lab-result"><Formula block={false}>{resultFormula}</Formula></strong>{vectors&&<span><Formula block={false}>{norms}</Formula></span>}</div></div></div>
     <div className="lab-task"><div><span>试一试</span>{lesson.labTask}</div>{onObserve&&<button type="button" className="text-button observation-trigger" onClick={event=>onObserve(event.currentTarget)}>记录观察</button>}</div>
+    <ExperimentComparison key={lesson.id} parameters={comparisonParameters} rows={comparisonRows} onRestore={parameters=>onChange({...values,...parameters})}/>
   </section></MathContent>;
 }
