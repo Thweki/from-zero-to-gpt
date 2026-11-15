@@ -77,7 +77,7 @@ async function main(){
     await run('workflow-lint','actionlint',[]);
     await run('shell-lint','shellcheck',['start-linux.sh','start-macos.command','.githooks/pre-push']);
     await run('clean-install',process.execPath,[npm,'ci']);
-    for(const name of ['check','test','test:ci-local','test:delivery','test:tauri','test:release','validate:course','build','package:delivery'])await npmRun(name);
+    for(const name of ['check','test','test:ci-local','test:delivery','test:tauri','test:release','validate:course','build','test:built-runtime','package:delivery'])await npmRun(name);
     const pythonEnv=path.join(resultsDir,'python-env');
     if(!existsSync(pythonEnv))await run('python-environment',python,['-m','venv',pythonEnv]);
     const pythonExe=path.join(pythonEnv,process.platform==='win32'?'Scripts/python.exe':'bin/python');

@@ -120,9 +120,11 @@ async function handleTutorRequestInternal(request:Request,env:TutorEnvironment,f
   try{body=validateTutorBody(JSON.parse(await limitedText(request.body,env.TUTOR_SUPPORTS_IMAGES==='1'?320000:64000)));}catch{return reply({error:'请求格式无效、内容过长或章节不存在。'},400);}
   if(body.selection?.image&&env.TUTOR_SUPPORTS_IMAGES!=='1')return reply({error:'当前模型未启用图片识别，请使用图表文字与参数提问。'},400);
   const now=Date.now(),actor=request.headers.get('CF-Connecting-IP')||'local';
-  for(const [key,value] of limits)if(value.expires<now&&value.active===0)limits.delete(key);
+  for(const [key,value] of limits)if(value.expires<=now&&value.active===0)limits.delete(key);
   if(limits.size>1000&&!limits.has(actor))return reply({error:'导师当前繁忙，请稍后再试。'},429);
   const bucket=limits.get(actor)||{count:0,expires:now+3600000,active:0};
+  // Renew the hourly quota in place: in-flight requests still release this bucket.
+  if(bucket.expires<=now){bucket.count=0;bucket.expires=now+3600000;}
   if(bucket.count>=60||bucket.active>=2)return reply({error:'导师请求较多，请稍后再试。你可以继续操作教材和实验。'},429);
   bucket.count++;bucket.active++;limits.set(actor,bucket);
   const controller=new AbortController();const cancel=()=>controller.abort();request.signal.addEventListener('abort',cancel,{once:true});
