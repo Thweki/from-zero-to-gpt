@@ -195,6 +195,16 @@ tiny GPT：CPU PyTorch `2.14.1+cpu`，62,592参数，默认250步实测训练 `3
 
 噪声回归的验收改为对照独立QR最优损失，避免把不可消除噪声当程序缺陷；离线导师模拟保持断线直到用户检查，避免React StrictMode双挂载让测试假恢复。
 
+## Native tutor cancellation — audit B4（2026-11-15）
+
+`burn/native-tutor-cancel`：Stop 与卸载共用 AbortSignal；原生 IPC 收到取消命令，前端无需等待迟到的 IPC 回复即可重试。每次原生请求使用独立 ID，防止旧取消／清理影响下一次请求。卸载后不再更新对话、错误或 pending 状态。
+
+新增 `src/tutor-cancellation.test.ts` 的 11 项回归通过，使用实际 App／TutorPanel、React StrictMode 和 fake Tauri transport；模拟 managed gate，不使用模型凭据或网络。覆盖 Stop／重试、章节切换、紧凑面板关闭、页面导航、排队中的取消、Stop 后关闭、迟到的成功／失败、完成后取消监听清理、IPC 发送前取消，以及 HTTP override 只取消 fetch。最初 8 项回归在修复前有 7 项失败。
+
+- `npm test -- src/tutor-cancellation.test.ts src/tutor.test.ts src/tutor-security.test.ts src/tutor-selection.test.ts src/learning-flow.test.ts src/provider-engine.test.ts src/runtime.test.ts`：7 个文件，74/74 通过。
+- `npm run check`（`tsc -b`）：通过。
+- 本轮未运行 Playwright、Tauri／Cargo 或真实桌面／提供商验收；本轮验证范围为前端生命周期和 fake native IPC，不代表原生进程或真实模型调用已验收。
+
 ## 限制
 
 移动验收是Chromium模拟，不是真实iOS/Safari；未完成全面WCAG、屏幕阅读器、Firefox或多标签并发数据验收。真实小模型不代表通用语言能力。0.3.0已补齐本地模型整合；尚无分页缓存、整数GEMM、QLoRA或GPU吞吐验收。站点托管结果和版本以发布回执为准；仅静态部署不含导师API。

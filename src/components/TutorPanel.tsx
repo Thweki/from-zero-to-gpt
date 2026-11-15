@@ -5,8 +5,8 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import type {Lesson,TutorMessage,ViewMode} from '../types';
 import {useTutorConnection} from '../tutor-connection';
-import {isTauriRuntime,tutorApiUrl} from '../runtime';
-import {nativeTutorCancel,nativeTutorChat} from '../provider-manager';
+import {tutorApiUrl} from '../runtime';
+import {nativeTutorChat} from '../provider-manager';
 import {selectionSummary,type TutorSelection} from '../tutor-selection';
 import './SelectionTutor.css';
 import './TutorPanel.css';
@@ -34,16 +34,16 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
   const [input,setInput]=useState(draft),[mode,setMode]=useState<Mode>('guide');
   const [difficulty,setDifficulty]=useState('beginner'),[shareCode,setShareCode]=useState(false),[shareNote,setShareNote]=useState(false);
   const [pending,setPending]=useState(false),[error,setError]=useState(''),[accessCode,setAccessCode]=useState(''),[options,setOptions]=useState(false);
-  const controller=useRef<AbortController|null>(null),bottom=useRef<HTMLDivElement>(null),composer=useRef<HTMLTextAreaElement>(null),current=useRef(messages),session=useRef('');
+  const controller=useRef<AbortController|null>(null),bottom=useRef<HTMLDivElement>(null),composer=useRef<HTMLTextAreaElement>(null),current=useRef(messages);
   current.current=messages;
-  useEffect(()=>()=>controller.current?.abort(),[]);
+  useEffect(()=>()=>{const active=controller.current;controller.current=null;active?.abort();},[]);
   useEffect(()=>{setInput(draft);},[draft]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});},[messages.length,pending]);
   const editDraft=(text:string)=>{setInput(text);onDraft?.(text);};
   const prepareQuestion=(text:string)=>{editDraft(text);composer.current?.focus();};
   const canSend=Boolean(status?.configured&&(!status.accessCodeRequired||accessCode.trim()));
   async function send(retry=false){
-    if(pending||!canSend)return;
+    if(controller.current||!canSend)return;
     const latest=current.current;
     const text=retry?latest.at(-1)?.content:input.trim();if(!text)return;
     const reference=retry?latest.at(-1)?.selection:selection;
@@ -56,18 +56,19 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
     try{
       const payload={lessonId:lesson.id,message:text,history:history.slice(-12).map(({role,content,selection})=>({role,content:`${content}${selection?`\n\n${selectionSummary(selection)}`:''}`.slice(0,8000)})),mode,difficulty,readingMode,shareCode,shareNote,...(transmittedReference?{selection:transmittedReference}:{}),...(shareCode?{code:code.slice(0,8000),error:lastRun.slice(0,3000)}:{}),...(shareNote?{note:note.slice(0,2000)}:{}),sessionId:`fz-gpt-${lesson.id}-${(combined[0]?.createdAt||user.createdAt).replace(/[^A-Za-z0-9]/g,'')}`};
       while(new TextEncoder().encode(JSON.stringify(payload)).length-(transmittedReference?.image?.length||0)>60000&&payload.history.length)payload.history.shift();
-      session.current=payload.sessionId;
       const endpoint=tutorApiUrl('chat');
+      // Native session IDs also identify cancellation tokens and managed jobs.
+      // A retry must not reuse an abandoned request's ID.
       const result:{answer?:string;error?:string}=endpoint?await (async()=>{
         const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(accessCode?{Authorization:`Bearer ${accessCode}`}:{})},signal:abort.signal,body:JSON.stringify(payload)});
         const data=await response.json().catch(()=>({error:'导师服务返回了无法读取的内容。'}));
         if(!response.ok)throw new Error(data.error||'导师服务暂时不可用。');
         return data;
-      })():await nativeTutorChat(payload);
+      })():await nativeTutorChat({...payload,sessionId:`fz-gpt-${crypto.randomUUID()}`},abort.signal);
       if(typeof result.answer!=='string'||!result.answer.trim())throw new Error('导师没有返回内容，请重试。');
-      if(!abort.signal.aborted)onMessages(retainRecentImages([...combined,{role:'assistant' as const,content:result.answer,createdAt:new Date().toISOString()}].slice(-80)));
-    }catch(cause){if(!abort.signal.aborted||controller.current)setError(abort.signal.aborted?'已停止回复。问题已保留，可以重试。':cause instanceof Error?cause.message:'连接失败，可以稍后重试。');}
-    finally{setPending(false);controller.current=null;}
+      if(controller.current===abort&&!abort.signal.aborted)onMessages(retainRecentImages([...combined,{role:'assistant' as const,content:result.answer,createdAt:new Date().toISOString()}].slice(-80)));
+    }catch(cause){if(controller.current===abort)setError(abort.signal.aborted?'已停止回复。问题已保留，可以重试。':cause instanceof Error?cause.message:'连接失败，可以稍后重试。');}
+    finally{if(controller.current===abort){controller.current=null;setPending(false);}}
   }
   const suggestions=readingMode==='math'?[
     {label:'这个公式怎么一步步得到？',question:`请逐步解释本章公式 $${lesson.formula}$，先说明每个符号的含义。`},
@@ -103,7 +104,7 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
       }}/>
       {readingMode==='code'&&!shareCode&&<button className="text-button tutor-attach-code" onClick={()=>setShareCode(true)}>附上当前代码{lastRun?'和最近运行结果':''}</button>}
       {status?.accessCodeRequired&&<label className="tutor-access">导师访问码<input type="password" aria-label="导师访问码" autoComplete="off" value={accessCode} onChange={event=>setAccessCode(event.target.value)}/></label>}
-      <div className="tutor-compose-actions"><button className="text-button" onClick={()=>setOptions(!options)} aria-expanded={options}><ChevronDown size={13}/>讲解与分享设置</button>{pending?<button className="button secondary compact" onClick={()=>{controller.current?.abort();if(isTauriRuntime&&session.current)void nativeTutorCancel(session.current);}}><Square size={13}/>停止</button>:<button className="button primary compact" disabled={!input.trim()||!canSend} onClick={()=>void send()}><Send size={13}/>发送</button>}</div>
+      <div className="tutor-compose-actions"><button className="text-button" onClick={()=>setOptions(!options)} aria-expanded={options}><ChevronDown size={13}/>讲解与分享设置</button>{pending?<button className="button secondary compact" onClick={()=>controller.current?.abort()}><Square size={13}/>停止</button>:<button className="button primary compact" disabled={!input.trim()||!canSend} onClick={()=>void send()}><Send size={13}/>发送</button>}</div>
       {options&&<div className="tutor-options">
         <label>讲解方式<select aria-label="导师回答方式" value={mode} onChange={event=>setMode(event.target.value as Mode)}>{modeOptions.map(option=><option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
         <label>解释深度<select aria-label="导师解释难度" value={difficulty} onChange={event=>setDifficulty(event.target.value)}><option value="beginner">从直觉开始</option><option value="standard">连接公式与代码</option><option value="deep">推导与边界</option></select></label>
