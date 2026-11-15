@@ -34,6 +34,7 @@ export interface LessonProgress {
   mode: ViewMode;
   note: string;
   code: string;
+  customTests?: string;
   review: boolean;
   quizAnswer?: number;
   quizPassed?: boolean;
