@@ -35,6 +35,7 @@ export interface LessonProgress {
   note: string;
   code: string;
   review: boolean;
+  reviewSchedule?: ReviewSchedule;
   quizAnswer?: number;
   quizPassed?: boolean;
   labValues?: Record<string, number>;
@@ -49,6 +50,10 @@ export interface LessonProgress {
   observationDraft?: string;
   observationSnapshot?: string;
 }
+export interface ReviewSchedule {
+  dueAt: string;
+  step: number;
+}
 export interface Checkpoint {
   lessonId: LessonId;
   question: string;
@@ -59,6 +64,7 @@ export interface Checkpoint {
 }
 export interface LearningState {
   version: 1;
+  reviewQueueEnabled?: boolean;
   theme: 'light' | 'dark';
   lastLesson: LessonId;
   progress: Partial<Record<LessonId, LessonProgress>>;
