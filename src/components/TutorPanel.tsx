@@ -36,6 +36,7 @@ export function TutorPanel({lesson,messages,onMessages,code='',note='',lastRun='
   const [pending,setPending]=useState(false),[error,setError]=useState(''),[accessCode,setAccessCode]=useState(''),[options,setOptions]=useState(false);
   const controller=useRef<AbortController|null>(null),bottom=useRef<HTMLDivElement>(null),composer=useRef<HTMLTextAreaElement>(null),current=useRef(messages),session=useRef('');
   current.current=messages;
+  useEffect(()=>{if(compact)composer.current?.focus({preventScroll:true});},[compact]);
   useEffect(()=>()=>controller.current?.abort(),[]);
   useEffect(()=>{setInput(draft);},[draft]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});},[messages.length,pending]);

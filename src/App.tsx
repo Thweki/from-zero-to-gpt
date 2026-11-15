@@ -7,7 +7,7 @@ import graph from './data/knowledge-graph.json';
 import type { LearningState, Lesson, LessonId, LessonProgress } from './types';
 import { emptyProgress, initialState, lessonIds, readState, validateImport, writeState } from './storage';
 import { LessonLab as MathLab } from './components/LessonLab';
-import { TutorPanel } from './components/TutorPanel';
+import { DeferredTutorPanel as TutorPanel } from './components/DeferredTutorPanel';
 import {AppUpdateNotice,AppUpdateSettings} from './components/AppUpdate';
 import {ProviderSettings} from './components/ProviderSettings';
 import {LessonReader} from './components/LessonReader';
@@ -39,7 +39,7 @@ export default function App(){
   useEffect(()=>{if(mobile)document.querySelector<HTMLButtonElement>('.navigation-close')?.focus();},[mobile]);
   const observationOrigin=useRef<{element:HTMLElement|null;x:number;y:number}|null>(null);
   useReadablePlots(ready);
-  useEffect(()=>{if(rightOpen)document.querySelector<HTMLElement>(contextTab==='tutor'?'.context-panel .tutor-composer textarea':'.context-panel .observation-input,.context-panel .scratchpad')?.focus({preventScroll:true});},[rightOpen,contextTab]);
+  useEffect(()=>{if(rightOpen&&contextTab==='notes')document.querySelector<HTMLElement>('.context-panel .observation-input,.context-panel .scratchpad')?.focus({preventScroll:true});},[rightOpen,contextTab]);
   const saveSequence=useRef(0),lastSavedState=useRef<LearningState>(state);
   const searchRef=useRef<HTMLInputElement>(null),stateRef=useRef(state),importRef=useRef<HTMLInputElement>(null),toastTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const restoringSearchFocus=useRef(false);
