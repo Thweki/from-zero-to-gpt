@@ -19,6 +19,19 @@
 
 当前版本为 **0.5.0**。课程、实验和基础代码练习都可在不接入模型服务的情况下使用。
 
+### 实验性小节朗读（默认关闭）
+
+需要听读课文时，用 `VITE_EXPERIMENTAL_TTS=true npm run dev` 启动，或用
+`VITE_EXPERIMENTAL_TTS=true npm run build` 构建。只有值为 `true` 时才启用，不修改学习设置。
+在「直觉理解」「数学推导」「深入研究」中选择「朗读小节」，点击「朗读本节」；可暂停、继续或停止。
+切换小节、阅读模式、章节或离开课程页面会停止，不会自动播放下一节，也不会标记已读。
+
+朗读只使用教材标题与正文，不包含代码、测验答案、笔记或导师对话。行内公式以提示代替，独立公式不朗读，需参照页面。
+使用浏览器的 [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance)，无需配置服务或密钥；中文语音、暂停行为及联网需求取决于浏览器和系统，不能保证离线可用。缺少支持或播放失败时会显示提示。
+
+自动化验证：`npx vitest run src/lesson-speech.test.ts src/lesson-speech-ui.test.ts`。
+浏览器测试：`VITE_EXPERIMENTAL_TTS=true npx playwright test tests/read-aloud.spec.ts --project=desktop`；不设置该变量再运行一次可验证默认关闭。测试模拟语音引擎，实际发音仍需在目标浏览器试听。
+
 ## 下载安装
 
 从 [最新 Release](https://github.com/Thweki/from-zero-to-gpt/releases/latest) 下载桌面应用，安装后即可学习，无需先安装 Node.js、Python 或配置模型密钥。
