@@ -1,0 +1,6 @@
+.code-import { padding: 14px 20px; border-top: 1px solid var(--border); font-size: 13px; }
+.code-import summary { cursor: pointer; }
+.code-import p { line-height: 1.8; overflow-wrap: anywhere; }
+.code-import input { display: block; margin-top: 8px; max-width: 100%; }
+.code-import pre { max-height: 240px; overflow: auto; padding: 12px; background: var(--panel); }
+.code-import .text-button { margin-top: 12px; }
