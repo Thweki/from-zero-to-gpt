@@ -32,7 +32,22 @@ export function removeProviderService(id:string):Promise<ProviderServiceSnapshot
   return request('remove',{id});
 }
 export function nativeTutorStatus(){return invokeNative<Record<string,unknown>>('native_tutor_status');}
-export function nativeTutorChat(payload:unknown){return invokeNative<{answer:string}>('native_tutor_chat',{payload});}
+export async function nativeTutorChat(payload:{sessionId:string},signal:AbortSignal){
+  const {invoke}=await import('@tauri-apps/api/core');
+  signal.throwIfAborted();
+  return new Promise<{answer:string}>((resolve,reject)=>{
+    const cancel=()=>{
+      void invoke<void>('native_tutor_cancel',{sessionId:payload.sessionId}).catch(()=>{});
+      reject(new DOMException('已停止回复。','AbortError'));
+    };
+    signal.addEventListener('abort',cancel,{once:true});
+    // Dispatch before cancellation can run; late IPC replies remain handled.
+    invoke<{answer:string}>('native_tutor_chat',{payload}).then(
+      result=>{signal.removeEventListener('abort',cancel);resolve(result);},
+      error=>{signal.removeEventListener('abort',cancel);reject(error);},
+    );
+  });
+}
 export function nativeTutorCancel(sessionId:string){return invokeNative<void>('native_tutor_cancel',{sessionId});}
 
 export async function providerEngineRequest<T>(action:string,data:Record<string,unknown>={}):Promise<T>{
