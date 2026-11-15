@@ -15,6 +15,7 @@ import {ChapterPicker} from './components/ChapterPicker';
 import {ObservationNote} from './components/ObservationNote';
 import {experimentContext} from './experiment-context';
 import {useReadablePlots} from './use-readable-plots';
+import {addHighlight} from './lesson-highlights';
 import {SelectionTutor} from './components/SelectionTutor';
 import {MathContent} from './components/Formula';
 
@@ -100,7 +101,10 @@ export default function App(){
     <AppUpdateNotice/><div className="workspace"><header className="topbar" data-tauri-drag-region><div className="breadcrumb"><button className="icon-button mobile-menu" aria-label="打开导航" aria-expanded={mobile} aria-controls="course-navigation" onClick={()=>{setMobile(!mobile);setRightOpen(false);}}><Menu size={21}/></button><a className="home-link" href="#/map">从零到 GPT</a><ChevronRight size={13}/><b>{route.page==='lesson'?`第 ${stageFor(lesson.id)} 阶段 · ${stages[stageFor(lesson.id)-1].title}　/　${lesson.number} ${lesson.title}`:route.page==='labs'?'交互实验':route.page==='notes'?'我的笔记':route.page==='settings'?'设置与数据':route.page==='tutor'?'AI 导师':'学习首页'}</b></div><div className="topbar-actions"><div className="search-box"><Search size={15}/><input ref={searchRef} aria-label="搜索知识点" placeholder="搜索知识点…" value={query} onFocus={()=>{if(!restoringSearchFocus.current)setSearching(true);}} onClick={()=>setSearching(true)} onKeyDown={e=>{if(e.key==='Enter')setSearching(true);}} onChange={e=>{setQuery(e.target.value);setSearching(true);}}/><kbd>⌘ K</kbd></div><button className="icon-button header-theme" aria-label={state.theme==='light'?'切换深色外观':'切换浅色外观'} onClick={()=>setState(s=>({...s,theme:s.theme==='light'?'dark':'light'}))}>{state.theme==='light'?<Moon size={17}/>:<Sun size={17}/>}</button><button className="icon-button" aria-label="保存学习断点" title="保存思路，立即结束" onClick={()=>setCheckpointOpen(true)}><Pause size={17}/></button><button className="text-button context-toggle" aria-label="问导师" title="围绕当前章节提问" aria-expanded={rightOpen} aria-controls="learning-tools" onClick={()=>{if(route.page==='tutor'){document.querySelector<HTMLTextAreaElement>('.tutor-page .tutor-composer textarea')?.focus();return;}setRightOpen(!rightOpen||contextTab!=='tutor');setContextTab('tutor');setMobile(false);}}><Sparkles size={17}/><span>问导师</span></button></div></header>
     {storageError&&<div className="storage-warning" role="alert">{storageError}<button onClick={exportData}>导出备份</button></div>}
     <div className="content-layout"><main id="main-content" tabIndex={-1}>
-      <SelectionTutor lesson={lesson} resetKey={`${route.page}:${progress.mode}`} values={progress.labValues||{}} onPick={selection=>{
+      <SelectionTutor onHighlight={route.page==='lesson'?anchor=>{
+        try{patch({highlights:addHighlight(progress.highlights||[],anchor,crypto.getRandomValues(new Uint32Array(4)).join('-'))});notify('已高亮，可在「本章高亮」跳回原文');}
+        catch{notify('本章最多保存 50 条高亮，请先删除不再需要的高亮。');}
+      }:undefined} lesson={lesson} resetKey={`${route.page}:${progress.mode}`} values={progress.labValues||{}} onPick={selection=>{
         patch({tutorSelection:selection,...(!progress.tutorDraft?.trim()?{tutorDraft:selection.kind==='image'?'请帮我理解这张图。':'请帮我理解这段内容。'}:{})});
         setContextTab('tutor');if(route.page!=='tutor')setRightOpen(true);setMobile(false);
         requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>(route.page==='tutor'?'.tutor-page .tutor-composer textarea':'.context-panel .tutor-composer textarea')?.focus());
