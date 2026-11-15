@@ -285,7 +285,7 @@ mod tests {
       assert!(parsed.validate().is_ok());
       assert_eq!(build_messages(&parsed).unwrap()[2]["content"], text);
       value["history"][1]["content"] = json!(format!("{text}a"));
-      assert!(!valid(value));
+      assert!(!valid(value.clone()));
       value["history"] = json!(vec![json!({"role": "user", "content": "中"}); 12]);
       assert!(valid(value.clone()));
       value["history"].as_array_mut().unwrap().push(json!({"role": "user", "content": "中"}));
