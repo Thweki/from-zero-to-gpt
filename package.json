@@ -10,6 +10,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "package:site": "npm run build && node scripts/package-site.mjs",
     "test": "vitest run",
+    "test:built-runtime": "node --test scripts/built-runtime-smoke.test.mjs",
     "test:e2e": "playwright test",
     "check": "tsc -b",
     "postinstall": "node scripts/copy-python.mjs",
