@@ -124,7 +124,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
       {progress.mode==='code'&&<>
         <section className="exercise-section"><h2>本章编程任务</h2><p>{lesson.exercise}</p></section>
         {!progress.codePassed&&progress.lastRun?.startsWith('✓')&&<p className="mode-estimate">已保留先前的运行结果；请重新运行，验证当前编辑器中的代码。</p>}
-        <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
+        <div id="lesson-code" tabIndex={-1}><CodeLab lesson={lesson} versions={progress.codeVersions||[]} onVersionsChange={codeVersions=>patch({codeVersions})} code={progress.code} lastRun={progress.lastRun} onCode={code=>patch({code,codePassed:false})} onResult={(lastRun,source)=>patch({lastRun,codePassed:lastRun.startsWith('✓')&&source===currentCode.current})}/></div>
       </>}
       {progress.mode==='deep'&&<>
         <ReadingSections sections={lesson.deep}/>
