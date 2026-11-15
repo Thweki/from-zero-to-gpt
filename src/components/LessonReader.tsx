@@ -7,6 +7,8 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {isPageWidth,pageWidths,readPageWidth,savePageWidth} from '../page-width';
+import './PageWidth.css';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -31,6 +33,8 @@ function ReadingSections({sections,formulaCaption,mainFormula}:{sections:Lesson[
 }
 
 export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
+  const [pageWidth,setPageWidth]=useState(readPageWidth);
+  const [widthSaved,setWidthSaved]=useState(true);
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
   const currentCode=useRef(progress.code);currentCode.current=progress.code;
   const [feedback,setFeedback]=useState(false),[hint,setHint]=useState(false);
@@ -80,10 +84,18 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const hintVisible=hint||(feedback&&answer!==lesson.quiz.correct);
   const pathDone=progress.readCompleted&&progress.experimented&&progress.quizPassed;
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
-  return <MathContent><article className="page-content lesson-page">
+  return <MathContent><article className="page-content lesson-page" data-page-width={pageWidth}>
     <div className="lesson-kicker"><span>阶段 0{stage}</span><span>{lesson.number}</span><span>{lesson.english}</span></div>
     <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
+    <div className="page-width-control">
+      <label>页面宽度<select value={pageWidth} aria-describedby="page-width-note" onChange={event=>{
+        const width=event.target.value;
+        if(!isPageWidth(width))return;
+        setPageWidth(width);setWidthSaved(savePageWidth(width));
+      }}>{pageWidths.map(width=><option key={width} value={width}>{{narrow:'窄幅',standard:'标准',wide:'宽幅'}[width]}</option>)}</select></label>
+      <span id="page-width-note" role="status">{widthSaved?'适用于所有章节，仅保存在此设备；小屏幕自动适配。':'无法保存宽度，当前页面仍可使用。'}</span>
+    </div>
     <section className="recommended-path" aria-label="新手推荐路径">
       <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
       <details className="recommended-path-details"><summary>如何使用这条路径</summary><p>{pathDone?'现在可以停下，也可以选一项扩展继续探索。':'数学推导、代码实现和深入研究是可选扩展，随时可以跳转。'}用时仅作参考，不计时、不设期限。</p></details>
