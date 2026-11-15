@@ -1,5 +1,5 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {ArrowRight,Bookmark,BookOpen,Check,CheckCheck,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
+import {ArrowRight,Bookmark,BookOpen,Check,Code2,ExternalLink,GitBranch,HelpCircle,Lightbulb,Pause,RotateCcw} from 'lucide-react';
 import type {Lesson,LessonId,LessonProgress,ViewMode} from '../types';
 import {lessons,lessonById} from '../data/lessons';
 import {LessonLab} from './LessonLab';
@@ -7,6 +7,7 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {LessonChecklist} from './LessonChecklist';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -108,8 +109,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         <ReadingSections sections={lesson.intuition}/>
         <div className="reading-next"><button className="text-button" onClick={()=>{patch({readCompleted:true});goToSection('experiment');}}>{progress.readCompleted?'已记录阅读，继续实验':'我已读完，去做实验'}<ArrowRight size={14}/></button></div>
         <div id="lesson-experiment" tabIndex={-1}><LessonLab lesson={lesson} values={progress.labValues||{}} onChange={labValues=>patch({labValues,experimented:true})} onObserve={onObserve}/></div>
-        <details className="reading-disclosure"><summary>学习目标与容易混淆的地方</summary>
-          <section className="goals-section"><h2><CheckCheck size={19}/>你应该能够解释</h2><ul>{lesson.goals.map(goal=><li key={goal}>{goal}</li>)}</ul></section>
+        <details className="reading-disclosure"><summary>容易混淆的地方</summary>
           <section className="misconceptions"><h3><HelpCircle size={17}/>容易混淆的地方</h3>{lesson.misconceptions.map(misconception=><p key={misconception}>{misconception}</p>)}</section>
         </details>
         <section className="quiz-card" id="lesson-quiz" tabIndex={-1}>
@@ -135,6 +135,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         <ProjectDownload stage={stage} lessonId={lesson.id}/>
       </>}
     </div>
+    <LessonChecklist lesson={lesson} progress={progress} patch={patch}/>
     <section className="learning-evidence" aria-label="本章学习记录"><p>这些记录相互独立，不是必须做完的清单。</p><dl><div><dt>阅读（自记）</dt><dd>{progress.readCompleted?'已阅读':'未记录'}</dd></div><div><dt>自测</dt><dd>{progress.quizPassed?'已验证':'待验证'}</dd></div><div><dt>当前代码</dt><dd>{progress.codePassed?'验收通过':'未验证'}</dd></div><div><dt>掌握（自评）</dt><dd>{progress.status==='mastered'?'自评已掌握':'尚未自评'}</dd></div></dl></section>
     <div className="lesson-completion"><div><strong>{progress.status==='mastered'?'你已将本章自评为掌握。':'能用自己的话解释了吗？'}</strong><p>这是你的判断，不代表系统认证；无需完成所有扩展。</p></div><button className="button secondary" onClick={()=>patch({status:progress.status==='mastered'?'learning':'mastered'})}><Check size={16}/>{progress.status==='mastered'?'取消掌握自评':'自评为已掌握'}</button></div>
     <div className="lesson-pagination"><button className="text-button" onClick={onCheckpoint}><Pause size={14}/>保存思路，今天到这里</button>{next?<button className="button primary next-lesson" onClick={()=>navigate(next.id)}>下一步 · {next.title}<ArrowRight size={16}/></button>:<a className="button primary" href="#/map">回到学习路线<ArrowRight size={16}/></a>}</div>
