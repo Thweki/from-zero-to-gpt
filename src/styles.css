@@ -15,3 +15,6 @@ html:root[data-native-material='true'],html:root[data-native-material='true'] bo
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @media(prefers-reduced-transparency:reduce){:root{--glass-bg:var(--panel);--glass-highlight:var(--border)}html:root,html:root[data-native-material],body{background:var(--bg)}.app-shell::before{display:none}:is(.sidebar,.topbar,.context-panel,.lesson-sticky-tools,.modal-backdrop,.search-overlay,.mobile-scrim){backdrop-filter:none;-webkit-backdrop-filter:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--glass-bg:var(--panel);--glass-highlight:var(--border)}.app-shell::before{display:none}:is(.sidebar,.topbar,.context-panel,.lesson-sticky-tools,.modal-backdrop,.search-overlay,.mobile-scrim){backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+.search-count{padding:10px 18px;font-size:12px;color:var(--secondary);border-bottom:1px solid var(--border)}
+.search-results>button>span:first-child{min-width:0;align-items:flex-start}.search-results>button svg{flex-shrink:0}.search-results .search-snippet{font-size:12px;line-height:1.8;overflow-wrap:anywhere;margin-top:6px}
