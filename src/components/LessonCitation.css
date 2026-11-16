@@ -1,0 +1,3 @@
+.lesson-citation{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 12px;color:var(--secondary);font-size:12px}
+.lesson-citation .text-button{min-height:44px}
+.lesson-citation textarea{flex-basis:100%;width:100%;min-width:0;resize:vertical;padding:10px;border:1px solid var(--control-border);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;line-height:1.7}
