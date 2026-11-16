@@ -1,4 +1,5 @@
 import math
+import sys
 import unittest
 from engine import Value
 from main import verify_gradients
@@ -6,6 +7,30 @@ from nn import MLP, XOR, train_xor
 
 
 class EngineTests(unittest.TestCase):
+    def test_backward_handles_chain_beyond_python_recursion_limit(self):
+        recursion_limit = sys.getrecursionlimit()
+        x = Value(2)
+        result = x
+        for _ in range(2 * recursion_limit):
+            result = result * 1.0
+        result.backward()
+        self.assertEqual(result.data, 2)
+        self.assertEqual(x.grad, 1)
+        result.backward()
+        self.assertEqual(x.grad, 2)
+        self.assertEqual(sys.getrecursionlimit(), recursion_limit)
+
+    def test_backward_handles_deep_loss_sum_with_shared_parameter(self):
+        count = 2 * sys.getrecursionlimit()
+        x = Value(2)
+        loss = sum((x - target) ** 2 for target in range(count))
+        # d/dx sum((x-i)**2) = 2*n*x - n*(n-1).
+        expected = 4 * count - count * (count - 1)
+        loss.backward()
+        self.assertEqual(x.grad, expected)
+        loss.backward()
+        self.assertEqual(x.grad, 2 * expected)
+
     def test_shared_operand_accumulates_both_edges(self):
         x = Value(3)
         y = x * x
