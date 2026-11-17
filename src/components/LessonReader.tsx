@@ -7,6 +7,7 @@ import {CodeLab} from './CodeLab';
 import {Formula,MathContent} from './Formula';
 import {ProjectDownload} from './ProjectDownload';
 import {LessonNavigation,type LessonSection} from './LessonNavigation';
+import {LessonPrint} from './LessonPrint';
 import {LessonCitation} from './LessonCitation';
 import {isPageWidth,pageWidths,readPageWidth,savePageWidth} from '../page-width';
 import './PageWidth.css';
@@ -36,6 +37,7 @@ function ReadingSections({lesson,mode,sections,formulaCaption,mainFormula}:{less
 }
 
 export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve,readerFont}:Props){
+  const [printing,setPrinting]=useState(false);
   const [pageWidth,setPageWidth]=useState(readPageWidth);
   const [widthSaved,setWidthSaved]=useState(true);
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
@@ -97,8 +99,10 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
         if(!isPageWidth(width))return;
         setPageWidth(width);setWidthSaved(savePageWidth(width));
       }}>{pageWidths.map(width=><option key={width} value={width}>{{narrow:'窄幅',standard:'标准',wide:'宽幅'}[width]}</option>)}</select></label>
+      <button type="button" className="text-button lesson-print-trigger" onClick={()=>setPrinting(true)}>打印本章 / 保存 PDF</button>
       <span id="page-width-note" role="status">{widthSaved?'适用于所有章节，仅保存在此设备；小屏幕自动适配。':'无法保存宽度，当前页面仍可使用。'}</span>
     </div>
+    {printing&&<LessonPrint lesson={lesson} stage={stage} onClose={()=>setPrinting(false)}/>}
     <section className="recommended-path" aria-label="新手推荐路径">
       <div className="recommended-path-head"><strong>{pathDone?'这一小轮已完成':'新手推荐路径'}</strong><ol><li><button onClick={()=>{changeMode('intuition');setPendingSection('reading');}}>{progress.readCompleted&&<Check size={13}/>}1 · 读懂直觉</button></li><li><button onClick={()=>goToSection('experiment')}>{progress.experimented&&<Check size={13}/>}2 · 动手实验</button></li><li><button onClick={()=>goToSection('quiz')}>{progress.quizPassed&&<Check size={13}/>}3 · 自测理解</button></li></ol></div>
       <details className="recommended-path-details"><summary>如何使用这条路径</summary><p>{pathDone?'现在可以停下，也可以选一项扩展继续探索。':'数学推导、代码实现和深入研究是可选扩展，随时可以跳转。'}用时仅作参考，不计时、不设期限。</p></details>

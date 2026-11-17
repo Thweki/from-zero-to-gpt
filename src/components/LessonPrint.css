@@ -1,0 +1,61 @@
+body.lesson-print-open { overflow: hidden; }
+.lesson-print-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: auto;
+  background: #eee;
+  color: #111;
+  --text: #111;
+}
+.lesson-print-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #aaa;
+  font-size: 14px;
+}
+.lesson-print-controls button { border: 1px solid #555; border-radius: 6px; padding: 10px 16px; }
+.lesson-print-controls button:disabled { opacity: .6; }
+.lesson-print-controls label { display: flex; align-items: center; gap: 8px; }
+.lesson-print-controls p { flex-basis: 100%; }
+.lesson-handout { max-width: 210mm; margin: 24px auto; padding: 18mm; background: #fff; color: #111; font-size: 11pt; line-height: 1.8; overflow-wrap: anywhere; }
+.lesson-handout header { border-bottom: 1px solid #555; padding-bottom: 16px; }
+.lesson-handout h1 { font-size: 26pt; }
+.lesson-handout h2 { font-size: 17pt; margin: 24px 0 12px; }
+.lesson-handout h3 { font-size: 13pt; margin: 18px 0 8px; }
+.lesson-handout p { margin: 10px 0; }
+.lesson-handout ul,.lesson-handout ol { padding-left: 24px; }
+.lesson-handout li { margin: 8px 0; }
+.lesson-handout pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 9pt/1.6 var(--font-mono); border: 1px solid #aaa; padding: 12px; }
+.handout-url { display: block; font-size: 9pt; }
+.handout-writing-space { height: 24mm; border-bottom: 1px solid #aaa; }
+@media screen and (max-width: 600px) {
+  .lesson-handout { margin: 0; padding: 24px 16px; }
+}
+@media print {
+  @page lessonHandout { margin: 16mm; }
+  html:has(body.lesson-print-open),body.lesson-print-open { height: auto !important; overflow: visible !important; background: #fff !important; }
+  body.lesson-print-open > :not(.lesson-print-dialog) { display: none !important; }
+  .lesson-print-dialog[open] { page: lessonHandout; position: static; display: block; width: auto; height: auto; overflow: visible; background: #fff; }
+  .lesson-print-dialog::backdrop { display: none; }
+  .lesson-print-controls { display: none; }
+  .lesson-handout { max-width: none; margin: 0; padding: 0; }
+  .lesson-handout h1,.lesson-handout h2,.lesson-handout h3 { break-after: avoid; }
+  .lesson-handout p,.lesson-handout li { orphans: 3; widows: 3; }
+  .lesson-handout .formula.block { overflow: visible; font-size: 9pt; break-inside: avoid; }
+  .lesson-handout .katex-display { white-space: normal; }
+  .handout-answers { break-before: page; }
+}
+
+/* Share the existing preference row rather than pushing lesson content below it. */
+.lesson-page .lesson-print-trigger{min-height:44px}
