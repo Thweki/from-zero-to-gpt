@@ -41,11 +41,11 @@ export function validateTutorBody(value:unknown):TutorBody{
   const text=(v:unknown,max:number)=>{if(typeof v!=='string'||v.length>max)throw new Error('invalid text');return v;};
   if(!lessons.some(l=>l.id===b.lessonId))throw new Error('unknown lesson');
   const mode=b.mode??'guide',difficulty=b.difficulty??'beginner',readingMode=b.readingMode??'intuition';
-  if(!['intuition','math','code','deep'].includes(String(readingMode)))throw new Error('invalid reading mode');
-  if(!['guide','hint','explain','review','solution'].includes(String(mode))||!['beginner','standard','deep'].includes(String(difficulty)))throw new Error('invalid mode');
+  if(typeof readingMode!=='string'||!['intuition','math','code','deep'].includes(readingMode))throw new Error('invalid reading mode');
+  if(typeof mode!=='string'||!['guide','hint','explain','review','solution'].includes(mode)||typeof difficulty!=='string'||!['beginner','standard','deep'].includes(difficulty))throw new Error('invalid mode');
   const message=text(b.message,4000).trim();if(!message)throw new Error('empty question');
   const rawHistory=b.history??[];if(!Array.isArray(rawHistory)||rawHistory.length>12)throw new Error('invalid history');
-  const history=rawHistory.map((item:unknown)=>{if(!item||typeof item!=='object')throw new Error('invalid history');const m=item as Record<string,unknown>;if(!['user','assistant'].includes(String(m.role)))throw new Error('invalid role');return {role:m.role as Message['role'],content:text(m.content,8000)};});
+  const history=rawHistory.map((item:unknown):Message=>{if(!item||typeof item!=='object')throw new Error('invalid history');const m=item as Record<string,unknown>;if(m.role!=='user'&&m.role!=='assistant')throw new Error('invalid role');return {role:m.role,content:text(m.content,8000)};});
   const result:TutorBody={lessonId:String(b.lessonId),message,history,mode:mode as TutorBody['mode'],readingMode:readingMode as ViewMode,difficulty:difficulty as TutorBody['difficulty'],sessionId:text(b.sessionId,160)};
   if(!/^[A-Za-z0-9_:.\-]{8,160}$/.test(result.sessionId))throw new Error('invalid session');
   if(b.shareCode===true){result.code=text(b.code??'',16000);result.error=text(b.error??'',8000);}
