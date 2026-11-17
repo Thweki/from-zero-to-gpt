@@ -1,0 +1,12 @@
+.code-comparison { border-top: 1px solid var(--border); padding: 14px 18px; }
+.code-comparison summary { min-height: 44px; align-content: center; cursor: pointer; font-size: 13px; }
+.code-comparison p { color: var(--secondary); font-size: 13px; line-height: 1.8; }
+.code-comparison-scroll { max-height: 360px; overflow: auto; margin-top: 12px; }
+.code-comparison table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.code-comparison caption { text-align: left; padding: 8px; color: var(--secondary); }
+.code-comparison th, .code-comparison td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: top; }
+.code-comparison code { white-space: pre; font-size: 12px; }
+.code-comparison tr[data-change='added'] { background: var(--accent-soft); }
+.code-comparison tr[data-change='removed'] { background: var(--panel-soft); }
+.code-comparison tr[data-change='removed'] td:nth-child(3) { font-weight: 700; }
+.code-comparison :is(summary, .code-comparison-scroll):focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 2px; }

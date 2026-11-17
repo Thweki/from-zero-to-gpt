@@ -14,7 +14,7 @@ vi.mock('./components/ProjectDownload',()=>({ProjectDownload:()=>null}));
 let container:HTMLDivElement,root:Root;
 const patch=vi.fn();
 function render(mode:ViewMode='intuition',lesson:Lesson=lessonById.functions){
-  act(()=>root.render(createElement(LessonReader,{key:lesson.id,lesson,progress:{...emptyProgress(),mode},stage:1,patch,navigate:vi.fn(),onCheckpoint:vi.fn(),onObserve:vi.fn()})));
+  act(()=>root.render(createElement(LessonReader,{key:lesson.id,lesson,progress:{...emptyProgress(),mode},stage:1,patch,navigate:vi.fn(),onCheckpoint:vi.fn(),onObserve:vi.fn(),readerFont:{size:'standard',saveError:false,changeSize:vi.fn()}})));
 }
 function buttons(){return [...container.querySelectorAll<HTMLButtonElement>('button[aria-label^="复制引用："]')];}
 async function click(button=buttons()[0]){await act(async()=>button.click());}

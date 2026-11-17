@@ -1,0 +1,21 @@
+.reader-preferences{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-bottom:16px}
+.reader-preferences .mode-estimate{margin:0}
+.reader-font-control{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--secondary)}
+.reader-font-control select{min-height:44px;padding:8px 12px;border:1px solid var(--control-border);border-radius:8px;background:var(--panel);font-size:16px}
+.reader-font-error{flex-basis:100%;font-size:12px;color:var(--secondary)}
+
+.lesson-page{--reader-scale:1;--reader-prose-size:17px;--reader-heading-size:21px;--reader-option-size:14px}
+.lesson-page[data-reader-font-size=large]{--reader-scale:1.15}
+.lesson-page[data-reader-font-size=largest]{--reader-scale:1.3}
+/* Scale reading content only; controls, plots and the code editor keep their metrics. */
+.lesson-page .prose-section p{font-size:calc(var(--reader-prose-size) * var(--reader-scale))}
+.lesson-page .prose-section h2{font-size:calc(var(--reader-heading-size) * var(--reader-scale))}
+.lesson-page :is(.problem-callout p,.goals-section li,.misconceptions p,.exercise-section p,.quiz-hint,.quiz-feedback,.references>a){font-size:calc(14px * var(--reader-scale))}
+.lesson-page :is(.goals-section h2,.related-section h2,.exercise-section h2){font-size:calc(19px * var(--reader-scale))}
+.lesson-page :is(.misconceptions h3,.quiz-card h3){font-size:calc(17px * var(--reader-scale))}
+.lesson-page .quiz-options label{font-size:calc(var(--reader-option-size) * var(--reader-scale))}
+.lesson-page :is(.main-formula,.formula-card){font-size:calc(15px * var(--reader-scale))}
+.lesson-page :is(.main-formula>p,.formula-card>p,.references small){font-size:calc(12px * var(--reader-scale))}
+@media(max-width:600px){
+  .lesson-page{--reader-prose-size:16px;--reader-heading-size:19px;--reader-option-size:13px}
+}
