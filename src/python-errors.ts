@@ -1,4 +1,16 @@
 export interface PythonFailure {type:string;message:string;explanation:string;line?:number;filename?:string;location:string;stdout:string;source?:string;raw:string;}
+/** A compact report from the saved run, independent of subsequent editor changes. */
+export function formatPythonFailure(lesson:{id:string;title:string},failure:PythonFailure):string{
+  const location=failure.filename&&failure.line
+    ?`${failure.filename}:${failure.line}（${failure.filename==='acceptance_tests.py'?'验收测试，不是用户代码':'用户代码'}）`
+    :failure.location;
+  return [
+    `章节：${lesson.title} (${lesson.id})`,
+    `位置：${location}`,
+    `错误：${failure.type}${failure.message?`: ${failure.message}`:''}`,
+    ...(failure.source?[`源码：${failure.source}`]:[]),
+  ].join('\n');
+}
 const hints:Record<string,string>={
   NameError:'这个名字还没有定义。检查拼写，以及它是否在使用之前被赋值。',
   SyntaxError:'Python 无法读懂这段语法。检查这一行及上一行的括号、引号和冒号。',

@@ -1,0 +1,6 @@
+.lesson-page[data-page-width='narrow']{max-width:760px}
+.lesson-page[data-page-width='wide']{max-width:1200px}
+.lesson-page[data-page-width='wide'] .prose-section p{max-inline-size:100%}
+.page-width-control{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-top:16px;font-size:12px;color:var(--secondary)}
+.page-width-control label{display:flex;align-items:center;gap:8px}
+.page-width-control select{min-height:44px;padding:8px;border:1px solid var(--control-border);border-radius:8px;background:var(--panel);color:var(--text)}
