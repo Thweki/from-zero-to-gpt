@@ -10,7 +10,7 @@ test('lesson formula cards copy their exact LaTeX with keyboard access', async (
   const cards = page.locator('#lesson-mode-panel').locator('.formula-card,.main-formula');
   expect(await cards.count()).toBeGreaterThan(0);
   for (const card of await cards.all()) {
-    const source = await card.locator('annotation[encoding="application/x-tex"]').textContent();
+    const source = await card.locator(':scope > .formula.block annotation[encoding="application/x-tex"]').textContent();
     const copy = card.getByRole('button', { name: '复制 LaTeX', exact: true });
     await copy.focus();
     await page.keyboard.press('Enter');
@@ -34,7 +34,7 @@ test('clipboard denial exposes selectable source on a narrow screen and clears o
   await closeNotebook(page);
   await page.getByRole('tab', { name: '数学推导', exact: true }).click();
   const card = page.locator('#lesson-mode-panel').locator('.formula-card,.main-formula').first();
-  const source = await card.locator('annotation[encoding="application/x-tex"]').textContent();
+  const source = await card.locator(':scope > .formula.block annotation[encoding="application/x-tex"]').textContent();
   await card.getByRole('button', { name: '复制 LaTeX', exact: true }).click();
   await expect(card.locator('.formula-copy').getByRole('status')).toContainText('请手动复制');
   const field = card.getByRole('textbox', { name: 'LaTeX 源码（不含 $ 分隔符）' });
