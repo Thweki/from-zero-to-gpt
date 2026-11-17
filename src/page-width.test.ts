@@ -27,12 +27,12 @@ function renderLesson(index=0,mode:'intuition'|'math'|'code'|'deep'='intuition')
   const patch=vi.fn();
   act(()=>root.render(createElement(LessonReader,{
     key:lessons[index].id,lesson:lessons[index],progress:{...emptyProgress(),mode},stage:1,
-    patch,navigate:vi.fn(),onCheckpoint:vi.fn(),onObserve:vi.fn(),
+    patch,navigate:vi.fn(),onCheckpoint:vi.fn(),onObserve:vi.fn(),readerFont:{size:'standard',saveError:false,changeSize:vi.fn()},
   })));
   return patch;
 }
 function choose(width:string){
-  const select=host.querySelector('select')!;
+  const select=host.querySelector<HTMLSelectElement>('.page-width-control select')!;
   act(()=>{select.value=width;select.dispatchEvent(new Event('change',{bubbles:true}));});
 }
 
@@ -53,7 +53,7 @@ describe('device page width',()=>{
   });
   it('applies the selection immediately, across modes and chapter remounts, without editing learning records',()=>{
     const patch=renderLesson();
-    expect(host.querySelector('select')?.value).toBe('standard');
+    expect(host.querySelector<HTMLSelectElement>('.page-width-control select')?.value).toBe('standard');
     choose('narrow');
     expect(host.querySelector('article')?.dataset.pageWidth).toBe('narrow');
     expect(localStorage.getItem(pageWidthKey)).toBe('narrow');
@@ -61,7 +61,7 @@ describe('device page width',()=>{
     renderLesson(0,'math');
     expect(host.querySelector('article')?.dataset.pageWidth).toBe('narrow');
     renderLesson(1);
-    expect(host.querySelector('select')?.value).toBe('narrow');
+    expect(host.querySelector<HTMLSelectElement>('.page-width-control select')?.value).toBe('narrow');
     choose('standard');renderLesson(0);
     expect(host.querySelector('article')?.dataset.pageWidth).toBe('standard');
   });

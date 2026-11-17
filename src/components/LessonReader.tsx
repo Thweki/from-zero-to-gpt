@@ -10,6 +10,7 @@ import {LessonNavigation,type LessonSection} from './LessonNavigation';
 import {LessonCitation} from './LessonCitation';
 import {isPageWidth,pageWidths,readPageWidth,savePageWidth} from '../page-width';
 import './PageWidth.css';
+import type {ReaderFontSize,useReaderFontSize} from '../use-reader-font-size';
 
 const modes=[
   {id:'intuition',label:'直觉理解',icon:Lightbulb},
@@ -17,7 +18,7 @@ const modes=[
   {id:'code',label:'代码实现',icon:Code2},
   {id:'deep',label:'深入研究',icon:BookOpen},
 ] as const;
-type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void};
+type Props={lesson:Lesson;progress:LessonProgress;stage:number;patch:(p:Partial<LessonProgress>)=>void;navigate:(id:LessonId)=>void;onCheckpoint:()=>void;onObserve:(origin:HTMLElement)=>void;readerFont:ReturnType<typeof useReaderFontSize>};
 
 function ReadingSections({lesson,mode,sections,formulaCaption,mainFormula}:{lesson:Lesson;mode:ViewMode;sections:Lesson['math'];formulaCaption?:string;mainFormula?:string}){
   const shown=new Set<string>();
@@ -34,7 +35,7 @@ function ReadingSections({lesson,mode,sections,formulaCaption,mainFormula}:{less
   })}{mainFormula&&!shown.has(mainFormula.trim())&&<div className="main-formula"><Formula>{mainFormula}</Formula><p>{formulaCaption}</p></div>}</MathContent>;
 }
 
-export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve}:Props){
+export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,onObserve,readerFont}:Props){
   const [pageWidth,setPageWidth]=useState(readPageWidth);
   const [widthSaved,setWidthSaved]=useState(true);
   const [answer,setAnswer]=useState<number|undefined>(progress.quizAnswer);
@@ -86,7 +87,7 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
   const hintVisible=hint||(feedback&&answer!==lesson.quiz.correct);
   const pathDone=progress.readCompleted&&progress.experimented&&progress.quizPassed;
   const estimate={intuition:'参考 8–15 分钟',math:'可选扩展 · 参考 10–20 分钟',code:`可选扩展 · 参考 ${lesson.runtime==='local-python'?'30–60':'15–30'} 分钟`,deep:'可选扩展 · 参考 10–20 分钟'}[progress.mode];
-  return <MathContent><article className="page-content lesson-page" data-page-width={pageWidth}>
+  return <MathContent><article className="page-content lesson-page" data-page-width={pageWidth} data-reader-font-size={readerFont.size}>
     <div className="lesson-kicker"><span>阶段 0{stage}</span><span>{lesson.number}</span><span>{lesson.english}</span></div>
     <div className="lesson-title-row"><h1>{lesson.title}</h1><button className={`icon-button bookmark-title ${progress.review?'bookmarked':''}`} aria-label="稍后复习本章" onClick={()=>patch({review:!progress.review})}><Bookmark size={20}/></button></div>
     <p className="lesson-subtitle">{lesson.subtitle}</p>
@@ -115,7 +116,15 @@ export function LessonReader({lesson,progress,stage,patch,navigate,onCheckpoint,
       }}>{modes.map(mode=><button role="tab" tabIndex={progress.mode===mode.id?0:-1} aria-selected={progress.mode===mode.id} aria-controls="lesson-mode-panel" id={`tab-${mode.id}`} key={mode.id} onClick={()=>changeMode(mode.id)}><mode.icon size={15}/>{mode.label}</button>)}</div>
       <LessonNavigation onGo={goToSection}/>
     </div>
-    <p className="mode-estimate">{progress.mode==='intuition'?'推荐路径 · ':''}{estimate}</p>
+    <div className="reader-preferences">
+      <p className="mode-estimate">{progress.mode==='intuition'?'推荐路径 · ':''}{estimate}</p>
+      <label className="reader-font-control">阅读字号
+        <select value={readerFont.size} onChange={event=>readerFont.changeSize(event.target.value as ReaderFontSize)}>
+          <option value="standard">标准</option><option value="large">大</option><option value="largest">特大</option>
+        </select>
+      </label>
+      {readerFont.saveError&&<p className="reader-font-error" role="status">字号已应用，但无法保存；刷新后可能恢复默认。</p>}
+    </div>
     <div id="lesson-mode-panel" tabIndex={-1} role="tabpanel" aria-labelledby={`tab-${progress.mode}`} data-mode={progress.mode}>
       {progress.mode==='intuition'&&<>
         <div className="problem-callout"><span className="mini-label">这个概念解决什么问题？</span><p>{lesson.problem}</p></div>
