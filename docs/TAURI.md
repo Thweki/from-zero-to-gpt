@@ -63,6 +63,14 @@ macOS 另使用 `titleBarStyle: Overlay` 与 `hiddenTitle: true`，让原生交�
 
 浏览器使用同源 `/api/tutor/*` 与 Node 服务端配置。若自行构建并设置 `VITE_TUTOR_API_ORIGIN=https://tutor.example.com`，应用可改用外部 HTTPS 导师代理；该地址不能含秘密。代理需设置 `TUTOR_ALLOW_TAURI_ORIGIN=1`，公网部署同时配置 `TUTOR_ACCESS_TOKEN`。详见 [架构说明](ARCHITECTURE.md)。
 
+### 导师文本长度契约（B3）
+
+导师与模型服务的文本字段按 **UTF-16 code units** 计数，与前端 `maxLength`、JavaScript `.length` / `.slice()` 一致；Rust 校验使用 `encode_utf16().count()`。一个普通汉字计 1，`😀` 计 2；不按 UTF-8 字节、Unicode 标量或视觉字符数计数。因此 1,334 个汉字（4,002 UTF-8 字节）可通过 4,000 单位的问题限制。
+
+问题上限为 4,000；每条历史为 8,000，最多 12 条；选区标题／正文为 160／3,000；服务名称／模型为 60／160（先去除两端空白）；凭据为 16,000。共享代码／错误／笔记保留现有前端截断与原生上限 8,000／3,000／2,000，Web 校验仍为 16,000／8,000／4,000；本修复只统一计数单位。ASCII 会话 ID 和服务 ID 的字节数与 UTF-16 单位数相同。原生 OpenAI 兼容接口的回答截取到不超过 24,000 UTF-16 单位，边界处保留完整字符，不截断 emoji 的代理对。
+
+传输上限仍单独按字节计算：Web JSON 请求为 64,000（启用图片时 320,000），上游响应为 2,000,000；原生上游响应同样限制为 2,000,000 字节。各字段合法不保证整个请求满足传输上限。此契约不修改学习状态导入／存储限制。
+
 ## GitHub Actions 与签名边界
 
 [tauri.yml](../.github/workflows/tauri.yml) 在 main、Pull Request 和手动触发时构建桌面应用，也供发布工作流复用。Android APK 是手动 `build_android` 选项，不属于桌面 Release。

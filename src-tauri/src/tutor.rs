@@ -47,8 +47,9 @@ pub struct TutorPayload {
 
 impl TutorPayload {
   fn validate(&self) -> Result<(), String> {
-    if self.message.trim().is_empty() || self.message.len() > 4_000 { return Err("问题为空或过长。".into()); }
-    if self.history.len() > 12 || self.history.iter().any(|message| !["user", "assistant"].contains(&message.role.as_str()) || message.content.len() > 8_000) {
+    // Text limits use UTF-16 code units, matching JS .length/.slice() and HTML maxLength.
+    if self.message.trim().is_empty() || self.message.encode_utf16().count() > 4_000 { return Err("问题为空或过长。".into()); }
+    if self.history.len() > 12 || self.history.iter().any(|message| !["user", "assistant"].contains(&message.role.as_str()) || message.content.encode_utf16().count() > 8_000) {
       return Err("导师历史格式无效。".into());
     }
     if !["guide", "hint", "explain", "review", "solution"].contains(&self.mode.as_str()) { return Err("回答方式无效。".into()); }
@@ -57,11 +58,11 @@ impl TutorPayload {
     if self.session_id.len() < 8 || self.session_id.len() > 160 || !self.session_id.chars().all(|c| c.is_ascii_alphanumeric() || "_:-.".contains(c)) {
       return Err("请求会话格式无效。".into());
     }
-    if self.code.as_ref().is_some_and(|value| value.len() > 8_000) || self.error.as_ref().is_some_and(|value| value.len() > 3_000) || self.note.as_ref().is_some_and(|value| value.len() > 2_000) {
+    if self.code.as_ref().is_some_and(|value| value.encode_utf16().count() > 8_000) || self.error.as_ref().is_some_and(|value| value.encode_utf16().count() > 3_000) || self.note.as_ref().is_some_and(|value| value.encode_utf16().count() > 2_000) {
       return Err("分享内容过长。".into());
     }
     if let Some(selection) = &self.selection {
-      if !["text", "image"].contains(&selection.kind.as_str()) || selection.title.len() > 160 || selection.text.len() > 3_000 { return Err("选区格式无效。".into()); }
+      if !["text", "image"].contains(&selection.kind.as_str()) || selection.title.encode_utf16().count() > 160 || selection.text.encode_utf16().count() > 3_000 { return Err("选区格式无效。".into()); }
     }
     Ok(())
   }
@@ -131,6 +132,16 @@ fn build_messages(payload: &TutorPayload) -> Result<Value, String> {
   for message in &payload.history { messages.push(json!({"role": message.role, "content": message.content})); }
   messages.push(json!({"role": "user", "content": serde_json::to_string(&question).map_err(|_| "无法序列化问题。")?}));
   Ok(Value::Array(messages))
+}
+
+// Bound output in the same units as JS slice(), retaining only complete Unicode scalars.
+fn utf16_prefix(text: &str, limit: usize) -> &str {
+  let mut units = 0;
+  for (index, character) in text.char_indices() {
+    units += character.len_utf16();
+    if units > limit { return &text[..index]; }
+  }
+  text
 }
 
 #[tauri::command]
@@ -204,7 +215,7 @@ pub async fn native_tutor_chat(
       }
       let data: Value = serde_json::from_slice(&bytes).map_err(|_| "模型回答格式无效。")?;
       let answer = data["choices"][0]["message"]["content"].as_str().filter(|answer| !answer.trim().is_empty()).ok_or("模型没有返回可显示的回答。")?;
-      Ok(NativeChatResponse { answer: answer.chars().take(24_000).collect(), model: service.model, provider: service.name })
+      Ok(NativeChatResponse { answer: utf16_prefix(answer, 24_000).to_string(), model: service.model, provider: service.name })
     } => result,
   };
   if token.is_cancelled() {let _=engine.call(&app,"cancel",json!({"jobId":payload.session_id})).await;}
@@ -215,4 +226,80 @@ pub async fn native_tutor_chat(
 pub fn register(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
   app.manage(Mutex::new(HashMap::<String, CancellationToken>::new()));
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn payload() -> Value {
+    json!({"lessonId": "functions", "message": "为什么？", "history": [], "mode": "guide",
+      "difficulty": "beginner", "readingMode": "intuition", "sessionId": "unicode-tests"})
+  }
+
+  fn valid(value: Value) -> bool {
+    serde_json::from_value::<TutorPayload>(value).unwrap().validate().is_ok()
+  }
+
+  #[test]
+  fn text_boundaries_match_frontend_utf16_units() {
+    for (field, limit) in [("message", 4_000), ("code", 8_000), ("error", 3_000), ("note", 2_000)] {
+      for character in ["a", "中", "😀"] {
+        let mut value = payload();
+        value["shareCode"] = json!(true);
+        value["shareNote"] = json!(true);
+        let text = character.repeat(limit / character.encode_utf16().count());
+        value[field] = json!(text);
+        assert!(valid(value.clone()), "{field}: {character} at limit");
+        value[field] = json!(format!("{text}a"));
+        assert!(!valid(value), "{field}: {character} over limit");
+      }
+    }
+    let mut value = payload();
+    value["message"] = json!("中".repeat(1_334)); // 4,002 UTF-8 bytes, 1,334 UTF-16 units.
+    assert!(valid(value));
+  }
+
+  #[test]
+  fn selection_boundaries_use_utf16_units() {
+    for (field, limit) in [("title", 160), ("text", 3_000)] {
+      for character in ["a", "中", "😀"] {
+        let mut value = payload();
+        value["selection"] = json!({"kind": "text", "title": "标题", "text": "选区"});
+        let text = character.repeat(limit / character.encode_utf16().count());
+        value["selection"][field] = json!(text);
+        assert!(valid(value.clone()));
+        value["selection"][field] = json!(format!("{text}a"));
+        assert!(!valid(value));
+      }
+    }
+  }
+
+  #[test]
+  fn follow_up_history_preserves_chinese_and_emoji_at_frontend_limit() {
+    for character in ["a", "中", "😀"] {
+      let text = character.repeat(8_000 / character.encode_utf16().count());
+      let mut value = payload();
+      value["history"] = json!([{"role": "user", "content": "上一个问题"}, {"role": "assistant", "content": text}]);
+      let parsed: TutorPayload = serde_json::from_value(value.clone()).unwrap();
+      assert!(parsed.validate().is_ok());
+      assert_eq!(build_messages(&parsed).unwrap()[2]["content"], text);
+      value["history"][1]["content"] = json!(format!("{text}a"));
+      assert!(!valid(value.clone()));
+      value["history"] = json!(vec![json!({"role": "user", "content": "中"}); 12]);
+      assert!(valid(value.clone()));
+      value["history"].as_array_mut().unwrap().push(json!({"role": "user", "content": "中"}));
+      assert!(!valid(value));
+    }
+  }
+
+  #[test]
+  fn answer_limit_counts_utf16_without_splitting_emoji() {
+    for character in ["a", "中", "😀"] {
+      let text = character.repeat(24_000 / character.encode_utf16().count());
+      assert_eq!(utf16_prefix(&format!("{text}a"), 24_000), text);
+    }
+    assert_eq!(utf16_prefix("中😀a", 2), "中");
+    assert_eq!(utf16_prefix("中😀a", 3), "中😀");
+  }
 }
