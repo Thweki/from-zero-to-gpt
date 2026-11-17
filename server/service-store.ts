@@ -42,6 +42,7 @@ export class NodeProviderServiceStore implements ProviderServiceStore{
   private services?:ProviderService[];
   private credentials?:Record<string,string>;
   private activeId?:string|null;
+  private loading?:Promise<void>;
   private queue=Promise.resolve();
   private engine=new ProviderEngine();
   private completedLogins=new Map<string,ProviderServiceSnapshot>();
@@ -57,6 +58,11 @@ export class NodeProviderServiceStore implements ProviderServiceStore{
   }
   private async load(){
     if(this.services&&this.credentials&&this.activeId!==undefined)return;
+    // A delayed cold read must not overwrite a concurrent save's newer state.
+    if(!this.loading)this.loading=this.loadFromDisk().finally(()=>{this.loading=undefined;});
+    return this.loading;
+  }
+  private async loadFromDisk(){
     const [rawServices,rawCredentials,rawActive]=await Promise.all([readJson(this.configPath),readJson(this.credentialsPath),readJson(path.join(path.dirname(this.configPath),'active-service.json'))]);
     if(rawServices===undefined)this.services=[this.defaultService()];
     else{
