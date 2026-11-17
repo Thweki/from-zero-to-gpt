@@ -1,4 +1,4 @@
-.reader-preferences{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-bottom:26px}
+.reader-preferences{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-bottom:16px}
 .reader-preferences .mode-estimate{margin:0}
 .reader-font-control{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--secondary)}
 .reader-font-control select{min-height:44px;padding:8px 12px;border:1px solid var(--control-border);border-radius:8px;background:var(--panel);font-size:16px}
